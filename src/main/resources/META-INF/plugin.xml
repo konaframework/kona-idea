@@ -1,0 +1,65 @@
+<idea-plugin require-restart="true">
+  <id>dev.kona.idea</id>
+  <name>Kona</name>
+  <vendor url="https://github.com/konaframework/kona-idea">Kona Framework</vendor>
+  <description><![CDATA[
+    <p><b>Kona Idea</b> — native JetBrains support for the Kona framework
+    (IntelliJ IDEA Community and Ultimate):</p>
+    <ul>
+      <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
+          with Crema directive / echo overlays</li>
+      <li>Directive completion and unknown-directive annotations</li>
+      <li><code>{{ }}</code> auto-close and Grind run configurations</li>
+    </ul>
+    <p>Sideload a zip from
+    <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a>,
+    or install from the JetBrains Marketplace when published.</p>
+    <p><b>Note:</b> installing, updating, or removing this plugin requires an IDE restart.</p>
+  ]]></description>
+
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.xml</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType
+        name="Crema"
+        implementationClass="dev.kona.idea.CremaFileType"
+        fieldName="INSTANCE"
+        language="Crema"
+        extensions="crema.html;crema.kt"
+        patterns="*.crema.html;*.crema.kt"/>
+
+    <fileTypeOverrider implementation="dev.kona.idea.CremaFileTypeOverrider"/>
+    <fileTypeDetector implementation="dev.kona.idea.CremaFileTypeDetector" order="first"/>
+
+    <lang.parserDefinition language="Crema" implementationClass="dev.kona.idea.CremaParserDefinition"/>
+    <lang.fileViewProviderFactory language="Crema" implementationClass="dev.kona.idea.CremaFileViewProviderFactory"/>
+
+    <lang.syntaxHighlighterFactory language="Crema" implementationClass="dev.kona.idea.CremaSyntaxHighlighterFactory"/>
+    <editorHighlighterProvider filetype="Crema" implementationClass="dev.kona.idea.CremaEditorHighlighterProvider"/>
+
+    <typedHandler implementation="dev.kona.idea.CremaTypedHandler"/>
+    <lang.braceMatcher language="Crema" implementationClass="dev.kona.idea.CremaBraceMatcher"/>
+
+    <configurationType implementation="dev.kona.idea.GrindConfigurationType"/>
+
+    <completion.contributor language="Crema" implementationClass="dev.kona.idea.CremaCompletionContributor"/>
+    <annotator language="Crema" implementationClass="dev.kona.idea.CremaAnnotator"/>
+  </extensions>
+
+  <actions>
+    <group id="Kona.Menu"
+           text="Kona"
+           description="Kona Idea"
+           icon="/icons/kona.svg"
+           popup="true">
+      <add-to-group group-id="MainMenu" anchor="before" relative-to-action="HelpMenu"/>
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <action id="Kona.ShowLspHelp"
+              class="dev.kona.idea.ShowLspHelpAction"
+              text="Show kona-lsp Setup Help"
+              description="Print how to run the kona-lsp jar for optional LSP clients"
+              icon="/icons/kona.svg"/>
+    </group>
+  </actions>
+</idea-plugin>
