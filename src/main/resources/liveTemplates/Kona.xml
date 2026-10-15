@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateSet group="Kona">
+  <template name="kroute" value="router.get(&quot;$PATH$&quot;) { $CTRL$.$METHOD$(it) }.name(&quot;$NAME$&quot;)"
+            description="Typed GET route (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="PATH" expression="&quot;/&quot;" defaultValue="&quot;/&quot;" alwaysStopAt="true"/>
+    <variable name="CTRL" expression="&quot;welcome&quot;" defaultValue="&quot;welcome&quot;" alwaysStopAt="true"/>
+    <variable name="METHOD" expression="&quot;index&quot;" defaultValue="&quot;index&quot;" alwaysStopAt="true"/>
+    <variable name="NAME" expression="&quot;welcome&quot;" defaultValue="&quot;welcome&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="jroute" value="router.get(&quot;$PATH$&quot;, $CTRL$::$METHOD$).name(&quot;$NAME$&quot;);"
+            description="Typed GET route (Java)" toReformat="true" toShortenFQNames="true">
+    <variable name="PATH" expression="&quot;/&quot;" defaultValue="&quot;/&quot;" alwaysStopAt="true"/>
+    <variable name="CTRL" expression="&quot;welcome&quot;" defaultValue="&quot;welcome&quot;" alwaysStopAt="true"/>
+    <variable name="METHOD" expression="&quot;index&quot;" defaultValue="&quot;index&quot;" alwaysStopAt="true"/>
+    <variable name="NAME" expression="&quot;welcome&quot;" defaultValue="&quot;welcome&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="JAVA_CODE" value="true"/>
+    </context>
+  </template>
+  <template name="kextract" value="$MODEL$.query().where(&quot;$COL$&quot;, $VALUE$).first()"
+            description="Extract query (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="MODEL" expression="&quot;User&quot;" defaultValue="&quot;User&quot;" alwaysStopAt="true"/>
+    <variable name="COL" expression="&quot;email&quot;" defaultValue="&quot;email&quot;" alwaysStopAt="true"/>
+    <variable name="VALUE" expression="&quot;email&quot;" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kauth" value="if (Auth.check()) {&#10;    $END$&#10;}"
+            description="Auth.check (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kdisk" value="files.disk(&quot;$DISK$&quot;).put(&quot;$PATH$&quot;, $CONTENTS$)"
+            description="FilesystemManager.disk put (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="DISK" expression="&quot;local&quot;" defaultValue="&quot;local&quot;" alwaysStopAt="true"/>
+    <variable name="PATH" expression="&quot;file.txt&quot;" defaultValue="&quot;file.txt&quot;" alwaysStopAt="true"/>
+    <variable name="CONTENTS" expression="&quot;bytes&quot;" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kqueue" value="bus.dispatch($JOB$)"
+            description="Bus.dispatch job (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="JOB" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kschedule" value="schedule.daily(&quot;$NAME$&quot;) { $END$ }"
+            description="Schedule.daily (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="NAME" expression="&quot;task&quot;" defaultValue="&quot;task&quot;" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kcrema" value="Crema.view(crema, &quot;$VIEW$&quot;, mapOf(&quot;$KEY$&quot; to $VALUE$))"
+            description="Crema.view response (Kotlin)" toReformat="true" toShortenFQNames="true">
+    <variable name="VIEW" expression="&quot;welcome&quot;" defaultValue="&quot;welcome&quot;" alwaysStopAt="true"/>
+    <variable name="KEY" expression="&quot;name&quot;" defaultValue="&quot;name&quot;" alwaysStopAt="true"/>
+    <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true"/>
+    <context>
+      <option name="KOTLIN" value="true"/>
+    </context>
+  </template>
+  <template name="kserve" value="// ./grind serve  →  Netty + virtual threads on http://127.0.0.1:4000"
+            description="Netty serve reminder" toReformat="false" toShortenFQNames="false">
+    <context>
+      <option name="KOTLIN" value="true"/>
+      <option name="JAVA_CODE" value="true"/>
+    </context>
+  </template>
+</templateSet>

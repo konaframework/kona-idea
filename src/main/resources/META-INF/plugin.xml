@@ -7,9 +7,18 @@
     (IntelliJ IDEA Community and Ultimate):</p>
     <ul>
       <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
-          with Crema directive / echo overlays</li>
-      <li>Directive completion and unknown-directive annotations</li>
-      <li><code>{{ }}</code> auto-close and Grind run configurations</li>
+          with Crema directive / echo overlays, completion, and annotator</li>
+      <li>Project layout markers for scaffold folders
+          (<code>bootstrap</code>, <code>routes</code>, <code>app</code>,
+          <code>config</code>, <code>database</code>, <code>views</code>,
+          <code>storage</code>)</li>
+      <li><b>Grind</b> run configurations — including <code>./grind serve</code>
+          for the Netty HTTP adapter (virtual threads, default port
+          <code>4000</code>)</li>
+      <li>File templates and live templates for typed Router handlers, Extract,
+          Auth, filesystem disks, Queue <code>Bus</code>, Schedule, and Crema</li>
+      <li>Kona menu helpers for layout, Maven <code>dev.kona</code> modules,
+          routing guidance, and optional kona-lsp setup</li>
     </ul>
     <p>Sideload a zip from
     <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a>,
@@ -42,6 +51,10 @@
     <lang.braceMatcher language="Crema" implementationClass="dev.kona.idea.CremaBraceMatcher"/>
 
     <configurationType implementation="dev.kona.idea.GrindConfigurationType"/>
+    <postStartupActivity implementation="dev.kona.idea.KonaProjectOpenActivity"/>
+    <iconProvider implementation="dev.kona.idea.KonaFolderIconProvider"/>
+    <fileTemplateGroup implementation="dev.kona.idea.KonaFileTemplates"/>
+    <defaultLiveTemplates file="/liveTemplates/Kona.xml"/>
 
     <completion.contributor language="Crema" implementationClass="dev.kona.idea.CremaCompletionContributor"/>
     <annotator language="Crema" implementationClass="dev.kona.idea.CremaAnnotator"/>
@@ -55,11 +68,33 @@
            popup="true">
       <add-to-group group-id="MainMenu" anchor="before" relative-to-action="HelpMenu"/>
       <add-to-group group-id="ToolsMenu" anchor="last"/>
+      <action id="Kona.ShowLayoutHelp"
+              class="dev.kona.idea.ShowLayoutHelpAction"
+              text="Show Project Layout Help"
+              description="Canonical kona new / grind scaffold folders and Netty serve"
+              icon="/icons/kona.svg"/>
+      <action id="Kona.ShowRoutingHelp"
+              class="dev.kona.idea.ShowRoutingHelpAction"
+              text="Show Routing Help"
+              description="Typed Router handlers (prefer instance/lambda)"
+              icon="/icons/kona.svg"/>
+      <action id="Kona.ShowArtifactsHelp"
+              class="dev.kona.idea.ShowArtifactsHelpAction"
+              text="Show Maven Modules Help"
+              description="dev.kona artifact coordinates"
+              icon="/icons/kona.svg"/>
       <action id="Kona.ShowLspHelp"
               class="dev.kona.idea.ShowLspHelpAction"
               text="Show kona-lsp Setup Help"
               description="Print how to run the kona-lsp jar for optional LSP clients"
               icon="/icons/kona.svg"/>
     </group>
+
+    <action id="Kona.NewCremaView"
+            class="dev.kona.idea.NewCremaViewAction"
+            text="Crema View"
+            description="Create a Kona Crema view (*.crema.html)">
+      <add-to-group group-id="NewGroup" anchor="first"/>
+    </action>
   </actions>
 </idea-plugin>
