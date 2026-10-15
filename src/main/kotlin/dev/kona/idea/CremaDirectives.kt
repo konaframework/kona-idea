@@ -4,8 +4,9 @@ package dev.kona.idea
  * Known Crema directive names (without `@`).
  *
  * Matching a known name — rather than "`@` followed by a word" — keeps
- * `hi@example.com` out of the highlighter. Keep in sync with
- * `modules/lsp` `CremaDirectives` in the konaframework/kona repository.
+ * `hi@example.com` out of the highlighter. Keep in sync with the Crema
+ * directive set in the konaframework/kona repository (`modules/crema` /
+ * editor support lists).
  */
 object CremaDirectives {
     val NAMES: Set<String> =

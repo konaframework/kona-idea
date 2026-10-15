@@ -32,7 +32,7 @@ class GrindConfigurationType :
         ID,
         "Grind",
         "Run a Kona ./grind command (serve uses Netty + virtual threads)",
-        NotNullLazyValue.createValue { CremaFileType.INSTANCE.icon },
+        NotNullLazyValue.createValue { KonaIcons.KONA },
     ) {
     init {
         addFactory(GrindConfigurationFactory(this))

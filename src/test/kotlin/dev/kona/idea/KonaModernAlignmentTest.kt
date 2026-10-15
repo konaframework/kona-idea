@@ -106,7 +106,7 @@ class KonaModernAlignmentTest {
         assertTrue(KonaLiveTemplates.abbreviations().contains("kroute"))
         assertTrue(KonaLiveTemplates.abbreviations().contains("kdisk"))
         assertTrue(layoutDoc(KonaLayout.AppLanguage.JAVA).contains("src/main/java"))
-        assertTrue(LspHelp.text().contains("kona-lsp"))
+        assertTrue(ViewNavHelp.text().contains("Ctrl+B"))
     }
 
     @Test

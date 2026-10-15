@@ -5,13 +5,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.Messages
 
-/** Surfaces kona-lsp setup notes (native plugin does not start LSP by default). */
-class ShowLspHelpAction : AnAction() {
-    override fun actionPerformed(e: AnActionEvent) {
-        Messages.showInfoMessage(e.project, LspHelp.text(), "Kona LSP")
-    }
-}
-
 class ShowLayoutHelpAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val root = e.project?.guessProjectDir()?.toNioPath()
@@ -38,19 +31,26 @@ class ShowRoutingHelpAction : AnAction() {
     }
 }
 
-object LspHelp {
+class ShowViewNavHelpAction : AnAction() {
+    override fun actionPerformed(e: AnActionEvent) {
+        Messages.showInfoMessage(e.project, ViewNavHelp.text(), "Kona view navigation")
+    }
+}
+
+object ViewNavHelp {
     fun text(): String =
         """
-        Kona Idea highlights Crema natively and does not start kona-lsp.
+        View names (Crema.view, Brew.view, engine.make / render, @extends, @include, …)
+        support native IntelliJ navigation — no language server.
 
-        Optional language server (stdio JSON-RPC), from a Kona checkout:
+        Go to Declaration (open the .crema.html file):
+          • Windows / Linux: Ctrl+B  or  Ctrl+Click
+          • macOS: ⌘B  or  ⌘Click
 
-          ./gradlew :kona-lsp:jar
-          java -jar modules/lsp/build/libs/kona-lsp-*.jar
+        Also: Navigate → Declaration or Related Symbol when the caret is on the name.
 
-        Or from an app: ./grind ide:lsp
-
-        See https://github.com/konaframework/kona — docs under Language / Editor.
+        Autocomplete: Ctrl+Space inside the view name string.
+        Crema directives: type @ in a *.crema.html view (native completion).
         """.trimIndent()
 }
 

@@ -1,11 +1,12 @@
 package dev.kona.idea
 
+import com.intellij.codeInsight.AutoPopupController
 import com.intellij.codeInsight.editorActions.TypedHandlerDelegate
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
 
-/** `{{` closes itself as `{{  }}` with the caret in the middle. */
+/** `{{` auto-close and `@` completion autopopup for Crema views. */
 class CremaTypedHandler : TypedHandlerDelegate() {
     override fun charTyped(
         c: Char,
@@ -13,7 +14,14 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         editor: Editor,
         file: PsiFile,
     ): Result {
-        if (c != '{' || !isCrema(file)) return Result.CONTINUE
+        if (!isCrema(file)) return Result.CONTINUE
+
+        if (c == '@') {
+            AutoPopupController.getInstance(project).scheduleAutoPopup(editor)
+            return Result.CONTINUE
+        }
+
+        if (c != '{') return Result.CONTINUE
         val document = editor.document
         val caret = editor.caretModel.offset
         if (caret < 2) return Result.CONTINUE
@@ -40,7 +48,12 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         editor: Editor,
         file: PsiFile,
     ): Result {
-        if (isCrema(file) && (c == '{' || c == '}')) return Result.STOP
+        if (!isCrema(file)) return Result.CONTINUE
+        if (c == '@') {
+            AutoPopupController.getInstance(project).scheduleAutoPopup(editor)
+            return Result.STOP
+        }
+        if (c == '{' || c == '}') return Result.STOP
         return Result.CONTINUE
     }
 
