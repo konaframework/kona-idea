@@ -1,0 +1,10 @@
+package app.http.controllers
+
+import dev.kona.http.Request
+import dev.kona.http.Response
+
+class ${NAME} {
+    fun index(request: Request): Response {
+        return Response.text("ok")
+    }
+}

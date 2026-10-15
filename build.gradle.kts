@@ -38,7 +38,8 @@ tasks.test {
 }
 
 kotlin {
-    jvmToolchain(17)
+    // Platform 2024.2+ prefers JDK 21 for runIde; CI uses Temurin 21.
+    jvmToolchain(21)
 }
 
 intellijPlatform {
@@ -55,18 +56,22 @@ intellijPlatform {
         }
         description.set(
             """
-            Kona Idea — native Crema highlighting and directive intelligence for
-            IntelliJ IDEA. Install from a GitHub release zip or the JetBrains
+            Kona Idea — Crema language support, scaffold layout markers, Grind
+            run/debug (Netty serve on port 4000), and live/file templates for
+            modern Kona apps. Install from a GitHub release zip or the JetBrains
             Marketplace when published.
             """.trimIndent(),
         )
         changeNotes.set(
             """
             <ul>
-              <li>0.1.0 — Initial release: native Crema file type
-                  (<code>*.crema.html</code> / <code>*.crema.kt</code>), HTML-layered
-                  highlighter, directive completion, unknown-directive annotator,
-                  <code>{{ }}</code> typed handler, Grind run configuration.</li>
+              <li>0.2.0 — Align with current Kona: scaffold folder markers,
+                  Netty-aware <code>./grind serve</code> (host/port 4000, virtual
+                  threads), persisted Grind settings, file + live templates for
+                  typed Router handlers / Extract / Auth / filesystem / Queue /
+                  Schedule / Crema, Kona menu help, New Crema View.</li>
+              <li>0.1.0 — Initial release: native Crema file type, highlighter,
+                  directive completion, Grind run configuration.</li>
             </ul>
             """.trimIndent(),
         )
@@ -116,8 +121,22 @@ kover {
                     "dev.kona.idea.GrindConfigurationFactory",
                     "dev.kona.idea.GrindRunConfiguration",
                     "dev.kona.idea.GrindRunConfiguration$*",
+                    "dev.kona.idea.GrindRunConfigurationOptions",
+                    "dev.kona.idea.GrindRunConfigurationOptions$*",
                     "dev.kona.idea.GrindSettingsEditor",
+                    "dev.kona.idea.GrindSettingsEditor$*",
+                    "dev.kona.idea.KonaProjectOpenActivity",
+                    "dev.kona.idea.KonaProjectOpenActivityKt",
+                    "dev.kona.idea.KonaFolderIconProvider",
+                    "dev.kona.idea.KonaFolderIconProvider$*",
+                    "dev.kona.idea.KonaFileTemplates",
+                    "dev.kona.idea.KonaFileTemplates$*",
+                    "dev.kona.idea.NewCremaViewAction",
                     "dev.kona.idea.ShowLspHelpAction",
+                    "dev.kona.idea.ShowLayoutHelpAction",
+                    "dev.kona.idea.ShowArtifactsHelpAction",
+                    "dev.kona.idea.ShowRoutingHelpAction",
+                    "dev.kona.idea.ShowKonaHelpActionsKt",
                 )
             }
         }
