@@ -1,23 +1,117 @@
-name: Publish release zip
+# Build the plugin zip, publish a GitHub Release, and (when secrets are set)
+# push the same version to the JetBrains Marketplace via publishPlugin.
+#
+# Trigger: push a version tag matching gradle.properties pluginVersion
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# Or re-run from Actions → Publish release → Run workflow (on a tag ref).
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   PUBLISH_TOKEN              — JetBrains Marketplace permanent token (Marketplace)
+#   CERTIFICATE_CHAIN          — Marketplace signing cert chain PEM (Marketplace)
+#   PRIVATE_KEY                — Marketplace signing private key PEM (Marketplace)
+#   PRIVATE_KEY_PASSWORD       — Password for PRIVATE_KEY (Marketplace)
+#   GITHUB_TOKEN               — provided automatically (contents: write for releases)
+#
+# Alias: JETBRAINS_PUBLISH_TOKEN is accepted if PUBLISH_TOKEN is unset.
+#
+# First Marketplace listing must be uploaded manually once; Gradle publishPlugin
+# only works for subsequent versions. See README “Releasing”.
+
+name: Publish release
 
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      skip_marketplace:
+        description: "Skip JetBrains Marketplace publish (GitHub Release only)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
+    name: Build + GitHub Release + Marketplace
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "21"
-      - run: ./gradlew test koverVerify buildPlugin --no-daemon
-      - uses: softprops/action-gh-release@v2
+
+      - name: Require version tag
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF}" != refs/tags/v* ]]; then
+            echo "::error::Run this workflow on a v* tag (e.g. git tag v0.2.0 && git push origin v0.2.0), or use workflow_dispatch from that tag."
+            exit 1
+          fi
+
+      - name: Verify tag matches pluginVersion
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          PROP="$(grep -E '^pluginVersion\s*=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')"
+          if [ -z "$PROP" ]; then
+            echo "::error::pluginVersion missing from gradle.properties"
+            exit 1
+          fi
+          if [ "$TAG" != "$PROP" ]; then
+            echo "::error::Tag version '$TAG' does not match pluginVersion '$PROP' in gradle.properties"
+            exit 1
+          fi
+          echo "OK: tag v$TAG matches pluginVersion=$PROP"
+
+      - name: Test + buildPlugin
+        run: ./gradlew test koverVerify buildPlugin --no-daemon --stacktrace
+
+      - name: Upload distribution artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: build/distributions/*.zip
+          name: kona-idea-zip
+          path: build/distributions/*.zip
+          if-no-files-found: error
+
+      - name: Create / update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/distributions/*.zip
+            CHANGELOG.md
+          body_path: CHANGELOG.md
           generate_release_notes: true
+          fail_on_unmatched_files: false
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to JetBrains Marketplace
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_marketplace != true }}
+        env:
+          PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN || secrets.JETBRAINS_PUBLISH_TOKEN }}
+          CERTIFICATE_CHAIN: ${{ secrets.CERTIFICATE_CHAIN }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PUBLISH_TOKEN:-}" ]; then
+            echo "::warning::PUBLISH_TOKEN (or JETBRAINS_PUBLISH_TOKEN) is not set — skipping Marketplace publish."
+            echo "GitHub Release zip is still available. Configure secrets and re-run, or upload manually for the first listing."
+            exit 0
+          fi
+          if [ -z "${CERTIFICATE_CHAIN:-}" ] || [ -z "${PRIVATE_KEY:-}" ] || [ -z "${PRIVATE_KEY_PASSWORD:-}" ]; then
+            echo "::error::Marketplace publish requires CERTIFICATE_CHAIN, PRIVATE_KEY, and PRIVATE_KEY_PASSWORD secrets (plugin signing)."
+            exit 1
+          fi
+          ./gradlew publishPlugin --no-daemon --stacktrace

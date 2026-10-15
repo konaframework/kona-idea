@@ -43,8 +43,24 @@ kotlin {
 }
 
 intellijPlatform {
+    // Marketplace: first upload must be manual; later versions use publishPlugin.
+    // Token: PUBLISH_TOKEN (official) or JETBRAINS_PUBLISH_TOKEN. Signing via CERTIFICATE_*.
     publishing {
-        token.set(providers.environmentVariable("JETBRAINS_PUBLISH_TOKEN"))
+        token.set(
+            providers.environmentVariable("PUBLISH_TOKEN")
+                .orElse(providers.environmentVariable("JETBRAINS_PUBLISH_TOKEN")),
+        )
+        // Unset → Stable ("default") channel. Override with PUBLISH_CHANNEL=beta|alpha|eap|…
+        channels.set(
+            providers.environmentVariable("PUBLISH_CHANNEL")
+                .map { name -> listOf(name.trim()).filter { it.isNotEmpty() } }
+                .orElse(providers.provider { listOf("default") }),
+        )
+    }
+    signing {
+        certificateChain.set(providers.environmentVariable("CERTIFICATE_CHAIN"))
+        privateKey.set(providers.environmentVariable("PRIVATE_KEY"))
+        password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
     }
     pluginConfiguration {
         id = "dev.kona.idea"
