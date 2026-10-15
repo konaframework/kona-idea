@@ -1,9 +1,9 @@
 # Kona Idea (IntelliJ IDEA)
 
 Native JetBrains plugin for [Kona](https://github.com/konaframework/kona) —
-Crema language support, scaffold-aware project markers, Grind run configurations
-(including Netty `serve`), and live/file templates for current public APIs.
-**Not** TextMate and **not** LSP4IJ by default.
+Crema language support, view/DB completion, scaffold markers, Grind run
+configurations (including Netty `serve`), a right-side tool window, and
+live/file templates. **No LSP** — IntelliJ platform APIs only.
 
 | | |
 | --- | --- |
@@ -23,23 +23,22 @@ Installing, updating, or removing the plugin requires an IDE restart.
 Kona app (kona new / grind scaffold)
   src/main/{kotlin|java}/bootstrap|app|routes|config|database
   src/main/resources/views/*.crema.html
-  ./grind  +  storage/
+  ./grind  +  storage/  +  .env (DB_*)
         │
-        ├── Folder icons on canonical layout dirs
+        ├── Folder icons (official Kona mark)
         ├── Grind Serve run config (Netty, :4000, virtual threads)
-        └── Crema + live/file templates (typed Router handlers)
+        ├── Right “Kona” tool window (serve, migrate, docs, …)
+        └── Crema + view/DB completion + live/file templates
 
 *.crema.html / *.crema.kt
         │
         ▼
   Crema file type (overrider + detector beat HTML)
         ├── Native CremaLexer + layered HTML highlighter
-        ├── @directive completion + unknown-directive warnings
+        ├── @directive completion (autopopup on @) + unknown-directive warnings
+        ├── View name refs → Ctrl+B / Ctrl+Click
         └── {{ }} typed handler
 ```
-
-Optional [kona-lsp](https://github.com/konaframework/kona/tree/main/modules/lsp)
-remains for other editors — **Kona → Show kona-lsp Setup Help**.
 
 ---
 
@@ -53,6 +52,7 @@ remains for other editors — **Kona → Show kona-lsp Setup Help**.
 4. Open a Kona app (or create one with `kona new demo`). Confirm:
    - Crema views open as language **Crema**
    - A **Grind Serve** run configuration appears (or add **Run → Edit Configurations → Grind**)
+   - The **Kona** tool window is available on the right
 5. Run **Grind Serve** → browse `http://127.0.0.1:4000`
 
 ### Sandbox IDE (developers)
@@ -63,34 +63,64 @@ remains for other editors — **Kona → Show kona-lsp Setup Help**.
 
 ---
 
-## Features (0.2.0)
+## Features (0.3.0)
 
-### Crema
+### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
 - Native highlighter: HTML + `@directives`, `{{ }}`, `{!! !!}`, `{{-- --}}`
-- Directive completion and unknown-directive warnings
+- **`@` directive completion** with autopopup (works with the HTML template layer)
+- Unknown-directive warnings (emails like `hi@example.com` ignored)
 - `{{` auto-closes as `{{  }}`
 - **New → Crema View**
 
-### Project structure (scaffold parity)
-Recognizes the Laravel-shaped tree from `kona new`:
+### View names
+- Autocomplete dotted names (`home`, `layouts.app`) in `Crema.view` / `Brew.view` /
+  `engine.make` / `engine.render` / `@extends` / `@include*` / `@component`
+- **Go to Declaration:** **Ctrl+B** or **Ctrl+Click** (macOS: **⌘B** / **⌘Click**)
+  opens the `.crema.html` / `.crema.kt` file
+- Help: **Kona → Show View Navigation Help**
+
+### DB columns
+- Completes column names in Extract / QueryBuilder call sites (`where`, `select`,
+  `orderBy`, `create(mapOf(…))`, …)
+- Sources (merged when both available):
+  1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
+  2. **JDBC** — if `.env` has `DB_URL` (and optional `DB_USERNAME` / `DB_PASSWORD` /
+     `DB_DRIVER`) and a driver can connect, columns come from `DatabaseMetaData`
+
+### Tool window (RIGHT)
+- **View → Tool Windows → Kona** (or the Kona icon on the right strip)
+- Quick actions: Serve, List, Migrate, Queue work, Schedule work, New Crema View,
+  layout/routing/Maven help, docs links
+
+### Project structure
+Recognizes the scaffold tree from `kona new`:
 `bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/views|public|lang`,
 `storage/`, app-local `./grind`, and `dev.kona:*` Gradle dependencies.
-Canonical folders get the Kona icon in the project view.
+Canonical folders use the official Kona brand mark.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments
 - Host / port fields for `serve` (defaults `127.0.0.1` / `4000`)
 - Auto-creates **Grind Serve** when opening a detected Kona app
 - Serve uses the framework’s **Netty** `KonaHttpServer` + **virtual threads**
-  (not the old JDK `HttpServer`)
 
 ### Tooling / APIs
 - Live templates: `kroute`, `jroute`, `kextract`, `kauth`, `kdisk`, `kqueue`,
   `kschedule`, `kcrema`, `kserve`
 - File templates: Controller (Kotlin/Java), Crema view, WebRoutes (typed handlers)
-- **Kona** menu: layout help, routing help (typed instance/lambda — no `Class@method`),
-  Maven `dev.kona` modules, kona-lsp setup
+- **Kona** menu: layout, routing, Maven modules, view navigation help
+
+---
+
+## Verify in the IDE (`./gradlew runIde`)
+
+1. **No LSP** — there is no kona-lsp menu item; completion works offline.
+2. **Crema `@`** — open `*.crema.html`, type `@` → directive popup (`@csrf`, `@extends`, …).
+3. **Tool window** — open **Kona** on the right → **Serve (Netty :4000)**.
+4. **Icons** — tool window, Crema files, marked folders, Grind configs show the Kona mark.
+5. **DB columns** — with a migration defining `string("email")`, type `User.where("` → `email`.
+6. **Views** — in `Crema.view(engine, "|")` or `@extends('|')`, complete names; **Ctrl+B** opens the file.
 
 ---
 
@@ -115,12 +145,12 @@ Versions live in `gradle.properties` (`pluginVersion`) and must match the Git ta
 
 ### Cut a release (tag → GitHub → Marketplace)
 
-1. Bump `pluginVersion` (e.g. `0.2.0`), update `CHANGELOG.md` and change notes
+1. Bump `pluginVersion` (e.g. `0.3.0`), update `CHANGELOG.md` and change notes
    in `build.gradle.kts`, merge to `main`.
 2. Tag and push:
    ```bash
-   git tag v0.2.0
-   git push origin v0.2.0
+   git tag v0.3.0
+   git push origin v0.3.0
    ```
 3. The **Publish release** workflow (`.github/workflows/publish.yml`) will:
    - run tests + `buildPlugin`

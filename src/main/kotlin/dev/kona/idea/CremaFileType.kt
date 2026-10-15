@@ -2,7 +2,6 @@ package dev.kona.idea
 
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.fileTypes.ex.FileTypeIdentifiableByVirtualFile
-import com.intellij.openapi.util.IconLoader
 import com.intellij.openapi.vfs.VirtualFile
 import javax.swing.Icon
 
@@ -20,8 +19,7 @@ class CremaFileType private constructor() :
 
     override fun getDefaultExtension(): String = "crema.html"
 
-    override fun getIcon(): Icon =
-        IconLoader.getIcon("/icons/kona.svg", CremaFileType::class.java)
+    override fun getIcon(): Icon = KonaIcons.KONA
 
     override fun isMyFileType(file: VirtualFile): Boolean =
         !file.isDirectory && isCremaFileName(file.name)

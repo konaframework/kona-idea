@@ -30,6 +30,7 @@ dependencies {
     }
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.opentest4j:opentest4j:1.3.0")
+    testImplementation("com.h2database:h2:2.3.232")
 }
 
 tasks.test {
@@ -72,15 +73,20 @@ intellijPlatform {
         }
         description.set(
             """
-            Kona Idea — Crema language support, scaffold layout markers, Grind
-            run/debug (Netty serve on port 4000), and live/file templates for
-            modern Kona apps. Install from a GitHub release zip or the JetBrains
-            Marketplace when published.
+            Kona Idea — native Crema + Grind support (no LSP): @directive and
+            view-name completion, Go to Declaration for views, DB column
+            completion from migrations/JDBC, right-side Kona tool window,
+            scaffold markers, and Netty-aware ./grind serve (port 4000).
             """.trimIndent(),
         )
         changeNotes.set(
             """
             <ul>
+              <li>0.3.0 — Fully native IDE features (no LSP): fix Crema
+                  <code>@</code> completion (HTML layer + autopopup), view name
+                  autocomplete + Ctrl+B/Ctrl+Click navigation, DB column
+                  completion (migrations + JDBC from <code>DB_URL</code>), right
+                  Kona tool window, official brand icons.</li>
               <li>0.2.0 — Align with current Kona: scaffold folder markers,
                   Netty-aware <code>./grind serve</code> (host/port 4000, virtual
                   threads), persisted Grind settings, file + live templates for
@@ -132,6 +138,20 @@ kover {
                     "dev.kona.idea.CremaCompletionContributor",
                     "dev.kona.idea.CremaCompletionContributor$*",
                     "dev.kona.idea.CremaAnnotator",
+                    "dev.kona.idea.ViewNameCompletionContributor",
+                    "dev.kona.idea.ViewNameCompletionContributor$*",
+                    "dev.kona.idea.ViewNameReference",
+                    "dev.kona.idea.ViewNameReferenceContributor",
+                    "dev.kona.idea.ViewNameReferenceContributor$*",
+                    "dev.kona.idea.ViewGotoDeclarationHandler",
+                    "dev.kona.idea.DbColumnCompletionContributor",
+                    "dev.kona.idea.DbColumnCompletionContributor$*",
+                    "dev.kona.idea.KonaToolWindowFactory",
+                    "dev.kona.idea.KonaQuickAccessPanel",
+                    "dev.kona.idea.KonaQuickAccessPanel$*",
+                    "dev.kona.idea.GrindQuickActions",
+                    "dev.kona.idea.GrindQuickActions$*",
+                    "dev.kona.idea.KonaIcons",
                     "dev.kona.idea.GrindConfigurationType",
                     "dev.kona.idea.GrindConfigurationType$*",
                     "dev.kona.idea.GrindConfigurationFactory",
@@ -148,10 +168,10 @@ kover {
                     "dev.kona.idea.KonaFileTemplates",
                     "dev.kona.idea.KonaFileTemplates$*",
                     "dev.kona.idea.NewCremaViewAction",
-                    "dev.kona.idea.ShowLspHelpAction",
                     "dev.kona.idea.ShowLayoutHelpAction",
                     "dev.kona.idea.ShowArtifactsHelpAction",
                     "dev.kona.idea.ShowRoutingHelpAction",
+                    "dev.kona.idea.ShowViewNavHelpAction",
                     "dev.kona.idea.ShowKonaHelpActionsKt",
                 )
             }

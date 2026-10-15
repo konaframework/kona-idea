@@ -4,21 +4,19 @@
   <vendor url="https://github.com/konaframework/kona-idea">Kona Framework</vendor>
   <description><![CDATA[
     <p><b>Kona Idea</b> — native JetBrains support for the Kona framework
-    (IntelliJ IDEA Community and Ultimate):</p>
+    (IntelliJ IDEA Community and Ultimate). <b>No LSP</b> — completion,
+    navigation, and inspections use IntelliJ platform APIs.</p>
     <ul>
       <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
-          with Crema directive / echo overlays, completion, and annotator</li>
-      <li>Project layout markers for scaffold folders
-          (<code>bootstrap</code>, <code>routes</code>, <code>app</code>,
-          <code>config</code>, <code>database</code>, <code>views</code>,
-          <code>storage</code>)</li>
-      <li><b>Grind</b> run configurations — including <code>./grind serve</code>
-          for the Netty HTTP adapter (virtual threads, default port
+          with Crema directive / echo overlays, <code>@</code> completion, and annotator</li>
+      <li>View name autocomplete + Go to Declaration (<b>Ctrl+B</b> / Ctrl+Click)</li>
+      <li>DB column completion from Extract migrations and optional JDBC (<code>DB_URL</code>)</li>
+      <li>Right-side <b>Kona</b> tool window — grind serve, common commands, docs</li>
+      <li>Project layout markers and official Kona brand icons</li>
+      <li><b>Grind</b> run configurations — <code>./grind serve</code> (Netty, port
           <code>4000</code>)</li>
       <li>File templates and live templates for typed Router handlers, Extract,
           Auth, filesystem disks, Queue <code>Bus</code>, Schedule, and Crema</li>
-      <li>Kona menu helpers for layout, Maven <code>dev.kona</code> modules,
-          routing guidance, and optional kona-lsp setup</li>
     </ul>
     <p>Sideload a zip from
     <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a>,
@@ -56,8 +54,20 @@
     <fileTemplateGroup implementation="dev.kona.idea.KonaFileTemplates"/>
     <defaultLiveTemplates file="/liveTemplates/Kona.xml"/>
 
-    <completion.contributor language="Crema" implementationClass="dev.kona.idea.CremaCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="dev.kona.idea.CremaCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="dev.kona.idea.ViewNameCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="dev.kona.idea.DbColumnCompletionContributor"/>
     <annotator language="Crema" implementationClass="dev.kona.idea.CremaAnnotator"/>
+
+    <psi.referenceContributor language="any" implementation="dev.kona.idea.ViewNameReferenceContributor"/>
+    <gotoDeclarationHandler implementation="dev.kona.idea.ViewGotoDeclarationHandler"/>
+
+    <toolWindow
+        id="Kona"
+        anchor="right"
+        icon="/icons/konaToolWindow.svg"
+        factoryClass="dev.kona.idea.KonaToolWindowFactory"
+        secondary="false"/>
   </extensions>
 
   <actions>
@@ -83,17 +93,18 @@
               text="Show Maven Modules Help"
               description="dev.kona artifact coordinates"
               icon="/icons/kona.svg"/>
-      <action id="Kona.ShowLspHelp"
-              class="dev.kona.idea.ShowLspHelpAction"
-              text="Show kona-lsp Setup Help"
-              description="Print how to run the kona-lsp jar for optional LSP clients"
+      <action id="Kona.ShowViewNavHelp"
+              class="dev.kona.idea.ShowViewNavHelpAction"
+              text="Show View Navigation Help"
+              description="Ctrl+B / Ctrl+Click to open Crema views"
               icon="/icons/kona.svg"/>
     </group>
 
     <action id="Kona.NewCremaView"
             class="dev.kona.idea.NewCremaViewAction"
             text="Crema View"
-            description="Create a Kona Crema view (*.crema.html)">
+            description="Create a Kona Crema view (*.crema.html)"
+            icon="/icons/kona.svg">
       <add-to-group group-id="NewGroup" anchor="first"/>
     </action>
   </actions>

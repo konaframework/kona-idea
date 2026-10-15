@@ -59,12 +59,6 @@ class CremaDirectivesTest {
     }
 
     @Test
-    fun lspHelpMentionsJar() {
-        assertTrue(LspHelp.text().contains("kona-lsp"))
-        assertTrue(LspHelp.text().contains("ide:lsp"))
-    }
-
-    @Test
     fun grindCommandPrefersLocalScript() {
         val dir = java.nio.file.Files.createTempDirectory("kona-grind")
         val grind = dir.resolve("grind")

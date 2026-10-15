@@ -37,7 +37,6 @@ object GrindCommands {
             Command("assets:vite", "Print Vite asset bundling setup help"),
             Command("storage:link", "Symlink public/storage to storage/app/public"),
             Command("key:generate", "Set the application key (APP_KEY)"),
-            Command("ide:lsp", "Print kona-lsp setup help"),
             Command("list", "List grind commands"),
             Command("help", "Show usage"),
         )
