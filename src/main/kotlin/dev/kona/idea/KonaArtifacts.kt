@@ -10,7 +10,7 @@ object KonaArtifacts {
             "kona-core",
             "kona-http",
             "kona-grind",
-            "kona-extract",
+            "kona-cadence",
             "kona-crema",
             "kona-session",
             "kona-auth",
@@ -44,7 +44,7 @@ object KonaArtifacts {
             appendLine("Typical web app (from kona new scaffolds):")
             appendLine("  ${coordinate("kona-http")}")
             appendLine("  ${coordinate("kona-grind")}")
-            appendLine("  ${coordinate("kona-extract")}")
+            appendLine("  ${coordinate("kona-cadence")}")
             appendLine("  ${coordinate("kona-session")}")
             appendLine("  ${coordinate("kona-auth")}")
             appendLine("  ${coordinate("kona-crema")}")

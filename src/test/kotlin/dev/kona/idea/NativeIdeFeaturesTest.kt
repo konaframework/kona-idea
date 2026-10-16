@@ -57,7 +57,7 @@ class NativeIdeFeaturesTest {
     }
 
     @Test
-    fun migrationColumnParserExtractsColumns() {
+    fun migrationColumnParserParsesColumns() {
         val source =
             """
             class CreateUsersTable : Migration {

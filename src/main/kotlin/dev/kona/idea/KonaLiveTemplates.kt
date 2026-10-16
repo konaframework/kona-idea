@@ -27,8 +27,8 @@ object KonaLiveTemplates {
                 "JAVA",
             ),
             Snippet(
-                "kextract",
-                "Extract query (Kotlin)",
+                "kcadence",
+                "Cadence query (Kotlin)",
                 "\$MODEL\$.query().where(\"\$COL\$\", \$VALUE\$).first()",
                 "KOTLIN",
             ),

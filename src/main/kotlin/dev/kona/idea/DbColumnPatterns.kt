@@ -1,7 +1,7 @@
 package dev.kona.idea
 
 /**
- * Detects Extract / QueryBuilder call sites where a DB column string is expected.
+ * Detects Cadence / QueryBuilder call sites where a DB column string is expected.
  */
 object DbColumnPatterns {
     private val METHOD_PREFIXES =

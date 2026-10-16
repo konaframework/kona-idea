@@ -17,7 +17,7 @@ object GrindCommands {
             Command("make:policy", "Generate an authorization policy"),
             Command("make:request", "Generate a form request"),
             Command("make:view", "Generate a Crema view"),
-            Command("make:model", "Generate an Extract model"),
+            Command("make:model", "Generate a Cadence model"),
             Command("make:migration", "Generate a migration"),
             Command("make:factory", "Generate a factory"),
             Command("make:seeder", "Generate a seeder"),

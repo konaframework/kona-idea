@@ -81,7 +81,7 @@ Kona app (kona new / grind scaffold)
 - Help: **Kona → Show View Navigation Help**
 
 ### DB columns
-- Completes column names in Extract / QueryBuilder call sites (`where`, `select`,
+- Completes column names in Cadence / QueryBuilder call sites (`where`, `select`,
   `orderBy`, `create(mapOf(…))`, …)
 - Sources (merged when both available):
   1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
@@ -106,7 +106,7 @@ Canonical folders use the official Kona brand mark.
 - Serve uses the framework’s **Netty** `KonaHttpServer` + **virtual threads**
 
 ### Tooling / APIs
-- Live templates: `kroute`, `jroute`, `kextract`, `kauth`, `kdisk`, `kqueue`,
+- Live templates: `kroute`, `jroute`, `kcadence`, `kauth`, `kdisk`, `kqueue`,
   `kschedule`, `kcrema`, `kserve`
 - File templates: Controller (Kotlin/Java), Crema view, WebRoutes (typed handlers)
 - **Kona** menu: layout, routing, Maven modules, view navigation help
