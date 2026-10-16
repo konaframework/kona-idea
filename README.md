@@ -35,9 +35,15 @@ Kona app (kona new / grind scaffold)
         ▼
   Crema file type (overrider + detector beat HTML)
         ├── Native CremaLexer + layered HTML highlighter
-        ├── @directive completion (autopopup on @) + unknown-directive warnings
+        ├── @directive autopopup + <x-*> / <x-slot> completion
         ├── View name refs → Ctrl+B / Ctrl+Click
         └── {{ }} typed handler
+
+Cadence Kotlin/Java
+        │
+        ▼
+  Model / DB column completion (scoped to model table)
+  Settings → Tools → Kona (Connection / Migrations / Both)
 ```
 
 ---
@@ -63,12 +69,15 @@ Kona app (kona new / grind scaffold)
 
 ---
 
-## Features (0.3.0)
+## Features (0.4.0)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
 - Native highlighter: HTML + `@directives`, `{{ }}`, `{!! !!}`, `{{-- --}}`
-- **`@` directive completion** with autopopup (works with the HTML template layer)
+- **`@` directive autopopup** — type `@` to see all directives; type `@com` to
+  filter without Ctrl+Space (HTML template layer supported)
+- **`<x-*>` components** — complete tags from `views/components/**`; `<x-slot>` /
+  `<x-slot:name>` hints for named slots
 - Unknown-directive warnings (emails like `hi@example.com` ignored)
 - `{{` auto-closes as `{{  }}`
 - **New → Crema View**
@@ -80,13 +89,18 @@ Kona app (kona new / grind scaffold)
   opens the `.crema.html` / `.crema.kt` file
 - Help: **Kona → Show View Navigation Help**
 
-### DB columns
+### Cadence models + DB columns
 - Completes column names in Cadence / QueryBuilder call sites (`where`, `select`,
-  `orderBy`, `create(mapOf(…))`, …)
-- Sources (merged when both available):
+  `orderBy`, `create(mapOf(…))`, …), **scoped to the receiver model’s table**
+  (`User.where("` → `users` columns only)
+- Completes **model attributes** on instances (`val project = Project.find(1)` →
+  `project.description` / `project.name`)
+- Column sources (configurable):
   1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
   2. **JDBC** — if `.env` has `DB_URL` (and optional `DB_USERNAME` / `DB_PASSWORD` /
      `DB_DRIVER`) and a driver can connect, columns come from `DatabaseMetaData`
+- **Settings → Tools → Kona** — Column source: **Both** (default) |
+  **Migrations only** | **Connection only**
 
 ### Tool window (RIGHT)
 - **View → Tool Windows → Kona** (or the Kona icon on the right strip)
@@ -116,11 +130,18 @@ Canonical folders use the official Kona brand mark.
 ## Verify in the IDE (`./gradlew runIde`)
 
 1. **No LSP** — there is no kona-lsp menu item; completion works offline.
-2. **Crema `@`** — open `*.crema.html`, type `@` → directive popup (`@csrf`, `@extends`, …).
-3. **Tool window** — open **Kona** on the right → **Serve (Netty :4000)**.
-4. **Icons** — tool window, Crema files, marked folders, Grind configs show the Kona mark.
-5. **DB columns** — with a migration defining `string("email")`, type `User.where("` → `email`.
-6. **Views** — in `Crema.view(engine, "|")` or `@extends('|')`, complete names; **Ctrl+B** opens the file.
+2. **Crema `@` autopopup** — open `*.crema.html`, type `@` (no Ctrl+Space) → full
+   directive list; continue with `com` → filtered `@component` / … stays open.
+3. **`<x-*>`** — add `views/components/alert.crema.html`, type `<x-` → `alert`;
+   inside `<x-alert>`, type `<` → `x-slot` hints.
+4. **Model attributes** — with `projects` migration columns + `Project` model,
+   type `val project = Project.find(1)` then `project.` → `description` / `name`.
+5. **Scoped query columns** — `User.where("` suggests only `users` columns (not
+   `projects` / `todos`).
+6. **Settings** — **Settings → Tools → Kona** → change Column source and re-try
+   completion (Connection only / Migrations only / Both).
+7. **Tool window** — open **Kona** on the right → **Serve (Netty :4000)**.
+8. **Views** — in `Crema.view(engine, "|")` or `@extends('|')`, complete names; **Ctrl+B** opens the file.
 
 ---
 

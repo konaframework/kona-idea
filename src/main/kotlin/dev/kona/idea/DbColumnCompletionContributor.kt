@@ -7,12 +7,18 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 
-/** Completes DB column names from migrations and/or a live JDBC connection. */
-class DbColumnCompletionContributor : CompletionContributor() {
+/**
+ * Completes DB column names from migrations and/or a live JDBC connection.
+ *
+ * When the call has a model receiver (`User.where("…")`), suggestions are limited
+ * to that model's table.
+ */
+class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
     init {
         extend(
             CompletionType.BASIC,
@@ -28,41 +34,55 @@ class DbColumnCompletionContributor : CompletionContributor() {
                     if (!KonaLayout.isKonaApp(root)) return
                     val text = parameters.originalFile.viewProvider.contents
                     val offset = parameters.offset.coerceIn(0, text.length)
-                    val prefix = DbColumnPatterns.columnPrefixAt(text, offset) ?: return
-                    val snapshot = DbColumnIndex.collect(root, probeJdbc = true)
-                    if (snapshot.allColumns.isEmpty()) return
+                    val ctx = DbColumnPatterns.columnContextAt(text, offset) ?: return
+                    val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
+                    val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = true)
+                    val table = resolveTable(root, ctx.receiver)
+                    val columns =
+                        if (table != null) {
+                            snapshot.columnsForTable(table)
+                        } else {
+                            snapshot.allColumns
+                        }
+                    if (columns.isEmpty()) return
                     val sourceHint =
                         when {
                             snapshot.fromJdbc && snapshot.fromMigrations -> "migration+JDBC"
                             snapshot.fromJdbc -> "JDBC"
                             else -> "migration"
                         }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-                    snapshot.allColumns
-                        .filter { it.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
+                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(ctx.prefix))
+                    columns
+                        .filter { it.startsWith(ctx.prefix, ignoreCase = true) || ctx.prefix.isEmpty() }
                         .sorted()
                         .forEach { col ->
-                            val tables =
-                                snapshot.byTable.entries
-                                    .filter { col in it.value }
-                                    .map { it.key }
-                                    .take(3)
-                                    .joinToString(", ")
+                            val typeText =
+                                buildString {
+                                    append(sourceHint)
+                                    if (table != null) append(" · ").append(table)
+                                }
                             matched.addElement(
                                 LookupElementBuilder.create(col)
                                     .withPresentableText(col)
-                                    .withTypeText(
-                                        buildString {
-                                            append(sourceHint)
-                                            if (tables.isNotEmpty()) append(" · ").append(tables)
-                                        },
-                                        true,
-                                    )
+                                    .withTypeText(typeText, true)
                                     .withIcon(KonaIcons.KONA_13),
                             )
                         }
                 }
             },
         )
+    }
+
+    companion object {
+        fun resolveTable(projectRoot: java.nio.file.Path, receiver: String?): String? {
+            if (receiver.isNullOrBlank()) return null
+            // PascalCase → model class
+            if (receiver[0].isUpperCase()) {
+                return ModelIndex.tableForClass(projectRoot, receiver)
+            }
+            // camelCase variable → conventional model class
+            val modelClass = receiver.replaceFirstChar { it.uppercaseChar() }
+            return ModelIndex.tableForClass(projectRoot, modelClass)
+        }
     }
 }

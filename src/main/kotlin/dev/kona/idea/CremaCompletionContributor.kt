@@ -7,6 +7,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiFile
 import com.intellij.util.ProcessingContext
@@ -17,8 +18,11 @@ import com.intellij.util.ProcessingContext
  * Crema uses a template-language view provider with an HTML data language, so the caret
  * is often an HTML PSI element. Registered for `language="any"` in plugin.xml and gated
  * on the Crema file type / base language.
+ *
+ * Autopopup is triggered by [CremaTypedHandler] when typing `@` (and while typing the
+ * directive name). [CremaCharFilter] keeps the lookup open for identifier characters.
  */
-class CremaCompletionContributor : CompletionContributor() {
+class CremaCompletionContributor : CompletionContributor(), DumbAware {
     init {
         extend(
             CompletionType.BASIC,
@@ -36,6 +40,7 @@ class CremaCompletionContributor : CompletionContributor() {
                     if (prefix.isEmpty() && !CremaCompletion.justTypedAt(text, offset)) return
                     val effectivePrefix = prefix.ifEmpty { "@" }
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(effectivePrefix))
+                    // Always show the full filtered set on autopopup (do not wait for Ctrl+Space).
                     CremaDirectives.completionsForPrefix(effectivePrefix).forEach { label ->
                         matched.addElement(
                             LookupElementBuilder.create(label)
@@ -71,6 +76,8 @@ object CremaCompletion {
         var i = offset - 1
         while (i >= 0 && CremaDirectives.isIdentPart(text[i])) i--
         if (i >= 0 && text[i] == '@') {
+            // `@@` is an escaped literal @, not a directive.
+            if (i > 0 && text[i - 1] == '@') return ""
             return text.subSequence(i, offset).toString()
         }
         return ""
@@ -82,4 +89,8 @@ object CremaCompletion {
         if (offset >= 2 && text[offset - 2] == '@') return false
         return true
     }
+
+    /** Whether autopopup should offer directive suggestions at [offset]. */
+    fun shouldAutopopup(text: CharSequence, offset: Int): Boolean =
+        prefixBefore(text, offset).isNotEmpty() || justTypedAt(text, offset)
 }
