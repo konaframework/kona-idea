@@ -90,7 +90,7 @@ intellijPlatform {
               <li>0.2.0 — Align with current Kona: scaffold folder markers,
                   Netty-aware <code>./grind serve</code> (host/port 4000, virtual
                   threads), persisted Grind settings, file + live templates for
-                  typed Router handlers / Extract / Auth / filesystem / Queue /
+                  typed Router handlers / Cadence / Auth / filesystem / Queue /
                   Schedule / Crema, Kona menu help, New Crema View.</li>
               <li>0.1.0 — Initial release: native Crema file type, highlighter,
                   directive completion, Grind run configuration.</li>

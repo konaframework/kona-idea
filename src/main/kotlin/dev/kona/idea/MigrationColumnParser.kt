@@ -1,7 +1,7 @@
 package dev.kona.idea
 
 /**
- * Parses Kona/Extract migration source for table → column names.
+ * Parses Kona/Cadence migration source for table → column names.
  *
  * Understands Kotlin and Java stubs from `grind make:migration`:
  * `schema.create("users") { … }`, `schema.table("users") { … }`,

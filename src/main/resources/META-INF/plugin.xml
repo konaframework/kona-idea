@@ -10,12 +10,12 @@
       <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
           with Crema directive / echo overlays, <code>@</code> completion, and annotator</li>
       <li>View name autocomplete + Go to Declaration (<b>Ctrl+B</b> / Ctrl+Click)</li>
-      <li>DB column completion from Extract migrations and optional JDBC (<code>DB_URL</code>)</li>
+      <li>DB column completion from Cadence migrations and optional JDBC (<code>DB_URL</code>)</li>
       <li>Right-side <b>Kona</b> tool window — grind serve, common commands, docs</li>
       <li>Project layout markers and official Kona brand icons</li>
       <li><b>Grind</b> run configurations — <code>./grind serve</code> (Netty, port
           <code>4000</code>)</li>
-      <li>File templates and live templates for typed Router handlers, Extract,
+      <li>File templates and live templates for typed Router handlers, Cadence,
           Auth, filesystem disks, Queue <code>Bus</code>, Schedule, and Crema</li>
     </ul>
     <p>Sideload a zip from
