@@ -8,9 +8,12 @@
     navigation, and inspections use IntelliJ platform APIs.</p>
     <ul>
       <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
-          with Crema directive / echo overlays, <code>@</code> completion, and annotator</li>
+          with Crema directive / echo overlays, <code>@</code> autopopup completion,
+          <code>&lt;x-*&gt;</code> component tags, and annotator</li>
       <li>View name autocomplete + Go to Declaration (<b>Ctrl+B</b> / Ctrl+Click)</li>
-      <li>DB column completion from Cadence migrations and optional JDBC (<code>DB_URL</code>)</li>
+      <li>Cadence model attribute / DB column completion (migrations and/or JDBC),
+          scoped to the model’s table; configure source under
+          <b>Settings → Tools → Kona</b></li>
       <li>Right-side <b>Kona</b> tool window — grind serve, common commands, docs</li>
       <li>Project layout markers and official Kona brand icons</li>
       <li><b>Grind</b> run configurations — <code>./grind serve</code> (Netty, port
@@ -46,6 +49,7 @@
     <editorHighlighterProvider filetype="Crema" implementationClass="dev.kona.idea.CremaEditorHighlighterProvider"/>
 
     <typedHandler implementation="dev.kona.idea.CremaTypedHandler"/>
+    <lookup.charFilter implementation="dev.kona.idea.CremaCharFilter"/>
     <lang.braceMatcher language="Crema" implementationClass="dev.kona.idea.CremaBraceMatcher"/>
 
     <configurationType implementation="dev.kona.idea.GrindConfigurationType"/>
@@ -54,9 +58,17 @@
     <fileTemplateGroup implementation="dev.kona.idea.KonaFileTemplates"/>
     <defaultLiveTemplates file="/liveTemplates/Kona.xml"/>
 
+    <projectConfigurable
+        parentId="tools"
+        instance="dev.kona.idea.KonaConfigurable"
+        id="dev.kona.idea.settings"
+        displayName="Kona"/>
+
     <completion.contributor language="any" implementationClass="dev.kona.idea.CremaCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="dev.kona.idea.XComponentCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="dev.kona.idea.ViewNameCompletionContributor"/>
     <completion.contributor language="any" implementationClass="dev.kona.idea.DbColumnCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="dev.kona.idea.ModelPropertyCompletionContributor"/>
     <annotator language="Crema" implementationClass="dev.kona.idea.CremaAnnotator"/>
 
     <psi.referenceContributor language="any" implementation="dev.kona.idea.ViewNameReferenceContributor"/>

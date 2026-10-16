@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0
+
+- **Crema `@` autopopup** — typing `@` in `*.crema.html` shows all directives
+  immediately (no Ctrl+Space); typing a prefix (e.g. `@com`) filters and keeps
+  the popup open (`CremaTypedHandler` + `CremaCharFilter`).
+- **`<x-*>` components** — complete tags from `views/components/**`, plus
+  `<x-slot>` / `<x-slot:name>` hints aligned with Crema named slots.
+- **Model attributes** — complete Cadence columns on instance access
+  (`project.description` after `Project.find(1)`), from migrations and/or JDBC.
+- **Scoped query columns** — `User.where("` only suggests columns for that
+  model’s table (override or conventional plural), not every table in the app.
+- **Settings → Tools → Kona** — column source: Connection only | Migrations only |
+  Both (default).
+
 ## 0.3.1
 
 - Rename **Extract** → **Cadence** across templates, artifacts, docs, and DB column completion.
