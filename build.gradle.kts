@@ -77,6 +77,12 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.10 — Env value completion for known option-like keys in
+                  <code>.env</code> / <code>.env.*</code> and
+                  <code>Env.getOrDefault</code> defaults (DB connections, log
+                  drivers/levels, session/cache/queue/mail/hash, booleans, …).</li>
+              <li>0.5.9 — Kona Project View: folders before files (including
+                  <code>resources</code> as a real directory node).</li>
               <li>0.5.7 — Kona Project View: <code>public</code> is top-level again;
                   <code>resources</code> no longer nests it.</li>
               <li>0.5.6 — <code>&lt;brew:*&gt;</code> tag completion; Kona Project View
@@ -193,6 +199,8 @@ kover {
                     "org.konaframework.idea.KonaResourcesDirectoryNode",
                     "org.konaframework.idea.EnvKeyCompletionContributor",
                     "org.konaframework.idea.EnvKeyCompletionContributor*",
+                    "org.konaframework.idea.EnvValueCompletionContributor",
+                    "org.konaframework.idea.EnvValueCompletionContributor*",
                     "org.konaframework.idea.EnvKeyReference",
                     "org.konaframework.idea.EnvKeyReferenceKt",
                     "org.konaframework.idea.EnvKeyReferenceContributor",
