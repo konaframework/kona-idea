@@ -98,8 +98,17 @@ Cadence Kotlin/Java
 ### Brew (`wire:*`)
 - Completes known Brew attributes in Crema HTML (`wire:model`, `wire:click`,
   `wire:submit`, `wire:loading`, … + common modifiers)
+- Known `wire:*` names are registered as HTML attributes, so IDEA does not
+  report them as “attribute is not allowed here”
 - Weak warnings for unknown `wire:*` names
 - Maven: `org.konaframework:kona-brew`
+
+### Env keys
+- In config (and any `Env.get` / `Env.getOrDefault` / `Env.require` string),
+  **Ctrl+Space** completes keys from `.env`, `.env.*` templates, and keys
+  already read in `src/main/{kotlin,java}`
+- **Ctrl+B** or **Ctrl+Click** on that key opens the assignment in the project `.env`
+- In `.env`, **Ctrl+Space** on a key completes names referenced from source
 
 ### Inertia
 - Live templates: `kinertia`, `kinertashare` (Kotlin), `jinertia` (Java)

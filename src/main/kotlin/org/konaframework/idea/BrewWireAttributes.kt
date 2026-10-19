@@ -87,6 +87,17 @@ object BrewWireAttributes {
         return base in BASE_NAMES
     }
 
+    /**
+     * HTML is case-insensitive. Known Brew names (any modifier on a known base)
+     * are legal attributes in Crema; anything else, including unknown `wire:*`,
+     * is not registered with the HTML schema.
+     */
+    fun isAllowedHtmlAttribute(raw: String): Boolean {
+        if (isKnownAttribute(raw)) return true
+        val lower = raw.lowercase()
+        return lower != raw && isKnownAttribute(lower)
+    }
+
     fun completionsForPrefix(prefix: String): List<String> {
         val p = prefix.lowercase()
         if (p.isEmpty() || p == "wire" || p == "wire:") {

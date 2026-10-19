@@ -52,6 +52,12 @@ object ViewNavHelp {
         Autocomplete: Ctrl+Space inside the view / page name string.
         Crema directives: type @ in a *.crema.html view (native completion).
         Brew: type wire: on HTML tags for Brew attribute completion.
+        Known wire:* names are legal HTML attributes in Crema views.
+
+        Env keys (Env.get / getOrDefault / require in config):
+          • Ctrl+Space completes keys from .env, .env.example, and other Env lookups.
+          • Ctrl+B or Ctrl+Click opens that key in the project .env file.
+          • In .env, Ctrl+Space completes keys already referenced from source.
         """.trimIndent()
 }
 

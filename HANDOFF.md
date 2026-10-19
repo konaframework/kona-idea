@@ -32,6 +32,11 @@ Paste this file (or its path) into a new chat so another agent can continue with
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
 
+## Unreleased (on a branch after 0.5.3, version not bumped)
+
+- Known Brew `wire:*` attributes are HTML attribute descriptors in `*.crema.html` (`BrewWireAttributeDescriptorsProvider`). Unknown names still get the weak warning.
+- Env keys: `EnvKeys` + completion / PsiReference / Go to Declaration. Config `Env.get` / `getOrDefault` / `require` completes keys from `.env` and source; Ctrl+B opens the key in `.env`. `.env` completes keys referenced from `src/main`.
+
 ## What 0.5.3 ships
 
 - `plugin.xml` description is the Marketplace/IDE text (do not override it from Gradle)
