@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.8
+
+- **Brew tag navigation** — Ctrl+B / Ctrl+Click on `<brew:counter` opens the
+  `Counter` class; on `:start` / property attributes opens the matching property
+  or `mount(...)` parameter.
+- **Brew tag attribute completion** — inside `<brew:… >`, completes attributes
+  from the component’s public properties and `mount` parameters (plus `:bound`
+  forms and `key` / `lazy` / `defer`).
+- **View variable navigation** — Ctrl+B on `{{ name }}` / `wire:model` values
+  jumps to the Brew member when the view is a component view, otherwise to the
+  controller `mapOf("name" to …)` key that feeds the page.
+
 ## 0.5.7
 
 - **Kona Project View `public`** — `public` is a top-level scaffold entry again;

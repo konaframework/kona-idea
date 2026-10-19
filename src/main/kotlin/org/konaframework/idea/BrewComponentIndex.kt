@@ -35,6 +35,8 @@ object BrewComponentIndex {
         val viewName: String,
         val sourcePath: Path?,
         val members: List<Member>,
+        /** Names of `mount(...)` parameters accepted as tag attributes (`:start`). */
+        val mountParams: List<String> = emptyList(),
     ) {
         fun actions(): List<String> =
             members.filter { it.kind == MemberKind.ACTION }.map { it.name }
@@ -43,6 +45,31 @@ object BrewComponentIndex {
             members
                 .filter { it.kind == MemberKind.PROPERTY || it.kind == MemberKind.COMPUTED }
                 .map { it.name }
+
+        fun properties(): List<String> =
+            members.filter { it.kind == MemberKind.PROPERTY }.map { it.name }
+
+        /**
+         * HTML attribute names accepted on `<brew:…>` for this component
+         * (plain, kebab-case, and `:`-bound forms).
+         */
+        fun acceptedAttributeNames(): List<String> {
+            val bases = linkedSetOf<String>()
+            bases += properties()
+            bases += mountParams
+            val out = linkedSetOf<String>()
+            for (base in bases) {
+                out += base
+                out += ":$base"
+                val kebabName = propertyKebab(base)
+                if (kebabName != base) {
+                    out += kebabName
+                    out += ":$kebabName"
+                }
+            }
+            out += listOf("key", "wire:key", "lazy", "defer", "bundle")
+            return out.toList()
+        }
     }
 
     private val KOTLIN_CLASS =
@@ -120,6 +147,22 @@ object BrewComponentIndex {
     fun byViewName(projectRoot: Path): Map<String, ComponentInfo> =
         collect(projectRoot).associateBy { it.viewName }
 
+    /** Resolve `<brew:Counter>` / `counter` / `admin.show-posts` to indexed info. */
+    fun findComponent(projectRoot: Path, rawName: String): ComponentInfo? {
+        val byName = byComponentName(projectRoot)
+        byName[rawName]?.let { return it }
+        val normalized = normalizeTagComponentName(rawName)
+        byName[normalized]?.let { return it }
+        // PascalCase class name → kebab leaf
+        val leaf = normalized.substringAfterLast('.')
+        return byName.entries.firstOrNull { it.key.substringAfterLast('.') == leaf }?.value
+    }
+
+    fun normalizeTagComponentName(name: String): String =
+        name.split('.').joinToString(".") { segment ->
+            if (segment.any { it.isUpperCase() }) kebab(segment) else segment
+        }
+
     /**
      * Resolve the Brew component that owns [viewFile] under `src/main/resources/views`.
      */
@@ -175,7 +218,45 @@ object BrewComponentIndex {
                 viewName = viewName,
                 sourcePath = sourcePath,
                 members = parseMembers(body, kotlin),
+                mountParams = parseMountParams(body, kotlin),
             )
+        }
+    }
+
+    /** Offset of the `class Name` identifier in [source]. */
+    fun offsetOfClass(source: String, className: String): Int? {
+        val escaped = Regex.escape(className)
+        val kt = Regex("""(?:open\s+|abstract\s+)?class\s+($escaped)\b""")
+        val java = Regex("""(?:public\s+|abstract\s+)?class\s+($escaped)\b""")
+        return kt.find(source)?.groups?.get(1)?.range?.first
+            ?: java.find(source)?.groups?.get(1)?.range?.first
+    }
+
+    /**
+     * Maps a tag attribute (`:start`, `start`, `show-posts`) to a property / mount param name.
+     */
+    fun resolveAttributeMember(info: ComponentInfo, attributeName: String): String? {
+        val raw = attributeName.removePrefix(":").removePrefix("wire:")
+        if (raw.isEmpty() || raw == "key") return null
+        val camel = kebabToCamel(raw)
+        val candidates = listOf(raw, camel, propertyKebab(raw), propertyKebab(camel))
+        for (c in candidates) {
+            if (info.properties().contains(c) || info.mountParams.contains(c)) return c
+            if (info.propertiesAndComputed().contains(c)) return c
+        }
+        return null
+    }
+
+    fun propertyKebab(value: String): String =
+        value
+            .replace(Regex("([a-z0-9])([A-Z])"), "$1-$2")
+            .lowercase()
+
+    fun kebabToCamel(value: String): String {
+        val parts = value.split('-')
+        if (parts.size < 2) return value
+        return parts[0] + parts.drop(1).joinToString("") { part ->
+            part.replaceFirstChar { ch -> ch.uppercaseChar() }
         }
     }
 
@@ -184,6 +265,62 @@ object BrewComponentIndex {
             .replace(Regex("([a-z0-9])([A-Z])"), "$1-$2")
             .replace(Regex("([A-Z]+)([A-Z][a-z])"), "$1-$2")
             .lowercase()
+
+    /**
+     * Character offset of [memberName] in [source] (property, computed, action, or mount param).
+     * Prefers [preferKind] when several patterns could match.
+     */
+    fun offsetOfMember(
+        source: String,
+        memberName: String,
+        preferKind: MemberKind? = null,
+    ): Int? {
+        val escaped = Regex.escape(memberName)
+        val prop =
+            Regex("""(?m)^[ \t]*(?:public\s+)?(?:override\s+)?(?:var|val)\s+($escaped)\b""")
+        val javaField =
+            Regex("""(?m)^[ \t]*public\s+(?!class\b|static\b|void\b)[\w.<>,\s\[\]]+\s+($escaped)\s*[=;]""")
+        val computed =
+            Regex(
+                """(?m)^[ \t]*@Computed(?:\([^)]*\))?[ \t]*\n[ \t]*(?:public\s+)?(?:override\s+)?fun\s+($escaped)\s*\(""",
+            )
+        val javaComputed =
+            Regex(
+                """(?m)^[ \t]*@Computed(?:\([^)]*\))?[ \t]*\n[ \t]*public\s+[\w.<>,\s\[\]]+\s+($escaped)\s*\(""",
+            )
+        val funKt =
+            Regex(
+                """(?m)^[ \t]*(?:@[A-Za-z.]+(?:\([^)]*\))?[ \t]*\n[ \t]*)*(?:public\s+)?(?:override\s+)?fun\s+($escaped)\s*\(""",
+            )
+        val funJava =
+            Regex(
+                """(?m)^[ \t]*(?:@[A-Za-z.]+(?:\([^)]*\))?[ \t]*\n[ \t]*)*public\s+(?:static\s+)?[\w.<>,\s\[\]]+\s+($escaped)\s*\(""",
+            )
+        val ordered =
+            when (preferKind) {
+                MemberKind.PROPERTY -> listOf(prop, javaField, computed, javaComputed, funKt, funJava)
+                MemberKind.COMPUTED -> listOf(computed, javaComputed, prop, javaField, funKt, funJava)
+                MemberKind.ACTION -> listOf(funKt, funJava, computed, javaComputed, prop, javaField)
+                null -> listOf(prop, javaField, computed, javaComputed, funKt, funJava)
+            }
+        for (pattern in ordered) {
+            pattern.find(source)?.groups?.get(1)?.range?.first?.let { return it }
+        }
+        return offsetOfMountParam(source, memberName)
+    }
+
+    fun offsetOfMountParam(source: String, paramName: String): Int? {
+        val escaped = Regex.escape(paramName)
+        for (pattern in listOf(KT_MOUNT, JAVA_MOUNT)) {
+            val m = pattern.find(source) ?: continue
+            val args = m.groups[1] ?: continue
+            val body = args.value
+            val local =
+                Regex("""\b($escaped)\b""").find(body) ?: continue
+            return args.range.first + local.groups[1]!!.range.first
+        }
+        return null
+    }
 
     fun isActionAttribute(rawName: String): Boolean {
         val base = wireBase(rawName)
@@ -273,6 +410,36 @@ object BrewComponentIndex {
             name in NON_ACTIONS ||
             LIFECYCLE_PREFIXED.containsMatchIn(name) ||
             DATA_CLASS.matches(name)
+
+    private val KT_MOUNT =
+        Regex("""(?:override\s+)?fun\s+mount\s*\(([^)]*)\)""")
+    private val JAVA_MOUNT =
+        Regex("""(?:public\s+)?void\s+mount\s*\(([^)]*)\)""")
+
+    private fun parseMountParams(body: String, kotlin: Boolean): List<String> {
+        val scope = outerClassBody(body)
+        val args =
+            if (kotlin) {
+                KT_MOUNT.find(scope)?.groupValues?.get(1)
+            } else {
+                JAVA_MOUNT.find(scope)?.groupValues?.get(1)
+            } ?: return emptyList()
+        if (args.isBlank()) return emptyList()
+        return args.split(',')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .mapNotNull { param ->
+                // Kotlin: `start: Int = 0` / Java: `int start`
+                if (kotlin) {
+                    param.substringBefore(':').substringBefore('=').trim()
+                        .removePrefix("vararg ").trim()
+                        .takeIf { it.isNotEmpty() && it[0].isLetter() }
+                } else {
+                    param.trim().substringAfterLast(' ').trim()
+                        .takeIf { it.isNotEmpty() && it[0].isLetter() }
+                }
+            }
+    }
 
     private fun packageRelativeToBrew(brewRoot: Path, file: Path): String {
         val parent = file.parent ?: return ""

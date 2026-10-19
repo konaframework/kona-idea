@@ -2,6 +2,7 @@ package org.konaframework.idea
 
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.xml.XmlElementDescriptorProvider
@@ -17,14 +18,14 @@ import com.intellij.xml.impl.schema.AnyXmlAttributeDescriptor
 /**
  * Registers Brew `<brew:*>` tags with the HTML schema so IDEA does not report
  * “unknown HTML tag” / “attribute is not allowed here” on Crema views.
- * Also contributes tag-name variants for the built-in HTML tag completion.
+ * Also contributes tag-name variants and attribute descriptors from the component class.
  */
 class BrewTagDescriptorsProvider : XmlElementDescriptorProvider, XmlTagNameProvider {
     override fun getDescriptor(tag: XmlTag): XmlElementDescriptor? {
         if (!isCrema(tag)) return null
         val name = tag.name
         if (!BrewTagPatterns.isBrewTagName(name)) return null
-        return BrewTagElementDescriptor(name)
+        return BrewTagElementDescriptor(name, tag.project)
     }
 
     override fun addTagNameVariants(
@@ -58,15 +59,18 @@ class BrewTagDescriptorsProvider : XmlElementDescriptorProvider, XmlTagNameProvi
     }
 
     /**
-     * Concrete descriptor (not [com.intellij.xml.impl.schema.AnyXmlElementDescriptor])
-     * so [com.intellij.codeInspection.htmlInspections.HtmlUnknownTagInspection] treats
-     * the tag as known. Attributes are accepted freely; [BrewWireAnnotator] still
-     * weak-warns on unknown `wire:*` names.
+     * Concrete descriptor so HtmlUnknownTagInspection treats the tag as known.
+     * [getDeclaration] enables Ctrl+Click on the tag name → component class.
      */
     private class BrewTagElementDescriptor(
         private val tagName: String,
+        private val project: Project,
     ) : XmlElementDescriptor {
-        override fun getDeclaration(): PsiElement? = null
+        override fun getDeclaration(): PsiElement? {
+            val root = project.guessProjectDir()?.toNioPath() ?: return null
+            val component = BrewTagPatterns.componentNameFromTag(tagName) ?: return null
+            return BrewTagNavigation.elementForComponent(project, root, component, member = null)
+        }
 
         override fun getName(context: PsiElement?): String = tagName
 
@@ -86,8 +90,18 @@ class BrewTagDescriptorsProvider : XmlElementDescriptorProvider, XmlTagNameProvi
         override fun getElementDescriptor(childTag: XmlTag?, contextTag: XmlTag?): XmlElementDescriptor? =
             null
 
-        override fun getAttributesDescriptors(context: XmlTag?): Array<XmlAttributeDescriptor> =
-            BrewWireAttributes.BASE.map { AnyXmlAttributeDescriptor(it) }.toTypedArray()
+        override fun getAttributesDescriptors(context: XmlTag?): Array<XmlAttributeDescriptor> {
+            val names = linkedSetOf<String>()
+            names += BrewWireAttributes.BASE
+            val root = project.guessProjectDir()?.toNioPath()
+            val component = BrewTagPatterns.componentNameFromTag(tagName)
+            if (root != null && component != null && KonaLayout.isKonaApp(root)) {
+                BrewComponentIndex.findComponent(root, component)?.acceptedAttributeNames()?.let {
+                    names += it
+                }
+            }
+            return names.map { AnyXmlAttributeDescriptor(it) }.toTypedArray()
+        }
 
         override fun getAttributeDescriptor(attributeName: String?, context: XmlTag?): XmlAttributeDescriptor? {
             if (attributeName.isNullOrEmpty()) return null
