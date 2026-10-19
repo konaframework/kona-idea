@@ -72,9 +72,13 @@
     <completion.contributor language="any" implementationClass="org.konaframework.idea.ModelPropertyCompletionContributor"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.CremaAnnotator"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.BrewWireAnnotator"/>
+    <xml.attributeDescriptorsProvider implementation="org.konaframework.idea.BrewWireAttributeDescriptorsProvider"/>
 
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvKeyCompletionContributor"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.ViewNameReferenceContributor"/>
+    <psi.referenceContributor language="any" implementation="org.konaframework.idea.EnvKeyReferenceContributor"/>
     <gotoDeclarationHandler implementation="org.konaframework.idea.ViewGotoDeclarationHandler"/>
+    <gotoDeclarationHandler implementation="org.konaframework.idea.EnvGotoDeclarationHandler"/>
 
     <toolWindow
         id="Kona"
