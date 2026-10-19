@@ -83,6 +83,8 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.1 — Marketplace <code>pluginIcon</code> (+ dark) uses the caramel
+                  mug mark from monorepo <code>kona-logo.svg</code>.</li>
               <li>0.5.0 — Plugin id/package <code>org.konaframework.idea</code>;
                   Brew <code>wire:*</code> completion + annotator;
                   <code>Inertia.render</code> page-name patterns; Inertia live/file
