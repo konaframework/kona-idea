@@ -231,13 +231,17 @@ Optional env (workflow / local): `PUBLISH_CHANNEL` — non-default channel
 The IDE and Marketplace overview use the HTML in `src/main/resources/META-INF/plugin.xml`
 (`<description>`). Gradle must not replace that block.
 
-Slides for the Marketplace **Media** section (1920×1080) live in
-[`marketplace/media/`](marketplace/media/). The same install steps, for the
-separate **Getting Started** field on the plugin admin page, are in
+Slides for the Marketplace **Media** section (~1920×1080 PNGs) live in
+[`marketplace/media/`](marketplace/media/). These are **real IntelliJ IDEA
+screenshots** (Crema editor, Grind Serve run config, Kona project tree) — not
+HTML mocks. Prefer a clear light theme when re-capturing; the checked-in set
+may use the Islands Dark UI if that is what the capture machine had. Optional
+mock HTML under `marketplace/studio/` remains only as a fallback generator.
+The same install steps, for the separate **Getting Started** field on the
+plugin admin page, are in
 [`marketplace/getting-started.html`](marketplace/getting-started.html).
 Marketplace has no upload API for those two fields: open the plugin page →
-admin → Media, and paste Getting Started there. Sources for the slides are
-`marketplace/studio/`.
+admin → Media, and paste Getting Started there.
 
 ### JetBrains Marketplace — first publish & org verification
 
