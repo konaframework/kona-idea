@@ -12,7 +12,8 @@ live/file templates. **No LSP** — IntelliJ platform APIs only.
 | **Sister extension** | [ide-support/vscode-crema](https://github.com/konaframework/kona/tree/main/ide-support/vscode-crema) in the Kona monorepo |
 | **Docs** | [IntelliJ](https://docs.konaframework.dev/docs/language/intellij) (when published) |
 
-**Supported products:** IntelliJ IDEA Community and Ultimate (2024.2+).
+**Supported products:** IntelliJ IDEA Community and Ultimate only (2024.2+).
+The plugin descriptor depends on `com.intellij.modules.idea`, so other JetBrains IDEs are not compatible.
 Installing, updating, or removing the plugin requires an IDE restart.
 
 **Plugin id:** `org.konaframework.idea` (Maven group `org.konaframework`).

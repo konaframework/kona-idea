@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2
+
+- **Supported IDEs** — Marketplace compatibility is IntelliJ IDEA only
+  (Community and Ultimate, 2024.2+). The plugin now depends on
+  `com.intellij.modules.idea` instead of `com.intellij.modules.platform`.
+
 ## 0.5.1
 
 - **Plugin icon** — Marketplace / Plugins list `pluginIcon.svg` (+ `_dark`) now uses the
