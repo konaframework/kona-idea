@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.5** |
+| Version | **0.5.6** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,15 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.6 ships
+
+- `<brew:*>` tag completion / HTML recognition (`BrewTagPatterns`,
+  `BrewTagCompletionContributor`, `BrewTagDescriptorsProvider`) from
+  `BrewComponentIndex` (`app.brew` / `@BrewComponent` → kebab tag names).
+- Kona Project View is the **default** Project tool window pane for Kona apps
+  (`KonaProjectViewPane.isDefaultPane` + `ensureKonaProjectView` on open).
+- Scaffold tree groups under one `resources` node (`KonaProjectStructure`).
 
 ## What 0.5.5 ships
 
@@ -81,6 +90,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 src/main/kotlin/org/konaframework/idea/
   Crema*.kt                 # language support + @ completion + CharFilter
   XComponent*.kt            # <x-*> index + patterns + contributor
+  BrewTag*.kt               # <brew:*> patterns + contributor + HTML descriptors
   BrewWire*.kt              # wire:* attributes
   BrewComponentIndex.kt / BrewMemberCompletionContributor.kt
   KonaProjectViewPane.kt / KonaProjectRootNode.kt / KonaProjectStructure.kt
