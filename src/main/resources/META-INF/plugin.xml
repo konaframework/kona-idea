@@ -11,7 +11,7 @@
       <li><b>Kona Project View</b> — default Project tool window view for Kona apps (scaffold folders: <code>app</code>, <code>routes</code>, <code>resources</code>, …); still available beside Project / Packages.</li>
       <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
       <li><b>Env</b> — key completion for <code>Env.get</code> / <code>getOrDefault</code> / <code>require</code>; value completion for known option-like keys (<code>DB_CONNECTION</code>, log drivers, session/cache/queue, booleans, <code>APP_ENV</code>, …) in <code>.env</code> / <code>.env.*</code> and <code>getOrDefault</code> defaults.</li>
-      <li><b>Cadence</b> — column and attribute completion from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
+      <li><b>Cadence</b> — on a model instance (<code>user.</code>), complete DB columns, accessors, and relations; the same keys inside <code>getAttribute</code> / <code>setAttribute</code> / <code>attribute</code>. Column strings in <code>User.where("…")</code> still complete from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
       <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
       <li><b>Templates</b> — file and live templates for typed Router handlers, Cadence, Auth, disks, Queue, Schedule, Crema, and Inertia.</li>
     </ul>

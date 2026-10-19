@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.11 — Cadence model attribute completion on <code>user.</code>
+                  (columns, accessors, relations) and in
+                  <code>getAttribute</code> / <code>setAttribute</code> /
+                  <code>attribute</code>; fix Kotlin completion dummy offset.</li>
               <li>0.5.10 — Env value completion for known option-like keys in
                   <code>.env</code> / <code>.env.*</code> and
                   <code>Env.getOrDefault</code> defaults (DB connections, log

@@ -69,6 +69,13 @@ object ViewNavHelp {
             HASH_DRIVER, FILESYSTEM_DISK, APP_ENV, booleans, SESSION_SAME_SITE, …) in
             .env / .env.* and in getOrDefault("KEY", "…") defaults. Project connection
             and disk names from config/Database and config/Filesystems are merged in.
+
+        Cadence models (app/Models):
+          • On a model instance (user. / user.em), Ctrl+Space completes columns,
+            accessors (getFullNameAttribute → full_name), and relations (posts).
+          • Inside getAttribute / setAttribute / attribute / hasAttribute (and raw
+            variants), Ctrl+Space completes the same attribute keys.
+          • User.where("…") still completes that model’s table columns.
         """.trimIndent()
 }
 

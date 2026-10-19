@@ -15,10 +15,19 @@ object ModelIndex {
         val sourcePath: Path?,
     )
 
+    /**
+     * Matches `class User : Cadence<User>()`, multi-interface scaffolds
+     * (`Cadence<User>(), Authenticatable, …`), and legacy `Extract`.
+     */
     private val KOTLIN_CLASS =
-        Regex("""(?:open\s+|abstract\s+)?class\s+(\w+)\s*(?:<[^>]*>)?\s*:\s*(?:Cadence|Extract)\b""")
+        Regex(
+            """(?:open\s+|abstract\s+)?class\s+(\w+)\s*(?:<[^>]*>)?\s*:\s*(?:Cadence|Extract)\s*(?:<[^>]*>)?""",
+        )
+    /** Matches `extends Cadence` / `extends Cadence<User>` (optional implements list). */
     private val JAVA_CLASS =
-        Regex("""(?:public\s+|abstract\s+)?class\s+(\w+)\s+extends\s+(?:Cadence|Extract)\b""")
+        Regex(
+            """(?:public\s+|abstract\s+)?class\s+(\w+)\s+extends\s+(?:Cadence|Extract)\s*(?:<[^>]*>)?""",
+        )
     private val TABLE_KT =
         Regex("""override\s+val\s+table\s*=\s*["']([^"']+)["']""")
     private val TABLE_JAVA =
@@ -56,14 +65,23 @@ object ModelIndex {
     fun byClassName(projectRoot: Path): Map<String, ModelInfo> =
         collect(projectRoot).associateBy { it.className }
 
-    fun tableForClass(projectRoot: Path, className: String): String? {
+    /** Discovered Cadence model only — no convention fallback (avoids spamming unrelated locals). */
+    fun find(projectRoot: Path, className: String): ModelInfo? {
         val simple = className.substringAfterLast('.')
-        return byClassName(projectRoot)[simple]?.table
-            ?: byClassName(projectRoot)[className]?.table
-            ?: run {
-                // Unknown class still pluralizes conventionally when it looks like a model call site.
-                if (simple.isNotEmpty() && simple[0].isUpperCase()) CadenceTableNames.tableNameFor(simple) else null
-            }
+        val by = byClassName(projectRoot)
+        return by[simple] ?: by[className]
+    }
+
+    fun tableForClass(projectRoot: Path, className: String): String? {
+        find(projectRoot, className)?.table?.let { return it }
+        val simple = className.substringAfterLast('.')
+        // Unknown class still pluralizes conventionally when it looks like a model call site
+        // (e.g. `User.where("…")` before the model file is indexed).
+        return if (simple.isNotEmpty() && simple[0].isUpperCase()) {
+            CadenceTableNames.tableNameFor(simple)
+        } else {
+            null
+        }
     }
 
     fun parseSource(source: String, sourcePath: Path? = null): List<ModelInfo> {

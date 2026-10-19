@@ -38,10 +38,12 @@ class CompletionUxTest {
               override val table = "projects"
             }
             class Todo : Cadence<Todo>()
+            class User : Cadence<User>(), Authenticatable, HasCredentials, HasEmail
             """.trimIndent()
         val parsed = ModelIndex.parseSource(kt)
         assertEquals("projects", parsed.first { it.className == "Project" }.table)
         assertEquals("todos", parsed.first { it.className == "Todo" }.table)
+        assertEquals("users", parsed.first { it.className == "User" }.table)
 
         val java =
             """
@@ -50,6 +52,12 @@ class CompletionUxTest {
             }
             """.trimIndent()
         assertEquals("accounts", ModelIndex.parseSource(java).first().table)
+
+        val javaGeneric =
+            """
+            public class Account extends Cadence<Account> implements Authenticatable {}
+            """.trimIndent()
+        assertEquals("accounts", ModelIndex.parseSource(javaGeneric).first().table)
     }
 
     @Test

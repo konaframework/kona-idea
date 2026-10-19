@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.10** |
+| Version | **0.5.11** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,13 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.11 ships
+
+- Cadence **model attribute** completion: columns + accessors + relations on
+  `user.` / `user.em`, and string keys in `getAttribute` / `setAttribute` /
+  `attribute` / `hasAttribute` / `getRawAttribute` / `setRawAttribute`
+  (`ModelAttributeIndex`, `AttributeKeyPatterns`, `CompletionText` dummy fix).
 
 ## What 0.5.10 ships
 
@@ -118,7 +125,8 @@ src/main/kotlin/org/konaframework/idea/
   BrewComponentIndex.kt / BrewMemberCompletionContributor.kt
   KonaProjectViewPane.kt / KonaProjectRootNode.kt / KonaProjectStructure.kt
   View*.kt                  # view index, patterns, refs, goto (+ Inertia)
-  Db*.kt / Migration*.kt / Model*.kt / CadenceTableNames.kt
+  Db*.kt / Migration*.kt / Model*.kt / ModelAttributeIndex.kt / CompletionText.kt
+  AttributeKeyPatterns.kt / CadenceTableNames.kt
   KonaIdeaSettings.kt / KonaConfigurable.kt
   KonaToolWindowFactory.kt / GrindQuickActions.kt
   Grind*.kt / KonaLayout.kt / KonaIcons.kt
