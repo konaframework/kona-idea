@@ -9,6 +9,7 @@ import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiManager
 
 /**
@@ -34,7 +35,12 @@ class KonaProjectRootNode(
             val vf = projectDir.findFileByRelativePath(entry.relativePath) ?: return@mapNotNull null
             if (vf.isDirectory) {
                 val dir = psi.findDirectory(vf) ?: return@mapNotNull null
-                KonaScaffoldDirectoryNode(myProject, dir, settings, entry.displayName)
+                when (entry.displayName) {
+                    "resources" ->
+                        KonaResourcesDirectoryNode(myProject, dir, settings)
+                    else ->
+                        KonaScaffoldDirectoryNode(myProject, dir, settings, entry.displayName)
+                }
             } else {
                 val file = psi.findFile(vf) ?: return@mapNotNull null
                 PsiFileNode(myProject, file, settings)
@@ -60,10 +66,10 @@ class KonaProjectRootNode(
     override fun getVirtualFile(): VirtualFile? = myProject.guessProjectDir()
 }
 
-/** Psi directory node with a short scaffold label (e.g. `resources` not `src/main/resources`). */
+/** Psi directory node with a short scaffold label (e.g. `public` not `resources/public`). */
 private class KonaScaffoldDirectoryNode(
     project: Project,
-    value: com.intellij.psi.PsiDirectory,
+    value: PsiDirectory,
     viewSettings: ViewSettings,
     private val label: String,
 ) : PsiDirectoryNode(project, value, viewSettings) {
@@ -71,5 +77,56 @@ private class KonaScaffoldDirectoryNode(
         super.update(data)
         data.presentableText = label
         data.setIcon(KonaIcons.KONA)
+    }
+}
+
+/**
+ * Custom `resources` node: lists children of `src/main/resources` except `public`,
+ * which is promoted to its own top-level Kona Project View entry.
+ */
+private class KonaResourcesDirectoryNode(
+    project: Project,
+    private val directory: PsiDirectory,
+    private val viewSettings: ViewSettings,
+) : ProjectViewNode<PsiDirectory>(project, directory, viewSettings) {
+    override fun getChildren(): Collection<AbstractTreeNode<*>> {
+        val psi = PsiManager.getInstance(myProject)
+        val out = mutableListOf<AbstractTreeNode<*>>()
+        for (child in directory.virtualFile.children.orEmpty()) {
+            if (child.isDirectory && child.name.equals("public", ignoreCase = true)) {
+                continue
+            }
+            if (child.isDirectory) {
+                val dir = psi.findDirectory(child) ?: continue
+                out += PsiDirectoryNode(myProject, dir, viewSettings)
+            } else {
+                val file = psi.findFile(child) ?: continue
+                out += PsiFileNode(myProject, file, viewSettings)
+            }
+        }
+        return out
+    }
+
+    override fun contains(file: VirtualFile): Boolean {
+        val root = directory.virtualFile
+        if (!file.path.startsWith(root.path)) return false
+        // Files under resources/public belong to the top-level public node, not here.
+        val publicDir = root.findChild("public")
+        return publicDir == null || !file.path.startsWith(publicDir.path)
+    }
+
+    override fun update(presentation: PresentationData) {
+        presentation.presentableText = "resources"
+        presentation.setIcon(KonaIcons.KONA)
+    }
+
+    override fun getVirtualFile(): VirtualFile = directory.virtualFile
+
+    override fun canNavigate(): Boolean = true
+
+    override fun canNavigateToSource(): Boolean = false
+
+    override fun navigate(requestFocus: Boolean) {
+        // Opening the directory in the project view is enough; no editor navigation.
     }
 }

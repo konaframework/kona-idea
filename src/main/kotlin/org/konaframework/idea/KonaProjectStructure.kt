@@ -38,8 +38,9 @@ object KonaProjectStructure {
                 Entry("$src/routes", "routes", Kind.SOURCE_PACKAGE),
                 Entry("$src/config", "config", Kind.SOURCE_PACKAGE),
                 Entry("$src/database", "database", Kind.SOURCE_PACKAGE),
-                // One node for resources; views / public / lang / css / js appear as children.
+                // views / lang / css / js stay under resources; public is its own top-level node.
                 Entry("src/main/resources", "resources", Kind.RESOURCE),
+                Entry("src/main/resources/public", "public", Kind.RESOURCE),
                 Entry("storage", "storage", Kind.ROOT_DIR),
                 Entry("grind", "grind", Kind.ROOT_FILE),
                 Entry("grind.bat", "grind.bat", Kind.ROOT_FILE),

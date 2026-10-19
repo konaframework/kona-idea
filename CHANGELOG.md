@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.7
+
+- **Kona Project View `public`** — `public` is a top-level scaffold entry again;
+  `resources` still groups `views` / `lang` / `css` / `js` and no longer nests
+  `public` underneath.
+
 ## 0.5.6
 
 - **`<brew:*>` tags** — complete and recognize Brew components from `app.brew`
@@ -8,7 +14,7 @@
 - **Kona Project View default** — when a Kona app is opened, the Project tool
   window uses the **Kona** pane by default (`isDefaultPane` + switch on open).
 - **Resources grouping** — Kona Project View shows one `resources` node
-  (`src/main/resources`) instead of separate top-level `views` / `public` / …
+  (`src/main/resources`) for `views` / `lang` / `css` / `js` (not `public`).
 
 ## 0.5.5
 
