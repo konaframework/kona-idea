@@ -54,6 +54,9 @@ object ViewNavHelp {
         Brew: type wire: on HTML tags for Brew attribute completion.
         Inside wire:submit / wire:click / wire:model (and {{ }} echoes), Ctrl+Space
         completes actions and properties from the owning app.brew component class.
+        Ctrl+B / Ctrl+Click on those names opens the property or method in the Kotlin/Java class.
+        On <brew:counter>, Ctrl+B opens the component class; tag attributes complete from
+        properties / mount params. On page views, {{ name }} jumps to the controller mapOf key.
         Known wire:* names are legal HTML attributes in Crema views.
         Project tool window: switch the view dropdown to “Kona” for the scaffold tree.
 
@@ -82,6 +85,8 @@ object BrewInertiaHelp {
             from the paired app.brew component (views/brew/todos ↔ Todos).
           • wire:model / wire:show / wire:text and {{ }} echoes complete properties
             and @Computed members from that class.
+          • Ctrl+B / Ctrl+Click on <brew:name> opens the class; on attributes / wire
+            values / {{ }} jumps to the prop, mount param, method, or controller mapOf key.
 
         Inertia (org.konaframework:kona-inertia)
           • Page names in Inertia.render(…) / manager.render(…) get the same completion

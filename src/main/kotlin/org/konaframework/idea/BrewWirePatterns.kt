@@ -28,6 +28,24 @@ object BrewWirePatterns {
     )
 
     /**
+     * Full member name under the caret for Go to Declaration
+     * (`wire:submit="add"`, `wire:model="draft"`, `{{ remaining }}`).
+     */
+    data class MemberReference(
+        val name: String,
+        /** Attribute name when inside a `wire:*` value; null for echoes. */
+        val attributeName: String?,
+    ) {
+        val expectsAction: Boolean
+            get() = attributeName != null && BrewComponentIndex.isActionAttribute(attributeName)
+
+        val expectsProperty: Boolean
+            get() =
+                attributeName == null ||
+                    BrewComponentIndex.isPropertyAttribute(attributeName)
+    }
+
+    /**
      * Prefix of a `wire:` attribute being typed at [offset]
      * (e.g. `wire:mo` inside `<input wire:mo|`).
      */
@@ -157,6 +175,122 @@ object BrewWirePatterns {
         val prefix = memberPrefix(between)
         return EchoContext(prefix)
     }
+
+    /**
+     * Resolves the Brew member name under [offset] for navigation
+     * (full identifier, not only the typed prefix).
+     */
+    fun memberReferenceAt(text: CharSequence, offset: Int): MemberReference? {
+        valueMemberAt(text, offset)?.let { return it }
+        echoMemberAt(text, offset)?.let { return it }
+        return null
+    }
+
+    private fun valueMemberAt(text: CharSequence, offset: Int): MemberReference? {
+        if (offset < 0 || offset > text.length) return null
+        var i = offset - 1
+        var quote: Char? = null
+        while (i >= 0) {
+            val c = text[i]
+            when {
+                c == '"' || c == '\'' -> {
+                    quote = c
+                    break
+                }
+                c == '>' || c == '<' || c == '\n' -> return null
+            }
+            i--
+        }
+        if (quote == null) return null
+        val valueStart = i + 1
+        var j = i - 1
+        while (j >= 0 && text[j].isWhitespace()) j--
+        if (j < 0 || text[j] != '=') return null
+        j--
+        while (j >= 0 && text[j].isWhitespace()) j--
+        val nameEnd = j + 1
+        while (j >= 0 && isAttrNamePart(text[j])) j--
+        val nameStart = j + 1
+        if (nameStart >= nameEnd) return null
+        val attrName = text.subSequence(nameStart, nameEnd).toString()
+        if (!attrName.lowercase().startsWith("wire:")) return null
+        if (!insideOpenTag(text, nameStart)) return null
+        if (!BrewComponentIndex.isActionAttribute(attrName) &&
+            !BrewComponentIndex.isPropertyAttribute(attrName)
+        ) {
+            return null
+        }
+        var valueEnd = valueStart
+        while (valueEnd < text.length && text[valueEnd] != quote) valueEnd++
+        if (offset < valueStart || offset > valueEnd) return null
+        val value = text.subSequence(valueStart, valueEnd)
+        val rel = (offset - valueStart).coerceIn(0, value.length)
+        val raw = identifierAt(value, rel) ?: return null
+        val name = navigationName(raw) ?: return null
+        return MemberReference(name, attrName)
+    }
+
+    private fun echoMemberAt(text: CharSequence, offset: Int): MemberReference? {
+        val echo = echoContextAt(text, offset) ?: return null
+        // Re-scan for the full identifier around the caret inside the echo.
+        var openAt = -1
+        var openLen = 0
+        var i = offset - 1
+        while (i >= 1) {
+            val two = text.subSequence(i - 1, i + 1).toString()
+            if (two == "{{") {
+                openAt = i - 1
+                openLen = 2
+                break
+            }
+            if (i >= 2 && text.subSequence(i - 2, i + 1).toString() == "{!!") {
+                openAt = i - 2
+                openLen = 3
+                break
+            }
+            i--
+        }
+        if (openAt < 0) {
+            val name = navigationName(echo.prefix) ?: return null
+            return MemberReference(name, null)
+        }
+        val closer = if (openLen == 2) "}}" else "!!}"
+        var closeAt = offset
+        while (closeAt + closer.length <= text.length) {
+            if (text.subSequence(closeAt, closeAt + closer.length).toString() == closer) break
+            closeAt++
+        }
+        val inner = text.subSequence(openAt + openLen, closeAt.coerceAtMost(text.length))
+        val rel = (offset - (openAt + openLen)).coerceIn(0, inner.length)
+        val raw = identifierAt(inner, rel) ?: echo.prefix
+        val name = navigationName(raw) ?: return null
+        return MemberReference(name, null)
+    }
+
+    /** Top-level member name: `remove(…)` → `remove`, `items.done` → `items`. */
+    fun navigationName(raw: String): String? {
+        val stem = raw.substringBefore('(').trim()
+        if (stem.isEmpty()) return null
+        val simple = stem.substringBefore('.')
+        return simple.takeIf { it.isNotEmpty() && it[0].isLetter() }
+    }
+
+    fun identifierAt(text: CharSequence, offset: Int): String? {
+        if (text.isEmpty()) return null
+        var pos = offset.coerceIn(0, text.length)
+        if (pos > 0 && (pos == text.length || !isMemberIdentPart(text[pos]))) {
+            pos--
+        }
+        if (pos < 0 || pos >= text.length || !isMemberIdentPart(text[pos])) return null
+        var start = pos
+        while (start > 0 && isMemberIdentPart(text[start - 1])) start--
+        var end = pos + 1
+        while (end < text.length && isMemberIdentPart(text[end])) end++
+        return text.subSequence(start, end).toString()
+    }
+
+    fun isMemberIdentPart(c: Char): Boolean =
+        c.isLetterOrDigit() || c == '_' || c == '.' || c == '$'
 
     fun isAttrNamePart(c: Char): Boolean =
         c == ':' || c == '.' || c == '-' || c == '_' || c.isLetterOrDigit()

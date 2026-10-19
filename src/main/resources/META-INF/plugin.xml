@@ -7,7 +7,7 @@
     <p>Native support for the <b>Kona Framework</b> in IntelliJ IDEA Community and Ultimate, 2024.2 and later. Crema views, Brew, Inertia, Cadence, and Grind are edited with IntelliJ platform completion, navigation, and inspections. This plugin does not use a language server.</p>
     <ul>
       <li><b>Crema</b> — <code>*.crema.html</code> and <code>*.crema.kt</code>, with HTML colors plus directive and echo overlays. Type <code>@</code> to complete directives. Complete <code>&lt;x-*&gt;</code> and <code>&lt;brew:*&gt;</code> component tags.</li>
-      <li><b>Brew</b> — <code>&lt;brew:component /&gt;</code> tags from <code>app.brew</code>; <code>wire:*</code> attribute completion; action/property values and <code>{{ }}</code> echoes from the owning component class; weak warnings for unknown names.</li>
+      <li><b>Brew</b> — <code>&lt;brew:component /&gt;</code> tags from <code>app.brew</code>; Ctrl+B on the tag opens the component class; tag attributes complete from properties / <code>mount</code> params; <code>wire:*</code> and <code>{{ }}</code> navigate and complete from the component (or controller <code>mapOf</code> keys on page views).</li>
       <li><b>Kona Project View</b> — default Project tool window view for Kona apps (scaffold folders: <code>app</code>, <code>routes</code>, <code>resources</code>, …); still available beside Project / Packages.</li>
       <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
       <li><b>Cadence</b> — column and attribute completion from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
@@ -70,6 +70,7 @@
     <completion.contributor language="any" implementationClass="org.konaframework.idea.CremaCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.XComponentCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewTagCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewTagAttributeCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewWireCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewMemberCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.ViewNameCompletionContributor"/>
@@ -86,6 +87,8 @@
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.EnvKeyReferenceContributor"/>
     <gotoDeclarationHandler implementation="org.konaframework.idea.ViewGotoDeclarationHandler"/>
     <gotoDeclarationHandler implementation="org.konaframework.idea.EnvGotoDeclarationHandler"/>
+    <gotoDeclarationHandler implementation="org.konaframework.idea.BrewTagGotoDeclarationHandler"/>
+    <gotoDeclarationHandler implementation="org.konaframework.idea.BrewMemberGotoDeclarationHandler"/>
 
     <toolWindow
         id="Kona"

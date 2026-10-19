@@ -133,6 +133,163 @@ class BrewInertiaSupportTest {
         assertEquals("items.done", BrewWirePatterns.memberPrefix("items.done"))
         assertEquals("add", BrewWirePatterns.memberPrefix("add("))
         assertEquals("\$wire", BrewWirePatterns.memberPrefix("\$wire"))
+
+        val navSubmit = """<form wire:submit="add">"""
+        val addAt = navSubmit.indexOf("add") + 1
+        val addRef = BrewWirePatterns.memberReferenceAt(navSubmit, addAt)
+        assertNotNull(addRef)
+        assertEquals("add", addRef!!.name)
+        assertTrue(addRef.expectsAction)
+
+        val navModel = """<input wire:model="draft">"""
+        val draftRef = BrewWirePatterns.memberReferenceAt(navModel, navModel.indexOf("dra") + 2)
+        assertNotNull(draftRef)
+        assertEquals("draft", draftRef!!.name)
+        assertTrue(draftRef.expectsProperty)
+
+        val navClick = """<button wire:click="remove({{ loop.index }})">"""
+        assertEquals(
+            "remove",
+            BrewWirePatterns.memberReferenceAt(navClick, navClick.indexOf("remove") + 2)!!.name,
+        )
+        val navEcho = "{{ remaining }}"
+        assertEquals(
+            "remaining",
+            BrewWirePatterns.memberReferenceAt(navEcho, navEcho.indexOf("rem") + 2)!!.name,
+        )
+        assertEquals("items", BrewWirePatterns.navigationName("items.done"))
+        assertEquals("add", BrewWirePatterns.navigationName("add("))
+        assertNull(BrewWirePatterns.memberReferenceAt("plain text", 3))
+    }
+
+    @Test
+    fun brewMemberOffsetInSource() {
+        val source =
+            """
+            class Todos : Component() {
+                var draft = ""
+                fun add() {}
+                @Computed
+                fun remaining(): Int = 0
+            }
+            """.trimIndent()
+        assertEquals(
+            source.indexOf("draft"),
+            BrewComponentIndex.offsetOfMember(source, "draft", BrewComponentIndex.MemberKind.PROPERTY),
+        )
+        assertEquals(
+            source.indexOf("add"),
+            BrewComponentIndex.offsetOfMember(source, "add", BrewComponentIndex.MemberKind.ACTION),
+        )
+        assertEquals(
+            source.indexOf("remaining"),
+            BrewComponentIndex.offsetOfMember(source, "remaining", BrewComponentIndex.MemberKind.COMPUTED),
+        )
+        assertNull(BrewComponentIndex.offsetOfMember(source, "missing"))
+    }
+
+    @Test
+    fun brewTagPatternsAndAcceptedAttributes() {
+        val html = """<h1>{{ name }}</h1><brew:counter :start="0" count="1" />"""
+        assertEquals(
+            "counter",
+            BrewTagPatterns.componentNameAt(html, html.indexOf("counter") + 2),
+        )
+        assertEquals(
+            "counter",
+            BrewTagPatterns.componentNameAt("<brew:counter />", "<brew:".length + 2),
+        )
+        assertEquals(
+            "counter",
+            BrewTagPatterns.componentNameAt("</brew:counter>", "</brew:".length + 2),
+        )
+        assertNull(BrewTagPatterns.componentNameAt("plain", 2))
+
+        val startRef = BrewTagPatterns.attributeReferenceAt(html, html.indexOf(":start") + 2)
+        assertNotNull(startRef)
+        assertEquals("counter", startRef!!.componentName)
+        assertEquals(":start", startRef.attributeName)
+        assertNull(BrewTagPatterns.attributeReferenceAt(html, html.indexOf("\"0\"") + 1))
+
+        val attrCtx = BrewTagPatterns.attributeNameContextAt("<brew:counter st", "<brew:counter st".length)
+        assertNotNull(attrCtx)
+        assertEquals("counter", attrCtx!!.componentName)
+        assertEquals("st", attrCtx.prefix)
+        assertNull(BrewTagPatterns.attributeNameContextAt("""<brew:counter :start="0""", html.length - 1))
+        assertNull(BrewTagPatterns.attributeNameContextAt("<div class", 8))
+
+        val afterClosed = """<brew:counter /><div cl"""
+        assertNull(BrewTagPatterns.attributeNameContextAt(afterClosed, afterClosed.length))
+
+        val counter =
+            """
+            class Counter : Component() {
+                var count = 0
+                var showPosts = false
+                fun mount(start: Int = 0) { count = start }
+                fun increment() {}
+            }
+            """.trimIndent()
+        val info = BrewComponentIndex.parseSource(counter).single()
+        assertEquals(listOf("start"), info.mountParams)
+        assertTrue(info.acceptedAttributeNames().containsAll(listOf("count", ":count", "start", ":start", "key")))
+        assertTrue(info.acceptedAttributeNames().contains(":show-posts"))
+        assertEquals("start", BrewComponentIndex.resolveAttributeMember(info, ":start"))
+        assertEquals("count", BrewComponentIndex.resolveAttributeMember(info, "count"))
+        assertEquals("showPosts", BrewComponentIndex.resolveAttributeMember(info, "show-posts"))
+        assertNull(BrewComponentIndex.resolveAttributeMember(info, "wire:key"))
+        assertEquals(
+            counter.indexOf("class Counter") + "class ".length,
+            BrewComponentIndex.offsetOfClass(counter, "Counter"),
+        )
+        assertEquals(
+            counter.indexOf("start: Int"),
+            BrewComponentIndex.offsetOfMountParam(counter, "start"),
+        )
+        assertEquals("counter", BrewComponentIndex.normalizeTagComponentName("Counter"))
+        assertEquals("showPosts", BrewComponentIndex.kebabToCamel("show-posts"))
+        assertEquals("show-posts", BrewComponentIndex.propertyKebab("showPosts"))
+
+        val java =
+            """
+            public class Counter extends Component {
+                public int count = 0;
+                public void mount(int start) { count = start; }
+            }
+            """.trimIndent()
+        val javaInfo = BrewComponentIndex.parseSource(java).single()
+        assertEquals(listOf("start"), javaInfo.mountParams)
+        assertEquals(java.indexOf("start)"), BrewComponentIndex.offsetOfMountParam(java, "start"))
+
+        val root = Files.createTempDirectory("kona-find-comp")
+        val brew = root.resolve("src/main/kotlin/app/brew")
+        Files.createDirectories(brew)
+        Files.writeString(brew.resolve("Counter.kt"), counter)
+        assertEquals("Counter", BrewComponentIndex.findComponent(root, "Counter")!!.className)
+        assertEquals("Counter", BrewComponentIndex.findComponent(root, "counter")!!.className)
+    }
+
+    @Test
+    fun viewDataIndexFindsControllerMapKeys() {
+        val controller =
+            """
+            package app.http.controllers
+            class WelcomeController {
+                fun home() = Crema.view(crema, "welcome", mapOf("name" to "World", "title" to "Hi"))
+                fun alt() = view("home", mapOf("x" to 1))
+            }
+            """.trimIndent()
+        val root = Files.createTempDirectory("kona-view-data")
+        val dir = root.resolve("src/main/kotlin/app/http/controllers")
+        Files.createDirectories(dir)
+        Files.writeString(dir.resolve("WelcomeController.kt"), controller)
+        val keys = ViewDataIndex.keysForView(root, "welcome")
+        assertEquals(setOf("name", "title"), keys.map { it.key }.toSet())
+        val name = ViewDataIndex.firstKey(root, "welcome", "name")
+        assertNotNull(name)
+        assertEquals(controller.indexOf("\"name\"") + 1, name!!.offset)
+        assertEquals(setOf("x"), ViewDataIndex.keysForView(root, "home").map { it.key }.toSet())
+        assertTrue(ViewDataIndex.keysForView(root, "missing").isEmpty())
     }
 
     @Test
