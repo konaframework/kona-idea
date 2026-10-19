@@ -45,7 +45,8 @@ kotlin {
 
 intellijPlatform {
     // Marketplace: first upload must be manual; later versions use publishPlugin.
-    // Token: PUBLISH_TOKEN (official) or JETBRAINS_PUBLISH_TOKEN. Signing via CERTIFICATE_*.
+    // Token: PUBLISH_TOKEN (official) or JETBRAINS_PUBLISH_TOKEN.
+    // Signing is optional. Empty CERTIFICATE_CHAIN / PRIVATE_KEY skips signPlugin.
     publishing {
         token.set(
             providers.environmentVariable("PUBLISH_TOKEN")
