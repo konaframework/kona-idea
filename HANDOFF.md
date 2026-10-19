@@ -13,23 +13,34 @@ Paste this file (or its path) into a new chat so another agent can continue with
 5. HTTP: `KonaHttpServer` is **Netty + virtual threads**; default serve port **4000**.
 6. Routing templates: **typed instance/lambda only** — do not reintroduce `Class@method` UX.
 7. **No LSP in this plugin** — native CompletionContributor / PsiReference / tool window only.
-8. ORM package is **Cadence** (`dev.kona:kona-cadence`), not Extract.
+8. ORM package is **Cadence** (`org.konaframework:kona-cadence`), not Extract.
+9. Brew / Inertia: keep `wire:*` lists aligned with `js/brew`; page-name patterns with `kona-inertia` samples.
 
 ## Where we are
 
 | Item | Value |
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
-| Plugin id | `dev.kona.idea` |
-| Version | **0.4.0** |
+| Plugin id | `org.konaframework.idea` |
+| Version | **0.5.0** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
-| Package | `dev.kona.idea` |
+| Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
 | Models | **Auto** unless the human names a model |
 | CI | `.github/workflows/ci.yml` — `test` + `koverVerify` + `buildPlugin` |
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
-## What 0.4.0 ships
+**Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.0 ships
+
+- Package / plugin id `org.konaframework.idea`; Maven group `org.konaframework`
+- Brew `wire:*` completion + annotator (`BrewWireAttributes`, `BrewWirePatterns`, …)
+- Inertia page-name patterns on `ViewNamePatterns` (`Inertia.render`, manager)
+- Inertia live templates (`kinertia`, `kinertashare`, `jinertia`) + file templates
+- Brew + Inertia help action / tool window mentions `kona-brew` / `kona-inertia`
+
+## What 0.4.0 shipped
 
 - Crema `@` autopopup + filter-as-you-type (`CremaTypedHandler`, `CremaCharFilter`)
 - `<x-*>` / `<x-slot>` completion (`XComponentIndex`, `XComponentCompletionContributor`)
@@ -40,10 +51,11 @@ Paste this file (or its path) into a new chat so another agent can continue with
 ## Layout
 
 ```text
-src/main/kotlin/dev/kona/idea/
+src/main/kotlin/org/konaframework/idea/
   Crema*.kt                 # language support + @ completion + CharFilter
   XComponent*.kt            # <x-*> index + patterns + contributor
-  View*.kt                  # view index, patterns, refs, goto
+  BrewWire*.kt              # wire:* attributes
+  View*.kt                  # view index, patterns, refs, goto (+ Inertia)
   Db*.kt / Migration*.kt / Model*.kt / CadenceTableNames.kt
   KonaIdeaSettings.kt / KonaConfigurable.kt
   KonaToolWindowFactory.kt / GrindQuickActions.kt
@@ -52,10 +64,10 @@ src/main/kotlin/dev/kona/idea/
 src/main/resources/
   META-INF/plugin.xml
   icons/ … fileTemplates/ liveTemplates/
-src/test/kotlin/dev/kona/idea/
+src/test/kotlin/org/konaframework/idea/
   CremaLexerTest.kt / CremaDirectivesTest.kt
   KonaModernAlignmentTest.kt / NativeIdeFeaturesTest.kt
-  CompletionUxTest.kt
+  CompletionUxTest.kt / BrewInertiaSupportTest.kt
 ```
 
 ## How to resume

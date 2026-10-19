@@ -1,0 +1,13 @@
+<script setup>
+defineProps({
+  title: { type: String, default: '${NAME}' },
+  message: { type: String, default: '' },
+});
+</script>
+
+<template>
+  <main>
+    <h1>{{ title }}</h1>
+    <p v-if="message">{{ message }}</p>
+  </main>
+</template>
