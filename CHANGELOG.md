@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.10
+
+- **Env value completion** — for known option-like keys (`DB_CONNECTION`,
+  `LOG_CHANNEL` / `LOG_STACK` / `LOG_LEVEL`, `SESSION_DRIVER`, cache/queue/mail/hash,
+  `FILESYSTEM_DISK`, `APP_ENV`, booleans, `SESSION_SAME_SITE`, …) in `.env` /
+  `.env.*` and in `Env.getOrDefault("KEY", "…")` defaults. Project connection and
+  disk names from `config/Database` and `config/Filesystems` are merged in.
+
 ## 0.5.9
 
 - **Kona Project View order** — `resources` (and all scaffold folders) sort with

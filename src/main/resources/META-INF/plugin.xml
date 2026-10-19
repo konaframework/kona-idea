@@ -10,6 +10,7 @@
       <li><b>Brew</b> — <code>&lt;brew:component /&gt;</code> tags from <code>app.brew</code>; Ctrl+B on the tag opens the component class; tag attributes complete from properties / <code>mount</code> params; <code>wire:*</code> and <code>{{ }}</code> navigate and complete from the component (or controller <code>mapOf</code> keys on page views).</li>
       <li><b>Kona Project View</b> — default Project tool window view for Kona apps (scaffold folders: <code>app</code>, <code>routes</code>, <code>resources</code>, …); still available beside Project / Packages.</li>
       <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
+      <li><b>Env</b> — key completion for <code>Env.get</code> / <code>getOrDefault</code> / <code>require</code>; value completion for known option-like keys (<code>DB_CONNECTION</code>, log drivers, session/cache/queue, booleans, <code>APP_ENV</code>, …) in <code>.env</code> / <code>.env.*</code> and <code>getOrDefault</code> defaults.</li>
       <li><b>Cadence</b> — column and attribute completion from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
       <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
       <li><b>Templates</b> — file and live templates for typed Router handlers, Cadence, Auth, disks, Queue, Schedule, Crema, and Inertia.</li>
@@ -83,6 +84,7 @@
     <xml.tagNameProvider implementation="org.konaframework.idea.BrewTagDescriptorsProvider"/>
 
     <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvKeyCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvValueCompletionContributor"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.ViewNameReferenceContributor"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.EnvKeyReferenceContributor"/>
     <gotoDeclarationHandler implementation="org.konaframework.idea.ViewGotoDeclarationHandler"/>

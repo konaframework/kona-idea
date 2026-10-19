@@ -60,10 +60,15 @@ object ViewNavHelp {
         Known wire:* names are legal HTML attributes in Crema views.
         Project tool window: switch the view dropdown to “Kona” for the scaffold tree.
 
-        Env keys (Env.get / getOrDefault / require in config):
+        Env keys and values (Env.get / getOrDefault / require in config):
           • Ctrl+Space completes keys from .env, .env.example, and other Env lookups.
           • Ctrl+B or Ctrl+Click opens that key in the project .env file.
           • In .env, Ctrl+Space completes keys already referenced from source.
+          • Value completion for known option-like keys (DB_CONNECTION, LOG_CHANNEL /
+            LOG_STACK / LOG_LEVEL, SESSION_DRIVER, CACHE_*, QUEUE_CONNECTION, MAIL_MAILER,
+            HASH_DRIVER, FILESYSTEM_DISK, APP_ENV, booleans, SESSION_SAME_SITE, …) in
+            .env / .env.* and in getOrDefault("KEY", "…") defaults. Project connection
+            and disk names from config/Database and config/Filesystems are merged in.
         """.trimIndent()
 }
 
