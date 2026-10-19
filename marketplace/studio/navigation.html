@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>View navigation</title>
+  <link rel="stylesheet" href="ide.css"/>
+</head>
+<body>
+  <div class="ide">
+    <div class="toolbar">
+      <img class="mug lg" src="brand/pluginIcon.svg" alt=""/>
+      <div class="project-name">kona-app</div>
+      <div class="run"><span class="play"></span> Grind Serve</div>
+    </div>
+    <div class="body">
+      <div class="tree">
+        <div class="pane-title">Project</div>
+        <div class="row file on">WebRoutes.kt</div>
+        <div class="row file">HomeController.kt</div>
+        <div class="row file">views/pages/welcome.crema.html</div>
+      </div>
+      <div class="editor">
+        <div class="tabs">
+          <div class="tab on">WebRoutes.kt</div>
+        </div>
+        <div class="code">
+          <div class="ln"><span>8</span><span><span class="kw">fun</span> home(): Response =</span></div>
+          <div class="ln"><span>9</span><span>    Crema.view(<span class="str link">"pages.welcome"</span>)</span></div>
+          <div class="ln"><span>10</span><span></span></div>
+          <div class="ln"><span>11</span><span><span class="kw">fun</span> orders(): Response =</span></div>
+          <div class="ln"><span>12</span><span>    Inertia.render(<span class="str">"orders/index"</span>)</span></div>
+          <div class="hint">Go to Declaration · <b>Ctrl+B</b></div>
+        </div>
+      </div>
+      <div class="tools">
+        <h2><img class="mug lg" src="brand/pluginIcon.svg" alt=""/> Kona</h2>
+        <h3>Help</h3>
+        <div class="btn">View navigation shortcuts</div>
+        <div class="btn">Brew + Inertia</div>
+        <p class="note">Ctrl+B or Ctrl+Click on a view name opens the Crema file. The same navigation applies to Crema.view, Brew.view, and Inertia.render. macOS: ⌘B.</p>
+      </div>
+    </div>
+    <div class="status"><span>Kotlin</span><span>WebRoutes.kt</span><span>9:16</span></div>
+  </div>
+</body>
+</html>

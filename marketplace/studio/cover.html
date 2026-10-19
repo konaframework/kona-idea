@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Kona Framework IDE support</title>
+  <link rel="stylesheet" href="ide.css"/>
+</head>
+<body class="cover">
+  <div>
+    <img class="lockup" src="brand/kona-mark.svg" alt="Kona"/>
+    <p class="lede">Framework IDE support for IntelliJ IDEA</p>
+    <ul class="pills">
+      <li>Crema views</li>
+      <li>Grind serve</li>
+      <li>Cadence columns</li>
+    </ul>
+  </div>
+  <div class="ide-card" aria-hidden="true">
+    <div class="toolbar">
+      <img class="mug" src="brand/pluginIcon.svg" alt=""/>
+      <div class="project-name">kona-app</div>
+      <div class="run"><span class="play"></span> Grind Serve</div>
+    </div>
+    <div class="body">
+      <div class="tree">
+        <div class="pane-title">Project</div>
+        <div class="row dir"><span class="chev"></span> src</div>
+        <div class="row dir indent-1"><span class="chev"></span> main</div>
+        <div class="row file indent-2">resources</div>
+        <div class="row file indent-3 on"><img class="mug" src="brand/pluginIcon.svg" alt=""/> welcome.crema.html</div>
+        <div class="row file indent-3">layouts/app.crema.html</div>
+      </div>
+      <div class="editor">
+        <div class="tabs">
+          <div class="tab on"><img class="mug" src="brand/pluginIcon.svg" alt=""/> welcome.crema.html</div>
+        </div>
+        <div class="code">
+          <div class="ln"><span>1</span><span><span class="kw">@extends</span>(<span class="str">"layouts.app"</span>)</span></div>
+          <div class="ln"><span>2</span><span></span></div>
+          <div class="ln"><span>3</span><span><span class="kw">@section</span>(<span class="str">"content"</span>)</span></div>
+          <div class="ln"><span>4</span><span>  <span class="tag">&lt;h1&gt;</span><span class="echo">{{ title }}</span><span class="tag">&lt;/h1&gt;</span></span></div>
+          <div class="ln"><span>5</span><span>  <span class="kw">@foreach</span> (items as item)</span></div>
+          <div class="ln"><span>6</span><span>    <span class="tag">&lt;p</span> <span class="attr">wire:click</span>=<span class="str">"choose"</span><span class="tag">&gt;</span><span class="echo">{{ item.name }}</span><span class="tag">&lt;/p&gt;</span></span></div>
+          <div class="ln"><span>7</span><span>  <span class="kw">@endforeach</span></span></div>
+          <div class="ln"><span>8</span><span><span class="kw">@endsection</span></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="status"><span>Crema</span><span>UTF-8</span><span>Kona</span></div>
+  </div>
+</body>
+</html>

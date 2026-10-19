@@ -217,6 +217,19 @@ Author signing secrets are optional. Marketplace signs the zip after upload, and
 Optional env (workflow / local): `PUBLISH_CHANNEL` — non-default channel
 (`beta`, `alpha`, `eap`, …). Unset = Stable (`default`).
 
+### Marketplace listing text and slides
+
+The IDE and Marketplace overview use the HTML in `src/main/resources/META-INF/plugin.xml`
+(`<description>`). Gradle must not replace that block.
+
+Slides for the Marketplace **Media** section (1920×1080) live in
+[`marketplace/media/`](marketplace/media/). The same install steps, for the
+separate **Getting Started** field on the plugin admin page, are in
+[`marketplace/getting-started.html`](marketplace/getting-started.html).
+Marketplace has no upload API for those two fields: open the plugin page →
+admin → Media, and paste Getting Started there. Sources for the slides are
+`marketplace/studio/`.
+
 ### JetBrains Marketplace — first publish & org verification
 
 JetBrains requires the **first** Marketplace listing to be uploaded **manually**:

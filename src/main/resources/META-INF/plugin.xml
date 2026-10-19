@@ -3,32 +3,27 @@
   <name>Kona</name>
   <vendor url="https://github.com/konaframework/kona-idea">Kona Framework</vendor>
   <description><![CDATA[
-    <p><b>Kona Idea</b> — native JetBrains support for the Kona framework
-    (IntelliJ IDEA Community and Ultimate). <b>No LSP</b> — completion,
-    navigation, and inspections use IntelliJ platform APIs.</p>
+    <p>Kona Framework IDE support in IDEA.</p>
+    <p>Native support for the <b>Kona Framework</b> in IntelliJ IDEA Community and Ultimate, 2024.2 and later. Crema views, Brew, Inertia, Cadence, and Grind are edited with IntelliJ platform completion, navigation, and inspections. This plugin does not use a language server.</p>
     <ul>
-      <li>Crema (<code>*.crema.html</code>, <code>*.crema.kt</code>) — HTML colors
-          with Crema directive / echo overlays, <code>@</code> autopopup completion,
-          <code>&lt;x-*&gt;</code> component tags, and annotator</li>
-      <li>Brew <code>wire:*</code> attribute completion + weak warnings
-          (<code>org.konaframework:kona-brew</code>)</li>
-      <li>View / Inertia page-name autocomplete + Go to Declaration
-          (<b>Ctrl+B</b> / Ctrl+Click) for Crema, Brew, and
-          <code>Inertia.render</code></li>
-      <li>Cadence model attribute / DB column completion (migrations and/or JDBC),
-          scoped to the model’s table; configure source under
-          <b>Settings → Tools → Kona</b></li>
-      <li>Right-side <b>Kona</b> tool window — grind serve, Brew+Inertia help, docs</li>
-      <li>Project layout markers and official Kona brand icons</li>
-      <li><b>Grind</b> run configurations — <code>./grind serve</code> (Netty, port
-          <code>4000</code>)</li>
-      <li>File templates and live templates for typed Router handlers, Cadence,
-          Auth, filesystem disks, Queue <code>Bus</code>, Schedule, Crema, and Inertia</li>
+      <li><b>Crema</b> — <code>*.crema.html</code> and <code>*.crema.kt</code>, with HTML colors plus directive and echo overlays. Type <code>@</code> to complete directives. Complete <code>&lt;x-*&gt;</code> component tags.</li>
+      <li><b>Brew</b> — <code>wire:*</code> attribute completion, and weak warnings for unknown names.</li>
+      <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
+      <li><b>Cadence</b> — column and attribute completion from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
+      <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
+      <li><b>Templates</b> — file and live templates for typed Router handlers, Cadence, Auth, disks, Queue, Schedule, Crema, and Inertia.</li>
     </ul>
-    <p>Sideload a zip from
-    <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a>,
-    or install from the JetBrains Marketplace when published.</p>
-    <p><b>Note:</b> installing, updating, or removing this plugin requires an IDE restart.</p>
+    <p><b>Getting started</b></p>
+    <ol>
+      <li>Install <b>Kona</b> from the Marketplace, or download the zip from <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a> and choose <b>Settings → Plugins → ⚙ → Install Plugin from Disk…</b>.</li>
+      <li>Restart IntelliJ IDEA. Installing, updating, or removing this plugin requires a restart.</li>
+      <li>Open a Kona application and a view under <code>src/main/resources/views</code> (<code>*.crema.html</code>). The editor language is <b>Crema</b>.</li>
+      <li>Type <code>@</code> in the view for directives, or <code>wire:</code> on a tag for Brew attributes.</li>
+      <li>Open the <b>Kona</b> tool window on the right and choose <b>Serve (Netty :4000)</b>.</li>
+      <li>Put the caret on a view-name string and press <b>Ctrl+B</b> (⌘B on macOS) to open that file.</li>
+      <li>Optional: <b>Settings → Tools → Kona</b> sets column completion to migrations, a database connection, or both.</li>
+    </ol>
+    <p>Guide: <a href="https://docs.konaframework.dev/docs/language/intellij">IntelliJ</a>. Framework: <a href="https://github.com/konaframework/kona">konaframework/kona</a>. Issues: <a href="https://github.com/konaframework/kona-idea/issues">kona-idea</a>.</p>
   ]]></description>
 
   <!-- idea = IntelliJ IDEA only (Community + Ultimate). platform would list every JetBrains IDE. -->

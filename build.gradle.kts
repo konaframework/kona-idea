@@ -72,18 +72,13 @@ intellijPlatform {
             sinceBuild = "242"
             untilBuild = provider { null }
         }
-        description.set(
-            """
-            Kona Idea — native Crema + Grind support (no LSP): @directive autopopup,
-            Brew wire:* attributes, &lt;x-*&gt; components, Crema/Inertia page-name
-            completion + Go to Declaration, Cadence model/DB column completion
-            (scoped + Settings → Tools → Kona), right-side Kona tool window,
-            scaffold markers, and Netty-aware ./grind serve (port 4000).
-            """.trimIndent(),
-        )
+        // Description stays in plugin.xml so the Marketplace card keeps the HTML,
+        // including the Getting Started steps. Do not set description here.
         changeNotes.set(
             """
             <ul>
+              <li>0.5.3 — Marketplace description: Kona Framework IDE support,
+                  with Getting Started install and use steps.</li>
               <li>0.5.2 — Supported IDEs limited to IntelliJ IDEA (Community and
                   Ultimate) via <code>com.intellij.modules.idea</code>.</li>
               <li>0.5.1 — Marketplace <code>pluginIcon</code> (+ dark) uses the caramel

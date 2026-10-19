@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.2** |
+| Version | **0.5.3** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,12 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.3 ships
+
+- `plugin.xml` description is the Marketplace/IDE text (do not override it from Gradle)
+- Getting Started steps live in that description and in `marketplace/getting-started.html`
+- Listing slides: `marketplace/media/*.png` (upload in the Marketplace Media admin)
 
 ## What 0.5.2 ships
 
