@@ -31,7 +31,8 @@
     <p><b>Note:</b> installing, updating, or removing this plugin requires an IDE restart.</p>
   ]]></description>
 
-  <depends>com.intellij.modules.platform</depends>
+  <!-- idea = IntelliJ IDEA only (Community + Ultimate). platform would list every JetBrains IDE. -->
+  <depends>com.intellij.modules.idea</depends>
   <depends>com.intellij.modules.xml</depends>
 
   <extensions defaultExtensionNs="com.intellij">
