@@ -6,9 +6,9 @@
     <p>Kona Framework IDE support in IDEA.</p>
     <p>Native support for the <b>Kona Framework</b> in IntelliJ IDEA Community and Ultimate, 2024.2 and later. Crema views, Brew, Inertia, Cadence, and Grind are edited with IntelliJ platform completion, navigation, and inspections. This plugin does not use a language server.</p>
     <ul>
-      <li><b>Crema</b> — <code>*.crema.html</code> and <code>*.crema.kt</code>, with HTML colors plus directive and echo overlays. Type <code>@</code> to complete directives. Complete <code>&lt;x-*&gt;</code> component tags.</li>
-      <li><b>Brew</b> — <code>wire:*</code> attribute completion; action/property values and <code>{{ }}</code> echoes from the owning component class; weak warnings for unknown names.</li>
-      <li><b>Kona Project View</b> — scaffold-oriented Project View pane (<code>app</code>, <code>routes</code>, <code>views</code>, …) beside Project / Packages.</li>
+      <li><b>Crema</b> — <code>*.crema.html</code> and <code>*.crema.kt</code>, with HTML colors plus directive and echo overlays. Type <code>@</code> to complete directives. Complete <code>&lt;x-*&gt;</code> and <code>&lt;brew:*&gt;</code> component tags.</li>
+      <li><b>Brew</b> — <code>&lt;brew:component /&gt;</code> tags from <code>app.brew</code>; <code>wire:*</code> attribute completion; action/property values and <code>{{ }}</code> echoes from the owning component class; weak warnings for unknown names.</li>
+      <li><b>Kona Project View</b> — default Project tool window view for Kona apps (scaffold folders: <code>app</code>, <code>routes</code>, <code>resources</code>, …); still available beside Project / Packages.</li>
       <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
       <li><b>Cadence</b> — column and attribute completion from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
       <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
@@ -19,8 +19,8 @@
       <li>Install <b>Kona</b> from the Marketplace, or download the zip from <a href="https://github.com/konaframework/kona-idea/releases">GitHub Releases</a> and choose <b>Settings → Plugins → ⚙ → Install Plugin from Disk…</b>.</li>
       <li>Restart IntelliJ IDEA. Installing, updating, or removing this plugin requires a restart.</li>
       <li>Open a Kona application and a view under <code>src/main/resources/views</code> (<code>*.crema.html</code>). The editor language is <b>Crema</b>.</li>
-      <li>Type <code>@</code> in the view for directives, or <code>wire:</code> on a tag for Brew attributes. Inside <code>wire:submit=""</code> / <code>wire:model=""</code> or <code>{{ }}</code>, complete actions and properties from the paired Brew component.</li>
-      <li>In the Project tool window, open the view dropdown and choose <b>Kona</b> for the scaffold folder tree.</li>
+      <li>Type <code>@</code> in the view for directives, <code>&lt;brew:</code> for Brew components, or <code>wire:</code> on a tag for Brew attributes. Inside <code>wire:submit=""</code> / <code>wire:model=""</code> or <code>{{ }}</code>, complete actions and properties from the paired Brew component.</li>
+      <li>In the Project tool window, the <b>Kona</b> scaffold folder tree is selected by default for Kona apps (you can still switch to Project / Packages).</li>
       <li>Open the <b>Kona</b> tool window on the right and choose <b>Serve (Netty :4000)</b>.</li>
       <li>Put the caret on a view-name string and press <b>Ctrl+B</b> (⌘B on macOS) to open that file.</li>
       <li>Optional: <b>Settings → Tools → Kona</b> sets column completion to migrations, a database connection, or both.</li>
@@ -69,6 +69,7 @@
 
     <completion.contributor language="any" implementationClass="org.konaframework.idea.CremaCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.XComponentCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewTagCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewWireCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewMemberCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.ViewNameCompletionContributor"/>
@@ -77,6 +78,8 @@
     <annotator language="Crema" implementationClass="org.konaframework.idea.CremaAnnotator"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.BrewWireAnnotator"/>
     <xml.attributeDescriptorsProvider implementation="org.konaframework.idea.BrewWireAttributeDescriptorsProvider"/>
+    <xml.elementDescriptorProvider implementation="org.konaframework.idea.BrewTagDescriptorsProvider"/>
+    <xml.tagNameProvider implementation="org.konaframework.idea.BrewTagDescriptorsProvider"/>
 
     <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvKeyCompletionContributor"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.ViewNameReferenceContributor"/>

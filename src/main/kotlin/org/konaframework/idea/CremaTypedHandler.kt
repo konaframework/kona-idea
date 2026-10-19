@@ -10,10 +10,10 @@ import com.intellij.psi.PsiFile
  * Crema typed handler:
  * - `{{` auto-close
  * - `@` directive autopopup (and continue while typing the directive name)
- * - `<x-` component autopopup
+ * - `<x-` / `<brew:` component autopopup
  *
- * Letter keys only intercept autopopup when already inside an `@directive` or
- * `<x-…>` context so normal HTML tag completion still works.
+ * Letter keys only intercept autopopup when already inside an `@directive`,
+ * `<x-…>`, or `<brew:…>` context so normal HTML tag completion still works.
  *
  * Uses [AutoPopupController.scheduleAutoPopup] with Editor only (2024.2 API).
  * Context gating happens in completion contributors.
@@ -66,6 +66,7 @@ class CremaTypedHandler : TypedHandlerDelegate() {
             CremaDirectives.isIdentPart(c) -> {
                 if (!directivePrefixAtCaret(editor) &&
                     !xComponentContext(editor) &&
+                    !brewTagContext(editor) &&
                     !brewMemberContext(editor)
                 ) {
                     return Result.CONTINUE
@@ -74,7 +75,7 @@ class CremaTypedHandler : TypedHandlerDelegate() {
                 return Result.STOP
             }
             c == '<' || c == '-' || c == '/' || c == '.' || c == ':' || c == '"' || c == '\'' -> {
-                // Schedule; contributors no-op when not in an x-component / wire context.
+                // Schedule; contributors no-op when not in an x-/brew-/wire context.
                 popup.scheduleAutoPopup(editor)
                 return Result.STOP
             }
@@ -99,6 +100,12 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         val offset = editor.caretModel.offset.coerceIn(0, text.length)
         return XComponentPatterns.tagPrefixAt(text, offset) != null ||
             XComponentPatterns.wantsSlotChild(text, offset)
+    }
+
+    private fun brewTagContext(editor: Editor): Boolean {
+        val text = editor.document.charsSequence
+        val offset = editor.caretModel.offset.coerceIn(0, text.length)
+        return BrewTagPatterns.tagPrefixAt(text, offset) != null
     }
 
     private fun brewMemberContext(editor: Editor): Boolean {

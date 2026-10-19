@@ -276,6 +276,26 @@ class BrewInertiaSupportTest {
     }
 
     @Test
+    fun brewTagPatternsDetectPrefixAndNames() {
+        assertEquals("coun", BrewTagPatterns.tagPrefixAt("<brew:coun", 10)?.prefix)
+        assertTrue(BrewTagPatterns.tagPrefixAt("<brew:coun", 10)!!.afterColon)
+        assertEquals("", BrewTagPatterns.tagPrefixAt("<brew:", 6)?.prefix)
+        assertTrue(BrewTagPatterns.tagPrefixAt("<brew:", 6)!!.afterColon)
+        assertFalse(BrewTagPatterns.tagPrefixAt("<brew", 5)!!.afterColon)
+        assertEquals("", BrewTagPatterns.tagPrefixAt("<bre", 4)?.prefix)
+        assertNull(BrewTagPatterns.tagPrefixAt("<br", 3))
+        assertNull(BrewTagPatterns.tagPrefixAt("<b", 2))
+        assertNull(BrewTagPatterns.tagPrefixAt("hello", 5))
+        assertTrue(BrewTagPatterns.isBrewTagName("brew:todos"))
+        assertTrue(BrewTagPatterns.isBrewTagName("BREW:Counter"))
+        assertFalse(BrewTagPatterns.isBrewTagName("x-alert"))
+        assertEquals("todos", BrewTagPatterns.componentNameFromTag("brew:todos"))
+        assertEquals("admin.show-posts", BrewTagPatterns.componentNameFromTag("brew:admin.show-posts"))
+        assertNull(BrewTagPatterns.componentNameFromTag("div"))
+        assertEquals("brew:counter", BrewTagPatterns.htmlTag("counter"))
+    }
+
+    @Test
     fun inertiaLiveAndFileTemplatesPresent() {
         assertTrue(KonaLiveTemplates.abbreviations().contains("kinertia"))
         assertTrue(KonaLiveTemplates.abbreviations().contains("kinertashare"))

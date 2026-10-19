@@ -39,7 +39,7 @@ Kona app (kona new / grind scaffold)
         ▼
   Crema file type (overrider + detector beat HTML)
         ├── Native CremaLexer + layered HTML highlighter
-        ├── @directive autopopup + <x-*> / <x-slot> completion
+        ├── @directive autopopup + <x-*> / <brew:*> completion
         ├── View name refs → Ctrl+B / Ctrl+Click
         └── {{ }} typed handler
 
@@ -82,6 +82,8 @@ Cadence Kotlin/Java
   filter without Ctrl+Space (HTML template layer supported)
 - **`<x-*>` components** — complete tags from `views/components/**`; `<x-slot>` /
   `<x-slot:name>` hints for named slots
+- **`<brew:*>` components** — complete tags from `app.brew` (`Counter` →
+  `<brew:counter />`); HTML unknown-tag warnings suppressed
 - Unknown-directive warnings (emails like `hi@example.com` ignored)
 - `{{` auto-closes as `{{  }}`
 - **New → Crema View**
@@ -140,11 +142,11 @@ Cadence Kotlin/Java
 
 ### Project structure
 Recognizes the scaffold tree from `kona new`:
-`bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/views|public|lang`,
-`storage/`, app-local `./grind`, and `org.konaframework:*` (or legacy `dev.kona:*`)
-Gradle dependencies. Canonical folders use the official Kona brand mark.
-**Kona** appears in the Project tool window view dropdown (beside Project /
-Packages) and lists those scaffold folders with short names.
+`bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/` (views,
+public, lang, …), `storage/`, app-local `./grind`, and `org.konaframework:*`
+(or legacy `dev.kona:*`) Gradle dependencies. Canonical folders use the official
+Kona brand mark. For Kona apps, the Project tool window defaults to the **Kona**
+pane (scaffold folders with short names); Project / Packages remain available.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments

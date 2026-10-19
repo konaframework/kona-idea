@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.6
+
+- **`<brew:*>` tags** — complete and recognize Brew components from `app.brew`
+  (`Counter` → `<brew:counter />`, `@BrewComponent`, nested packages). HTML
+  unknown-tag / attribute-not-allowed inspections are suppressed for those tags.
+- **Kona Project View default** — when a Kona app is opened, the Project tool
+  window uses the **Kona** pane by default (`isDefaultPane` + switch on open).
+- **Resources grouping** — Kona Project View shows one `resources` node
+  (`src/main/resources`) instead of separate top-level `views` / `public` / …
+
 ## 0.5.5
 
 - **Brew member completion** — inside `wire:submit` / `wire:click` / `wire:init` /

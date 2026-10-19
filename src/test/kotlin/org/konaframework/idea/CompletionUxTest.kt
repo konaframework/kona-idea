@@ -227,7 +227,7 @@ class CompletionUxTest {
                 "src/main/kotlin/bootstrap",
                 "src/main/kotlin/app",
                 "src/main/kotlin/routes",
-                "src/main/resources/views",
+                "src/main/resources",
                 "storage",
                 "grind",
                 ".env",
@@ -237,16 +237,17 @@ class CompletionUxTest {
                 root = Files.createTempDirectory("kona-struct"),
                 language = KonaLayout.AppLanguage.KOTLIN,
                 score = 10,
-                presentPackages = listOf("bootstrap", "app", "routes", "src/main/resources/views"),
+                presentPackages = listOf("bootstrap", "app", "routes", "src/main/resources"),
                 hasGrind = true,
                 hasDevKonaDependency = true,
             )
         val entries = KonaProjectStructure.entries(detection) { it in present }
         assertEquals(
-            listOf("bootstrap", "app", "routes", "views", "storage", "grind", ".env"),
+            listOf("bootstrap", "app", "routes", "resources", "storage", "grind", ".env"),
             entries.map { it.displayName },
         )
-        assertTrue(entries.any { it.relativePath == "src/main/resources/views" })
+        assertTrue(entries.any { it.relativePath == "src/main/resources" })
+        assertFalse(entries.any { it.displayName == "views" || it.displayName == "css" })
         assertTrue(
             KonaProjectStructure.entries(
                 detection.copy(score = 0),

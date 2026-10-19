@@ -4,8 +4,9 @@ import com.intellij.codeInsight.lookup.CharFilter
 import com.intellij.codeInsight.lookup.Lookup
 
 /**
- * Keeps Crema `@directive` and `<x-*>` completion open while typing identifier /
- * tag characters (default CharFilter would hide the popup on `@`, `-`, `/`, `.`, `:`).
+ * Keeps Crema `@directive`, `<x-*>`, and `<brew:*>` completion open while typing
+ * identifier / tag characters (default CharFilter would hide the popup on `@`,
+ * `-`, `/`, `.`, `:`).
  */
 class CremaCharFilter : CharFilter() {
     override fun acceptChar(c: Char, prefixLength: Int, lookup: Lookup): Result? {
@@ -26,7 +27,8 @@ class CremaCharFilter : CharFilter() {
         }
 
         if (XComponentPatterns.tagPrefixAt(text, offset) != null ||
-            XComponentPatterns.wantsSlotChild(text, offset)
+            XComponentPatterns.wantsSlotChild(text, offset) ||
+            BrewTagPatterns.tagPrefixAt(text, offset) != null
         ) {
             if (c == '-' || c == '/' || c == '.' || c == ':' || c == '_' ||
                 c.isLetterOrDigit()

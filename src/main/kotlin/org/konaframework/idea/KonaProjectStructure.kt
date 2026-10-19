@@ -38,11 +38,8 @@ object KonaProjectStructure {
                 Entry("$src/routes", "routes", Kind.SOURCE_PACKAGE),
                 Entry("$src/config", "config", Kind.SOURCE_PACKAGE),
                 Entry("$src/database", "database", Kind.SOURCE_PACKAGE),
-                Entry("src/main/resources/views", "views", Kind.RESOURCE),
-                Entry("src/main/resources/public", "public", Kind.RESOURCE),
-                Entry("src/main/resources/lang", "lang", Kind.RESOURCE),
-                Entry("src/main/resources/css", "css", Kind.RESOURCE),
-                Entry("src/main/resources/js", "js", Kind.RESOURCE),
+                // One node for resources; views / public / lang / css / js appear as children.
+                Entry("src/main/resources", "resources", Kind.RESOURCE),
                 Entry("storage", "storage", Kind.ROOT_DIR),
                 Entry("grind", "grind", Kind.ROOT_FILE),
                 Entry("grind.bat", "grind.bat", Kind.ROOT_FILE),

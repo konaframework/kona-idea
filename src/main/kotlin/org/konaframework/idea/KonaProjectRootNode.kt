@@ -60,7 +60,7 @@ class KonaProjectRootNode(
     override fun getVirtualFile(): VirtualFile? = myProject.guessProjectDir()
 }
 
-/** Psi directory node with a short scaffold label (e.g. `views` not `resources/views`). */
+/** Psi directory node with a short scaffold label (e.g. `resources` not `src/main/resources`). */
 private class KonaScaffoldDirectoryNode(
     project: Project,
     value: com.intellij.psi.PsiDirectory,

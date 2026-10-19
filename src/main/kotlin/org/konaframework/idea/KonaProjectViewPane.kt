@@ -9,15 +9,17 @@ import com.intellij.ide.projectView.impl.ProjectViewPane
 import com.intellij.ide.projectView.impl.ProjectViewTree
 import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import org.jetbrains.annotations.NonNls
 import javax.swing.Icon
 import javax.swing.tree.DefaultTreeModel
 
 /**
  * Project View presentation for Kona apps: top-level scaffold folders
- * (`app`, `routes`, `views`, `storage`, …) instead of deep package paths.
+ * (`app`, `routes`, `resources`, `storage`, …) instead of deep package paths.
  *
- * Available alongside the default Project / Packages views.
+ * Available alongside the default Project / Packages views. For Kona apps this
+ * pane is the default ([isDefaultPane]).
  */
 class KonaProjectViewPane(project: Project) : ProjectViewPane(project) {
     override fun getTitle(): String = TITLE
@@ -28,6 +30,11 @@ class KonaProjectViewPane(project: Project) : ProjectViewPane(project) {
     override fun getId(): String = ID
 
     override fun getWeight(): Int = WEIGHT
+
+    override fun isDefaultPane(project: Project): Boolean {
+        val root = project.guessProjectDir()?.toNioPath() ?: return false
+        return KonaLayout.isKonaApp(root)
+    }
 
     override fun createSelectInTarget(): SelectInTarget =
         object : ProjectViewSelectInTarget(myProject) {
