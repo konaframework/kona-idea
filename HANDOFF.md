@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.3** |
+| Version | **0.5.4** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -32,7 +32,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
 
-## Unreleased (on a branch after 0.5.3, version not bumped)
+## What 0.5.4 ships
 
 - Known Brew `wire:*` attributes are HTML attribute descriptors in `*.crema.html` (`BrewWireAttributeDescriptorsProvider`). Unknown names still get the weak warning.
 - Env keys: `EnvKeys` + completion / PsiReference / Go to Declaration. Config `Env.get` / `getOrDefault` / `require` completes keys from `.env` and source; Ctrl+B opens the key in `.env`. `.env` completes keys referenced from `src/main`.

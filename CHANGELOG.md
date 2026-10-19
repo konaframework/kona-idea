@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.4
+
+- **Brew `wire:*` HTML descriptors** — known attributes are registered so IDEA
+  does not flag them as “attribute is not allowed here” in `*.crema.html`.
+- **Env key completion** — `Env.get` / `getOrDefault` / `require` completes keys
+  from `.env` and source; `.env` completes keys referenced from `src/main`.
+- **Env Go to Declaration** — Ctrl+B / Ctrl+Click on a config env key opens the
+  assignment in the project `.env`.
+
 ## 0.5.3
 
 - **Marketplace description** — opens with “Kona Framework IDE support in IDEA”
