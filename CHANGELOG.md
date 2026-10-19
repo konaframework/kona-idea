@@ -1,9 +1,14 @@
 # Changelog
 
+## 0.5.1
+
+- **Plugin icon** — Marketplace / Plugins list `pluginIcon.svg` (+ `_dark`) now uses the
+  caramel mug mark from monorepo `kona-logo.svg` (replacing the old Ko lettermark).
+
 ## 0.5.0
 
 - **Plugin id / package** — `org.konaframework.idea` (Maven group `org.konaframework`);
-  brand icons refreshed from the monorepo mark.
+  in-IDE brand icons (tool window, file type, folders) use the monorepo mug mark.
 - **Brew `wire:*`** — completion + weak-warning annotator for known attributes
   (`wire:model`, `wire:click`, `wire:submit`, `wire:loading`, `wire:target`,
   `wire:ignore`, `wire:key`, `wire:dirty`, `wire:offline`, `wire:confirm`,
