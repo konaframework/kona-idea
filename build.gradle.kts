@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.7 — Kona Project View: <code>public</code> is top-level again;
+                  <code>resources</code> no longer nests it.</li>
+              <li>0.5.6 — <code>&lt;brew:*&gt;</code> tag completion; Kona Project View
+                  default for Kona apps; resources grouping.</li>
               <li>0.5.5 — Brew action/property completion from the owning component
                   class (<code>wire:submit</code>, <code>wire:model</code>,
                   <code>{{ }}</code>); Kona Project View pane for scaffold folders.</li>
@@ -178,6 +182,7 @@ kover {
                     "org.konaframework.idea.KonaProjectRootNode",
                     "org.konaframework.idea.KonaProjectRootNode$*",
                     "org.konaframework.idea.KonaScaffoldDirectoryNode",
+                    "org.konaframework.idea.KonaResourcesDirectoryNode",
                     "org.konaframework.idea.EnvKeyCompletionContributor",
                     "org.konaframework.idea.EnvKeyCompletionContributor*",
                     "org.konaframework.idea.EnvKeyReference",

@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.6** |
+| Version | **0.5.7** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -32,6 +32,11 @@ Paste this file (or its path) into a new chat so another agent can continue with
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
 
+## What 0.5.7 ships
+
+- Kona Project View: `public` is top-level again; `resources` hides nested
+  `public` (`KonaResourcesDirectoryNode`).
+
 ## What 0.5.6 ships
 
 - `<brew:*>` tag completion / HTML recognition (`BrewTagPatterns`,
@@ -39,7 +44,8 @@ Paste this file (or its path) into a new chat so another agent can continue with
   `BrewComponentIndex` (`app.brew` / `@BrewComponent` → kebab tag names).
 - Kona Project View is the **default** Project tool window pane for Kona apps
   (`KonaProjectViewPane.isDefaultPane` + `ensureKonaProjectView` on open).
-- Scaffold tree groups under one `resources` node (`KonaProjectStructure`).
+- Scaffold tree groups under one `resources` node (`KonaProjectStructure`), with
+  `public` as a sibling top-level entry.
 
 ## What 0.5.5 ships
 

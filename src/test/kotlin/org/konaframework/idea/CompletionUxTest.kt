@@ -228,6 +228,7 @@ class CompletionUxTest {
                 "src/main/kotlin/app",
                 "src/main/kotlin/routes",
                 "src/main/resources",
+                "src/main/resources/public",
                 "storage",
                 "grind",
                 ".env",
@@ -243,10 +244,11 @@ class CompletionUxTest {
             )
         val entries = KonaProjectStructure.entries(detection) { it in present }
         assertEquals(
-            listOf("bootstrap", "app", "routes", "resources", "storage", "grind", ".env"),
+            listOf("bootstrap", "app", "routes", "resources", "public", "storage", "grind", ".env"),
             entries.map { it.displayName },
         )
         assertTrue(entries.any { it.relativePath == "src/main/resources" })
+        assertTrue(entries.any { it.relativePath == "src/main/resources/public" })
         assertFalse(entries.any { it.displayName == "views" || it.displayName == "css" })
         assertTrue(
             KonaProjectStructure.entries(

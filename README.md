@@ -143,10 +143,11 @@ Cadence Kotlin/Java
 ### Project structure
 Recognizes the scaffold tree from `kona new`:
 `bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/` (views,
-public, lang, …), `storage/`, app-local `./grind`, and `org.konaframework:*`
-(or legacy `dev.kona:*`) Gradle dependencies. Canonical folders use the official
-Kona brand mark. For Kona apps, the Project tool window defaults to the **Kona**
-pane (scaffold folders with short names); Project / Packages remain available.
+lang, css, js), top-level `public/`, `storage/`, app-local `./grind`, and
+`org.konaframework:*` (or legacy `dev.kona:*`) Gradle dependencies. Canonical
+folders use the official Kona brand mark. For Kona apps, the Project tool window
+defaults to the **Kona** pane (scaffold folders with short names); Project /
+Packages remain available.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments
