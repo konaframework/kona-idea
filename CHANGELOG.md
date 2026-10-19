@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0
+
+- **Plugin id / package** — `org.konaframework.idea` (Maven group `org.konaframework`);
+  brand icons refreshed from the monorepo mark.
+- **Brew `wire:*`** — completion + weak-warning annotator for known attributes
+  (`wire:model`, `wire:click`, `wire:submit`, `wire:loading`, `wire:target`,
+  `wire:ignore`, `wire:key`, `wire:dirty`, `wire:offline`, `wire:confirm`,
+  `wire:poll`, `wire:init`, `wire:show`, `wire:transition`, + common modifiers).
+- **Inertia page names** — `Inertia.render` / `manager.render` /
+  `Inertia.manager().render` participate in view-name completion and navigation.
+- **Inertia templates** — live templates `kinertia`, `kinertashare`, `jinertia`;
+  file templates for a minimal Vue page and Crema root shell.
+- **Help / tool window** — Brew + Inertia help action; Maven coords
+  `org.konaframework:kona-brew` / `kona-inertia`; docs links.
+
 ## 0.4.0
 
 - **Crema `@` autopopup** — typing `@` in `*.crema.html` shows all directives

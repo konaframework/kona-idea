@@ -64,7 +64,7 @@ intellijPlatform {
         password.set(providers.environmentVariable("PRIVATE_KEY_PASSWORD"))
     }
     pluginConfiguration {
-        id = "dev.kona.idea"
+        id = "org.konaframework.idea"
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         ideaVersion {
@@ -74,15 +74,20 @@ intellijPlatform {
         description.set(
             """
             Kona Idea — native Crema + Grind support (no LSP): @directive autopopup,
-            &lt;x-*&gt; components, view-name completion + Go to Declaration,
-            Cadence model/DB column completion (scoped + Settings → Tools → Kona),
-            right-side Kona tool window, scaffold markers, and Netty-aware
-            ./grind serve (port 4000).
+            Brew wire:* attributes, &lt;x-*&gt; components, Crema/Inertia page-name
+            completion + Go to Declaration, Cadence model/DB column completion
+            (scoped + Settings → Tools → Kona), right-side Kona tool window,
+            scaffold markers, and Netty-aware ./grind serve (port 4000).
             """.trimIndent(),
         )
         changeNotes.set(
             """
             <ul>
+              <li>0.5.0 — Plugin id/package <code>org.konaframework.idea</code>;
+                  Brew <code>wire:*</code> completion + annotator;
+                  <code>Inertia.render</code> page-name patterns; Inertia live/file
+                  templates; Brew+Inertia help / tool window; Maven group
+                  <code>org.konaframework</code> (kona-brew / kona-inertia).</li>
               <li>0.4.0 — Crema <code>@</code> autopopup + filter-as-you-type;
                   <code>&lt;x-*&gt;</code> / <code>&lt;x-slot&gt;</code> completion;
                   Cadence model attribute completion; DB columns scoped to the
@@ -114,72 +119,76 @@ kover {
         filters {
             excludes {
                 classes(
-                    "dev.kona.idea.CremaEditorHighlighterProvider",
-                    "dev.kona.idea.CremaEditorHighlighterProvider*",
-                    "dev.kona.idea.CremaEditorHighlighter",
-                    "dev.kona.idea.CremaEditorHighlighter*",
-                    "dev.kona.idea.CremaFileTypeOverrider",
-                    "dev.kona.idea.CremaFileTypeDetector",
-                    "dev.kona.idea.CremaFileViewProvider*",
-                    "dev.kona.idea.CremaParserDefinition",
-                    "dev.kona.idea.CremaParserDefinition*",
-                    "dev.kona.idea.CremaPsiParser",
-                    "dev.kona.idea.CremaFile",
-                    "dev.kona.idea.CremaFileType",
-                    "dev.kona.idea.CremaLanguage",
-                    "dev.kona.idea.CremaLanguage$*",
-                    "dev.kona.idea.CremaLanguageKt",
-                    "dev.kona.idea.CremaBraceMatcher",
-                    "dev.kona.idea.CremaTypedHandler",
-                    "dev.kona.idea.CremaSyntaxHighlighter",
-                    "dev.kona.idea.CremaSyntaxHighlighter*",
-                    "dev.kona.idea.CremaSyntaxHighlighterFactory",
-                    "dev.kona.idea.CremaColors",
-                    "dev.kona.idea.CremaCompletionContributor",
-                    "dev.kona.idea.CremaCompletionContributor$*",
-                    "dev.kona.idea.CremaCharFilter",
-                    "dev.kona.idea.CremaAnnotator",
-                    "dev.kona.idea.ViewNameCompletionContributor",
-                    "dev.kona.idea.ViewNameCompletionContributor$*",
-                    "dev.kona.idea.ViewNameReference",
-                    "dev.kona.idea.ViewNameReferenceContributor",
-                    "dev.kona.idea.ViewNameReferenceContributor$*",
-                    "dev.kona.idea.ViewGotoDeclarationHandler",
-                    "dev.kona.idea.DbColumnCompletionContributor",
-                    "dev.kona.idea.DbColumnCompletionContributor$*",
-                    "dev.kona.idea.ModelPropertyCompletionContributor",
-                    "dev.kona.idea.ModelPropertyCompletionContributor$*",
-                    "dev.kona.idea.XComponentCompletionContributor",
-                    "dev.kona.idea.XComponentCompletionContributor$*",
-                    "dev.kona.idea.KonaConfigurable",
-                    "dev.kona.idea.KonaConfigurable$*",
-                    "dev.kona.idea.KonaToolWindowFactory",
-                    "dev.kona.idea.KonaQuickAccessPanel",
-                    "dev.kona.idea.KonaQuickAccessPanel$*",
-                    "dev.kona.idea.GrindQuickActions",
-                    "dev.kona.idea.GrindQuickActions$*",
-                    "dev.kona.idea.KonaIcons",
-                    "dev.kona.idea.GrindConfigurationType",
-                    "dev.kona.idea.GrindConfigurationType$*",
-                    "dev.kona.idea.GrindConfigurationFactory",
-                    "dev.kona.idea.GrindRunConfiguration",
-                    "dev.kona.idea.GrindRunConfiguration$*",
-                    "dev.kona.idea.GrindRunConfigurationOptions",
-                    "dev.kona.idea.GrindRunConfigurationOptions$*",
-                    "dev.kona.idea.GrindSettingsEditor",
-                    "dev.kona.idea.GrindSettingsEditor$*",
-                    "dev.kona.idea.KonaProjectOpenActivity",
-                    "dev.kona.idea.KonaProjectOpenActivityKt",
-                    "dev.kona.idea.KonaFolderIconProvider",
-                    "dev.kona.idea.KonaFolderIconProvider$*",
-                    "dev.kona.idea.KonaFileTemplates",
-                    "dev.kona.idea.KonaFileTemplates$*",
-                    "dev.kona.idea.NewCremaViewAction",
-                    "dev.kona.idea.ShowLayoutHelpAction",
-                    "dev.kona.idea.ShowArtifactsHelpAction",
-                    "dev.kona.idea.ShowRoutingHelpAction",
-                    "dev.kona.idea.ShowViewNavHelpAction",
-                    "dev.kona.idea.ShowKonaHelpActionsKt",
+                    "org.konaframework.idea.CremaEditorHighlighterProvider",
+                    "org.konaframework.idea.CremaEditorHighlighterProvider*",
+                    "org.konaframework.idea.CremaEditorHighlighter",
+                    "org.konaframework.idea.CremaEditorHighlighter*",
+                    "org.konaframework.idea.CremaFileTypeOverrider",
+                    "org.konaframework.idea.CremaFileTypeDetector",
+                    "org.konaframework.idea.CremaFileViewProvider*",
+                    "org.konaframework.idea.CremaParserDefinition",
+                    "org.konaframework.idea.CremaParserDefinition*",
+                    "org.konaframework.idea.CremaPsiParser",
+                    "org.konaframework.idea.CremaFile",
+                    "org.konaframework.idea.CremaFileType",
+                    "org.konaframework.idea.CremaLanguage",
+                    "org.konaframework.idea.CremaLanguage$*",
+                    "org.konaframework.idea.CremaLanguageKt",
+                    "org.konaframework.idea.CremaBraceMatcher",
+                    "org.konaframework.idea.CremaTypedHandler",
+                    "org.konaframework.idea.CremaSyntaxHighlighter",
+                    "org.konaframework.idea.CremaSyntaxHighlighter*",
+                    "org.konaframework.idea.CremaSyntaxHighlighterFactory",
+                    "org.konaframework.idea.CremaColors",
+                    "org.konaframework.idea.CremaCompletionContributor",
+                    "org.konaframework.idea.CremaCompletionContributor$*",
+                    "org.konaframework.idea.CremaCharFilter",
+                    "org.konaframework.idea.CremaAnnotator",
+                    "org.konaframework.idea.ViewNameCompletionContributor",
+                    "org.konaframework.idea.ViewNameCompletionContributor$*",
+                    "org.konaframework.idea.ViewNameReference",
+                    "org.konaframework.idea.ViewNameReferenceContributor",
+                    "org.konaframework.idea.ViewNameReferenceContributor$*",
+                    "org.konaframework.idea.ViewGotoDeclarationHandler",
+                    "org.konaframework.idea.DbColumnCompletionContributor",
+                    "org.konaframework.idea.DbColumnCompletionContributor$*",
+                    "org.konaframework.idea.ModelPropertyCompletionContributor",
+                    "org.konaframework.idea.ModelPropertyCompletionContributor$*",
+                    "org.konaframework.idea.XComponentCompletionContributor",
+                    "org.konaframework.idea.XComponentCompletionContributor$*",
+                    "org.konaframework.idea.BrewWireCompletionContributor",
+                    "org.konaframework.idea.BrewWireCompletionContributor$*",
+                    "org.konaframework.idea.BrewWireAnnotator",
+                    "org.konaframework.idea.KonaConfigurable",
+                    "org.konaframework.idea.KonaConfigurable$*",
+                    "org.konaframework.idea.KonaToolWindowFactory",
+                    "org.konaframework.idea.KonaQuickAccessPanel",
+                    "org.konaframework.idea.KonaQuickAccessPanel$*",
+                    "org.konaframework.idea.GrindQuickActions",
+                    "org.konaframework.idea.GrindQuickActions$*",
+                    "org.konaframework.idea.KonaIcons",
+                    "org.konaframework.idea.GrindConfigurationType",
+                    "org.konaframework.idea.GrindConfigurationType$*",
+                    "org.konaframework.idea.GrindConfigurationFactory",
+                    "org.konaframework.idea.GrindRunConfiguration",
+                    "org.konaframework.idea.GrindRunConfiguration$*",
+                    "org.konaframework.idea.GrindRunConfigurationOptions",
+                    "org.konaframework.idea.GrindRunConfigurationOptions$*",
+                    "org.konaframework.idea.GrindSettingsEditor",
+                    "org.konaframework.idea.GrindSettingsEditor$*",
+                    "org.konaframework.idea.KonaProjectOpenActivity",
+                    "org.konaframework.idea.KonaProjectOpenActivityKt",
+                    "org.konaframework.idea.KonaFolderIconProvider",
+                    "org.konaframework.idea.KonaFolderIconProvider$*",
+                    "org.konaframework.idea.KonaFileTemplates",
+                    "org.konaframework.idea.KonaFileTemplates$*",
+                    "org.konaframework.idea.NewCremaViewAction",
+                    "org.konaframework.idea.ShowLayoutHelpAction",
+                    "org.konaframework.idea.ShowArtifactsHelpAction",
+                    "org.konaframework.idea.ShowRoutingHelpAction",
+                    "org.konaframework.idea.ShowViewNavHelpAction",
+                    "org.konaframework.idea.ShowBrewInertiaHelpAction",
+                    "org.konaframework.idea.ShowKonaHelpActionsKt",
                 )
             }
         }

@@ -15,6 +15,9 @@ live/file templates. **No LSP** — IntelliJ platform APIs only.
 **Supported products:** IntelliJ IDEA Community and Ultimate (2024.2+).
 Installing, updating, or removing the plugin requires an IDE restart.
 
+**Plugin id:** `org.konaframework.idea` (Maven group `org.konaframework`).
+Changing the Marketplace plugin id from a prior `dev.kona.idea` listing may require a **new Marketplace listing**.
+
 ---
 
 ## How it works
@@ -85,9 +88,23 @@ Cadence Kotlin/Java
 ### View names
 - Autocomplete dotted names (`home`, `layouts.app`) in `Crema.view` / `Brew.view` /
   `engine.make` / `engine.render` / `@extends` / `@include*` / `@component`
+- Inertia page names (`Pages/Welcome`) in `Inertia.render` / `manager.render` /
+  `Inertia.manager().render`
 - **Go to Declaration:** **Ctrl+B** or **Ctrl+Click** (macOS: **⌘B** / **⌘Click**)
   opens the `.crema.html` / `.crema.kt` file
 - Help: **Kona → Show View Navigation Help**
+
+### Brew (`wire:*`)
+- Completes known Brew attributes in Crema HTML (`wire:model`, `wire:click`,
+  `wire:submit`, `wire:loading`, … + common modifiers)
+- Weak warnings for unknown `wire:*` names
+- Maven: `org.konaframework:kona-brew`
+
+### Inertia
+- Live templates: `kinertia`, `kinertashare` (Kotlin), `jinertia` (Java)
+- File templates: **Kona Inertia Page.vue**, **Kona Inertia Root.crema.html**
+- Help: **Kona → Show Brew + Inertia Help**
+- Maven: `org.konaframework:kona-inertia`
 
 ### Cadence models + DB columns
 - Completes column names in Cadence / QueryBuilder call sites (`where`, `select`,
@@ -105,13 +122,13 @@ Cadence Kotlin/Java
 ### Tool window (RIGHT)
 - **View → Tool Windows → Kona** (or the Kona icon on the right strip)
 - Quick actions: Serve, List, Migrate, Queue work, Schedule work, New Crema View,
-  layout/routing/Maven help, docs links
+  layout/routing/Maven/Brew+Inertia help, docs links (incl. Brew / Inertia)
 
 ### Project structure
 Recognizes the scaffold tree from `kona new`:
 `bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/views|public|lang`,
-`storage/`, app-local `./grind`, and `dev.kona:*` Gradle dependencies.
-Canonical folders use the official Kona brand mark.
+`storage/`, app-local `./grind`, and `org.konaframework:*` (or legacy `dev.kona:*`)
+Gradle dependencies. Canonical folders use the official Kona brand mark.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments
@@ -121,9 +138,10 @@ Canonical folders use the official Kona brand mark.
 
 ### Tooling / APIs
 - Live templates: `kroute`, `jroute`, `kcadence`, `kauth`, `kdisk`, `kqueue`,
-  `kschedule`, `kcrema`, `kserve`
-- File templates: Controller (Kotlin/Java), Crema view, WebRoutes (typed handlers)
-- **Kona** menu: layout, routing, Maven modules, view navigation help
+  `kschedule`, `kcrema`, `kinertia`, `kinertashare`, `jinertia`, `kserve`
+- File templates: Controller (Kotlin/Java), Crema view, Inertia page/root,
+  WebRoutes (typed handlers)
+- **Kona** menu: layout, routing, Maven modules, view navigation, Brew + Inertia
 
 ---
 
