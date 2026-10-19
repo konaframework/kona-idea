@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.9
+
+- **Kona Project View order** — `resources` (and all scaffold folders) sort with
+  directories again; root files (`.env`, `grind`, …) always come last. The
+  `resources` node is a real `PsiDirectoryNode` so IDEA’s type-sort no longer
+  parks it after scripts.
+
 ## 0.5.8
 
 - **Brew tag navigation** — Ctrl+B / Ctrl+Click on `<brew:counter` opens the

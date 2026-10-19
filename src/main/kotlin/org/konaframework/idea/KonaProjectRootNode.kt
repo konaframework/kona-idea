@@ -14,6 +14,7 @@ import com.intellij.psi.PsiManager
 
 /**
  * Root of the Kona Project View — lists canonical scaffold entries with short names.
+ * Directory entries always precede files (structure order, then IDE type-sort).
  */
 class KonaProjectRootNode(
     project: Project,
@@ -31,21 +32,25 @@ class KonaProjectRootNode(
             return fallbackChildren(projectDir)
         }
         val psi = PsiManager.getInstance(myProject)
-        return entries.mapNotNull { entry ->
-            val vf = projectDir.findFileByRelativePath(entry.relativePath) ?: return@mapNotNull null
+        val dirs = mutableListOf<AbstractTreeNode<*>>()
+        val files = mutableListOf<AbstractTreeNode<*>>()
+        for (entry in entries) {
+            val vf = projectDir.findFileByRelativePath(entry.relativePath) ?: continue
             if (vf.isDirectory) {
-                val dir = psi.findDirectory(vf) ?: return@mapNotNull null
-                when (entry.displayName) {
-                    "resources" ->
-                        KonaResourcesDirectoryNode(myProject, dir, settings)
-                    else ->
-                        KonaScaffoldDirectoryNode(myProject, dir, settings, entry.displayName)
-                }
+                val dir = psi.findDirectory(vf) ?: continue
+                dirs +=
+                    when (entry.displayName) {
+                        "resources" ->
+                            KonaResourcesDirectoryNode(myProject, dir, settings)
+                        else ->
+                            KonaScaffoldDirectoryNode(myProject, dir, settings, entry.displayName)
+                    }
             } else {
-                val file = psi.findFile(vf) ?: return@mapNotNull null
-                PsiFileNode(myProject, file, settings)
+                val file = psi.findFile(vf) ?: continue
+                files += PsiFileNode(myProject, file, settings)
             }
         }
+        return dirs + files
     }
 
     private fun fallbackChildren(projectDir: VirtualFile): Collection<AbstractTreeNode<*>> {
@@ -83,50 +88,45 @@ private class KonaScaffoldDirectoryNode(
 /**
  * Custom `resources` node: lists children of `src/main/resources` except `public`,
  * which is promoted to its own top-level Kona Project View entry.
+ *
+ * Extends [PsiDirectoryNode] so the Project View type-sort treats it as a folder
+ * (folders first), not as a trailing miscellaneous node after `.env` / scripts.
  */
 private class KonaResourcesDirectoryNode(
     project: Project,
-    private val directory: PsiDirectory,
-    private val viewSettings: ViewSettings,
-) : ProjectViewNode<PsiDirectory>(project, directory, viewSettings) {
-    override fun getChildren(): Collection<AbstractTreeNode<*>> {
+    value: PsiDirectory,
+    viewSettings: ViewSettings,
+) : PsiDirectoryNode(project, value, viewSettings) {
+    override fun getChildrenImpl(): Collection<AbstractTreeNode<*>> {
+        val directory = value ?: return emptyList()
         val psi = PsiManager.getInstance(myProject)
-        val out = mutableListOf<AbstractTreeNode<*>>()
-        for (child in directory.virtualFile.children.orEmpty()) {
+        val dirs = mutableListOf<AbstractTreeNode<*>>()
+        val files = mutableListOf<AbstractTreeNode<*>>()
+        for (child in directory.virtualFile.children.orEmpty().sortedBy { it.name.lowercase() }) {
             if (child.isDirectory && child.name.equals("public", ignoreCase = true)) {
                 continue
             }
             if (child.isDirectory) {
                 val dir = psi.findDirectory(child) ?: continue
-                out += PsiDirectoryNode(myProject, dir, viewSettings)
+                dirs += PsiDirectoryNode(myProject, dir, settings)
             } else {
                 val file = psi.findFile(child) ?: continue
-                out += PsiFileNode(myProject, file, viewSettings)
+                files += PsiFileNode(myProject, file, settings)
             }
         }
-        return out
+        return dirs + files
     }
 
     override fun contains(file: VirtualFile): Boolean {
-        val root = directory.virtualFile
+        val root = virtualFile ?: return false
         if (!file.path.startsWith(root.path)) return false
-        // Files under resources/public belong to the top-level public node, not here.
         val publicDir = root.findChild("public")
         return publicDir == null || !file.path.startsWith(publicDir.path)
     }
 
-    override fun update(presentation: PresentationData) {
-        presentation.presentableText = "resources"
-        presentation.setIcon(KonaIcons.KONA)
-    }
-
-    override fun getVirtualFile(): VirtualFile = directory.virtualFile
-
-    override fun canNavigate(): Boolean = true
-
-    override fun canNavigateToSource(): Boolean = false
-
-    override fun navigate(requestFocus: Boolean) {
-        // Opening the directory in the project view is enough; no editor navigation.
+    override fun update(data: PresentationData) {
+        super.update(data)
+        data.presentableText = "resources"
+        data.setIcon(KonaIcons.KONA)
     }
 }

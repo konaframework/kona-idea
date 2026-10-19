@@ -247,6 +247,15 @@ class CompletionUxTest {
             listOf("bootstrap", "app", "routes", "resources", "public", "storage", "grind", ".env"),
             entries.map { it.displayName },
         )
+        val firstFile = entries.indexOfFirst { it.kind == KonaProjectStructure.Kind.ROOT_FILE }
+        assertTrue(firstFile > 0)
+        assertTrue(
+            "directories must precede files in Kona Project View",
+            entries.take(firstFile).all {
+                it.kind != KonaProjectStructure.Kind.ROOT_FILE
+            },
+        )
+        assertTrue(entries.drop(firstFile).all { it.kind == KonaProjectStructure.Kind.ROOT_FILE })
         assertTrue(entries.any { it.relativePath == "src/main/resources" })
         assertTrue(entries.any { it.relativePath == "src/main/resources/public" })
         assertFalse(entries.any { it.displayName == "views" || it.displayName == "css" })
