@@ -6,6 +6,7 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.nio.file.Files
 
 class BrewInertiaSupportTest {
     @Test
@@ -97,6 +98,181 @@ class BrewInertiaSupportTest {
         assertTrue(BrewWirePatterns.findAll(body).any { it.name == "wire:model" })
         assertTrue(BrewWirePatterns.isAttrNamePart(':'))
         assertTrue(BrewWirePatterns.isAttrNamePart('.'))
+    }
+
+    @Test
+    fun brewWireValueAndEchoContexts() {
+        val submit = """<form wire:submit="ad"""
+        val v = BrewWirePatterns.valueContextAt(submit, submit.length)
+        assertNotNull(v)
+        assertEquals("wire:submit", v!!.attributeName)
+        assertEquals("ad", v.prefix)
+
+        val model = """<input wire:model.live="dra"""
+        assertEquals("dra", BrewWirePatterns.valueContextAt(model, model.length)!!.prefix)
+        assertEquals("wire:model.live", BrewWirePatterns.valueContextAt(model, model.length)!!.attributeName)
+
+        val click = """<button wire:click="remove("""
+        assertEquals("remove", BrewWirePatterns.valueContextAt(click, click.length)!!.prefix)
+
+        assertNull(BrewWirePatterns.valueContextAt("""<form wire:submit=""", """<form wire:submit=""".length))
+
+        val echo = "{{ rem"
+        assertEquals("rem", BrewWirePatterns.echoContextAt(echo, echo.length)!!.prefix)
+        assertEquals("count", BrewWirePatterns.echoContextAt("{{ count }}", "{{ count".length)!!.prefix)
+        assertEquals("n", BrewWirePatterns.echoContextAt("{!! n", "{!! n".length)!!.prefix)
+        assertNull(BrewWirePatterns.echoContextAt("plain rem", 9))
+        assertNull(BrewWirePatterns.echoContextAt("{{-- comment", "{{-- comment".length))
+        assertNull(BrewWirePatterns.echoContextAt("{{ done }} more", "{{ done }} more".length))
+        assertNull(BrewWirePatterns.valueContextAt("<div>\nwire:model=\"x\"", 6))
+        assertNull(BrewWirePatterns.valueContextAt("""<span title="x""", """<span title="x""".length))
+        assertNull(BrewWirePatterns.valueContextAt("hi", 99))
+        assertNull(BrewWirePatterns.valueContextAt("hi", -1))
+        assertNull(BrewWirePatterns.echoContextAt("hi", 99))
+        assertNull(BrewWirePatterns.valueContextAt("""<input wire:model="x" """, """<input wire:model="x""".length + 1))
+        assertEquals("items.done", BrewWirePatterns.memberPrefix("items.done"))
+        assertEquals("add", BrewWirePatterns.memberPrefix("add("))
+        assertEquals("\$wire", BrewWirePatterns.memberPrefix("\$wire"))
+    }
+
+    @Test
+    fun brewComponentIndexParsesMembersAndPairsViews() {
+        val kt =
+            """
+            package app.brew
+            import org.konaframework.brew.Component
+            import org.konaframework.brew.Computed
+
+            class Todos : Component() {
+                var draft = ""
+                var items = mutableListOf<String>()
+
+                fun add() {}
+                fun remove(index: Int) {}
+                fun mount() {}
+                fun getDraft(): String = draft
+
+                @Computed
+                fun remaining(): Int = 0
+
+                override fun render() = view("brew.todos")
+            }
+            """.trimIndent()
+        val parsed = BrewComponentIndex.parseSource(kt).single()
+        assertEquals("Todos", parsed.className)
+        assertEquals("todos", parsed.componentName)
+        assertEquals("brew.todos", parsed.viewName)
+        assertTrue(parsed.actions().containsAll(listOf("add", "remove")))
+        assertFalse(parsed.actions().contains("mount"))
+        assertFalse(parsed.actions().contains("render"))
+        assertFalse(parsed.actions().contains("getDraft"))
+        assertTrue(parsed.propertiesAndComputed().containsAll(listOf("draft", "items", "remaining")))
+        assertTrue(BrewComponentIndex.isActionAttribute("wire:submit"))
+        assertTrue(BrewComponentIndex.isActionAttribute("wire:click.prevent"))
+        assertTrue(BrewComponentIndex.isPropertyAttribute("wire:model.live"))
+        assertTrue(BrewComponentIndex.isPropertyAttribute("wire:show"))
+        assertEquals("show-posts", BrewComponentIndex.kebab("ShowPosts"))
+
+        val root = Files.createTempDirectory("kona-brew")
+        val brew = root.resolve("src/main/kotlin/app/brew")
+        val nested = brew.resolve("admin")
+        val views = root.resolve("src/main/resources/views/brew")
+        Files.createDirectories(nested)
+        Files.createDirectories(views)
+        Files.writeString(brew.resolve("Todos.kt"), kt)
+        Files.writeString(
+            nested.resolve("ShowPosts.kt"),
+            """
+            package app.brew.admin
+            import org.konaframework.brew.Component
+            import org.konaframework.brew.BrewComponent
+
+            @BrewComponent("posts")
+            class ShowPosts : Component() {
+                var title = ""
+                fun publish() {}
+                companion object { const val X = 1 }
+                data class Nested(val x: Int)
+            }
+            """.trimIndent(),
+        )
+        Files.writeString(
+            brew.resolve("readme.txt"),
+            "ignore me",
+        )
+        val viewFile = views.resolve("todos.crema.html")
+        Files.writeString(viewFile, """<form wire:submit=""><input wire:model="">{{ }}</form>""")
+
+        val owner = BrewComponentIndex.ownerForViewFile(root, viewFile)
+        assertNotNull(owner)
+        assertEquals("Todos", owner!!.className)
+        assertEquals("add", owner.actions().first { it == "add" })
+
+        val collected = BrewComponentIndex.collect(root)
+        assertTrue(collected.any { it.className == "Todos" })
+        assertTrue(BrewComponentIndex.byComponentName(root).containsKey("todos"))
+        // Nested package name + annotation override
+        val posts = collected.first { it.className == "ShowPosts" }
+        assertEquals("posts", posts.componentName)
+        assertTrue(posts.actions().contains("publish"))
+        assertFalse(posts.propertiesAndComputed().contains("x")) // nested data class truncated
+
+        // Convention view name without explicit render() pairing via prefix strip
+        assertNotNull(BrewComponentIndex.ownerForViewName(root, "brew.todos"))
+        assertNull(BrewComponentIndex.ownerForViewName(root, "layouts.app"))
+        assertNull(BrewComponentIndex.ownerForViewFile(root, root.resolve("nope.crema.html")))
+    }
+
+    @Test
+    fun brewComponentIndexParsesJavaAndNestedPackage() {
+        val java =
+            """
+            package app.brew;
+
+            import org.konaframework.brew.Component;
+            import org.konaframework.brew.Computed;
+
+            public class Counter extends Component {
+                public int count = 0;
+
+                public void increment() {}
+                public void mount() {}
+                public int getCount() { return count; }
+
+                @Computed
+                public int doubled() { return count * 2; }
+
+                @Override
+                public Object render() {
+                    return view("brew.counter");
+                }
+
+                public static class Nested {
+                    public String title = "";
+                }
+            }
+            """.trimIndent()
+        val parsed = BrewComponentIndex.parseSource(java, packageRelative = "").single()
+        assertEquals("counter", parsed.componentName)
+        assertEquals("brew.counter", parsed.viewName)
+        assertTrue(parsed.actions().contains("increment"))
+        assertFalse(parsed.actions().contains("mount"))
+        assertFalse(parsed.actions().contains("getCount"))
+        assertTrue(parsed.propertiesAndComputed().containsAll(listOf("count", "doubled")))
+        assertFalse(parsed.propertiesAndComputed().contains("title"))
+
+        val nestedPkg =
+            BrewComponentIndex.parseSource(
+                """
+                package app.brew.admin_area
+                class ShowPosts : Component() { fun go() {} }
+                """.trimIndent(),
+                packageRelative = "admin_area",
+            ).single()
+        assertEquals("admin-area.show-posts", nestedPkg.componentName)
+        assertEquals("brew.admin-area.show-posts", nestedPkg.viewName)
+
+        assertTrue(BrewComponentIndex.parseSource("class NotAComponent").isEmpty())
     }
 
     @Test

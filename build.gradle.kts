@@ -77,6 +77,9 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.5 — Brew action/property completion from the owning component
+                  class (<code>wire:submit</code>, <code>wire:model</code>,
+                  <code>{{ }}</code>); Kona Project View pane for scaffold folders.</li>
               <li>0.5.4 — Known Brew <code>wire:*</code> HTML attribute descriptors;
                   Env key completion and Go to Declaration for
                   <code>Env.get</code> / <code>getOrDefault</code> / <code>require</code>.</li>
@@ -161,9 +164,16 @@ kover {
                     "org.konaframework.idea.XComponentCompletionContributor$*",
                     "org.konaframework.idea.BrewWireCompletionContributor",
                     "org.konaframework.idea.BrewWireCompletionContributor$*",
+                    "org.konaframework.idea.BrewMemberCompletionContributor",
+                    "org.konaframework.idea.BrewMemberCompletionContributor$*",
                     "org.konaframework.idea.BrewWireAnnotator",
                     "org.konaframework.idea.BrewWireAttributeDescriptorsProvider",
                     "org.konaframework.idea.BrewWireAttributeDescriptorsProvider*",
+                    "org.konaframework.idea.KonaProjectViewPane",
+                    "org.konaframework.idea.KonaProjectViewPane$*",
+                    "org.konaframework.idea.KonaProjectRootNode",
+                    "org.konaframework.idea.KonaProjectRootNode$*",
+                    "org.konaframework.idea.KonaScaffoldDirectoryNode",
                     "org.konaframework.idea.EnvKeyCompletionContributor",
                     "org.konaframework.idea.EnvKeyCompletionContributor*",
                     "org.konaframework.idea.EnvKeyReference",

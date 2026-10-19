@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.5
+
+- **Brew member completion** — inside `wire:submit` / `wire:click` / `wire:init` /
+  `wire:target` values, completes **actions** from the owning `app.brew` component
+  (`views/brew/todos.crema.html` ↔ `Todos`). `wire:model` / `wire:show` /
+  `wire:text` and `{{ }}` / `{!! !!}` echoes complete **properties** and
+  `@Computed` members.
+- **Kona Project View** — Project tool window view dropdown includes **Kona**,
+  showing scaffold folders (`app`, `routes`, `views`, `storage`, …) with short
+  names instead of deep package paths.
+
 ## 0.5.4
 
 - **Brew `wire:*` HTML descriptors** — known attributes are registered so IDEA

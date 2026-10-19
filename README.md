@@ -98,6 +98,10 @@ Cadence Kotlin/Java
 ### Brew (`wire:*`)
 - Completes known Brew attributes in Crema HTML (`wire:model`, `wire:click`,
   `wire:submit`, `wire:loading`, … + common modifiers)
+- Completes **actions** (`wire:submit="add"`) and **properties** /
+  `@Computed` (`wire:model="draft"`, `{{ remaining }}`) from the owning
+  `app.brew` component class paired with the view
+  (`views/brew/todos.crema.html` ↔ `Todos`)
 - Known `wire:*` names are registered as HTML attributes, so IDEA does not
   report them as “attribute is not allowed here”
 - Weak warnings for unknown `wire:*` names
@@ -139,6 +143,8 @@ Recognizes the scaffold tree from `kona new`:
 `bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/views|public|lang`,
 `storage/`, app-local `./grind`, and `org.konaframework:*` (or legacy `dev.kona:*`)
 Gradle dependencies. Canonical folders use the official Kona brand mark.
+**Kona** appears in the Project tool window view dropdown (beside Project /
+Packages) and lists those scaffold folders with short names.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments

@@ -34,6 +34,14 @@ class CremaCharFilter : CharFilter() {
                 return Result.ADD_TO_PREFIX
             }
         }
+
+        if (BrewWirePatterns.valueContextAt(text, offset) != null ||
+            BrewWirePatterns.echoContextAt(text, offset) != null
+        ) {
+            if (c == '_' || c == '.' || c == '$' || c.isLetterOrDigit()) {
+                return Result.ADD_TO_PREFIX
+            }
+        }
         return null
     }
 
