@@ -77,6 +77,9 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.4 — Known Brew <code>wire:*</code> HTML attribute descriptors;
+                  Env key completion and Go to Declaration for
+                  <code>Env.get</code> / <code>getOrDefault</code> / <code>require</code>.</li>
               <li>0.5.3 — Marketplace description: Kona Framework IDE support,
                   with Getting Started install and use steps.</li>
               <li>0.5.2 — Supported IDEs limited to IntelliJ IDEA (Community and
