@@ -4,14 +4,17 @@
 # Trigger: push a version tag matching gradle.properties pluginVersion
 #   git tag v0.2.0 && git push origin v0.2.0
 #
-# Or re-run from Actions → Publish release → Run workflow (on a tag ref).
+# Or re-run from Actions → Publish release → Run workflow.
+# Dispatch from main uploads the current pluginVersion and skips the GitHub Release step.
+# Re-running the failed job on an existing tag still uses the workflow file from that tag.
 #
 # Secrets (Settings → Secrets and variables → Actions):
-#   PUBLISH_TOKEN              — JetBrains Marketplace permanent token (Marketplace)
-#   CERTIFICATE_CHAIN          — Marketplace signing cert chain PEM (Marketplace)
-#   PRIVATE_KEY                — Marketplace signing private key PEM (Marketplace)
-#   PRIVATE_KEY_PASSWORD       — Password for PRIVATE_KEY (Marketplace)
+#   PUBLISH_TOKEN              — JetBrains Marketplace permanent token (required to upload)
 #   GITHUB_TOKEN               — provided automatically (contents: write for releases)
+#
+# Optional author signing (Marketplace does not require these; JetBrains signs
+# the zip after upload). When all three are set, publishPlugin signs first:
+#   CERTIFICATE_CHAIN, PRIVATE_KEY, PRIVATE_KEY_PASSWORD
 #
 # Alias: JETBRAINS_PUBLISH_TOKEN is accepted if PUBLISH_TOKEN is unset.
 #
@@ -50,6 +53,7 @@ jobs:
           java-version: "21"
 
       - name: Require version tag
+        if: github.event_name == 'push'
         run: |
           set -euo pipefail
           if [[ "${GITHUB_REF}" != refs/tags/v* ]]; then
@@ -58,6 +62,7 @@ jobs:
           fi
 
       - name: Verify tag matches pluginVersion
+        if: github.event_name == 'push'
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF_NAME#v}"
@@ -83,6 +88,7 @@ jobs:
           if-no-files-found: error
 
       - name: Create / update GitHub Release
+        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -110,8 +116,12 @@ jobs:
             echo "GitHub Release zip is still available. Configure secrets and re-run, or upload manually for the first listing."
             exit 0
           fi
-          if [ -z "${CERTIFICATE_CHAIN:-}" ] || [ -z "${PRIVATE_KEY:-}" ] || [ -z "${PRIVATE_KEY_PASSWORD:-}" ]; then
-            echo "::error::Marketplace publish requires CERTIFICATE_CHAIN, PRIVATE_KEY, and PRIVATE_KEY_PASSWORD secrets (plugin signing)."
-            exit 1
+          # Author signing is optional. signPlugin runs only when a chain and key
+          # are present; otherwise publishPlugin uploads the unsigned buildPlugin zip.
+          if [ -n "${CERTIFICATE_CHAIN:-}" ] && [ -n "${PRIVATE_KEY:-}" ]; then
+            echo "Signing with CERTIFICATE_CHAIN and PRIVATE_KEY, then publishing."
+          else
+            echo "::notice::No plugin signing secrets — publishing the unsigned zip. Marketplace signs it after upload."
+            unset CERTIFICATE_CHAIN PRIVATE_KEY PRIVATE_KEY_PASSWORD
           fi
           ./gradlew publishPlugin --no-daemon --stacktrace

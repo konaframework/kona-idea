@@ -195,29 +195,26 @@ Versions live in `gradle.properties` (`pluginVersion`) and must match the Git ta
    - run tests + `buildPlugin`
    - create/update a [GitHub Release](https://github.com/konaframework/kona-idea/releases)
      with `build/distributions/kona-idea-*.zip` and `CHANGELOG.md`
-   - if Marketplace secrets are configured, run `publishPlugin` (signs, then uploads)
+   - if `PUBLISH_TOKEN` is configured, run `publishPlugin` (unsigned unless signing secrets are set)
 
-Optional: Actions → **Publish release** → Run workflow on the tag ref
-(`skip_marketplace` to publish GitHub-only).
+Optional: Actions → **Publish release** → Run workflow
+(`skip_marketplace` to publish GitHub-only). Dispatch from `main` uploads the
+current `pluginVersion` and does not create another GitHub Release. A re-run of
+an old tag job still uses the workflow file stored on that tag.
 
-### Required GitHub Actions secrets
+### GitHub Actions secrets
 
 Configure under **Settings → Secrets and variables → Actions**:
 
 | Secret | Purpose |
 | --- | --- |
-| `PUBLISH_TOKEN` | JetBrains Marketplace permanent token ([My Tokens](https://plugins.jetbrains.com/author/me/tokens)). Alias: `JETBRAINS_PUBLISH_TOKEN`. |
-| `CERTIFICATE_CHAIN` | Marketplace plugin-signing certificate chain (PEM). |
-| `PRIVATE_KEY` | Marketplace plugin-signing private key (PEM). |
-| `PRIVATE_KEY_PASSWORD` | Password for `PRIVATE_KEY`. |
+| `PUBLISH_TOKEN` | JetBrains Marketplace permanent token ([My Tokens](https://plugins.jetbrains.com/author/me/tokens)). Alias: `JETBRAINS_PUBLISH_TOKEN`. This is the only secret Marketplace upload needs. |
 | `GITHUB_TOKEN` | Automatic; workflow only needs `contents: write` for Releases. |
+
+Author signing secrets are optional. Marketplace signs the zip after upload, and other plugins publish with the token alone. Set all three only if you want `signPlugin` to run first: `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`. See [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html). Never commit tokens or PEMs.
 
 Optional env (workflow / local): `PUBLISH_CHANNEL` — non-default channel
 (`beta`, `alpha`, `eap`, …). Unset = Stable (`default`).
-
-Generate signing materials per
-[Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html).
-Never commit tokens or PEMs.
 
 ### JetBrains Marketplace — first publish & org verification
 
@@ -245,9 +242,8 @@ Local dry-run (no upload):
 
 ```bash
 ./gradlew test koverVerify buildPlugin
-# with secrets in the environment only:
-#   PUBLISH_TOKEN=… CERTIFICATE_CHAIN=… PRIVATE_KEY=… PRIVATE_KEY_PASSWORD=…
-#   ./gradlew publishPlugin
+# with the token in the environment only:
+#   PUBLISH_TOKEN=… ./gradlew publishPlugin
 ```
 
 ---
