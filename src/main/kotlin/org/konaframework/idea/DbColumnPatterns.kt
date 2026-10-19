@@ -60,7 +60,7 @@ object DbColumnPatterns {
         val quote = text[i]
         if (quote != '\'' && quote != '"') return null
         if (!isColumnCallContext(text, i)) return null
-        val prefix = text.subSequence(i + 1, offset).toString()
+        val prefix = CompletionText.stripDummy(text.subSequence(i + 1, offset).toString())
         val receiver = receiverBeforeQuote(text, i)
         return ColumnContext(prefix, receiver)
     }

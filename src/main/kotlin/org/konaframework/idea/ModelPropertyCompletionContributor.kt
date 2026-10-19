@@ -13,8 +13,13 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 
 /**
- * Completes Cadence model attributes / DB columns on instance property access:
- * `project.description`, `user.email` (from migrations and/or JDBC per settings).
+ * Completes Cadence model attributes on instance access and attribute-key APIs:
+ * - `user.` / `user.em` — columns, accessors, relations
+ * - `user.getAttribute("…")` / `setAttribute` / `attribute` / `hasAttribute` /
+ *   `getRawAttribute` / `setRawAttribute` — string keys
+ *
+ * Only fires when the receiver resolves to a discovered Cadence model
+ * ([ModelIndex.find]), so unrelated locals are not spammed.
  */
 class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
     init {
@@ -30,29 +35,62 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
                     val project = parameters.position.project
                     val root = project.guessProjectDir()?.toNioPath() ?: return
                     if (!KonaLayout.isKonaApp(root)) return
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
-                    val prop = ModelPropertyPatterns.propertyAt(text, offset) ?: return
-                    val modelClass = prop.modelClass ?: return
-                    val table = ModelIndex.tableForClass(root, modelClass) ?: return
+                    val snap = CompletionText.of(parameters)
                     val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
-                    val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = true)
-                    val columns = snapshot.columnsForTable(table)
-                    if (columns.isEmpty()) return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(prop.prefix))
-                    columns
-                        .filter { it.startsWith(prop.prefix, ignoreCase = true) || prop.prefix.isEmpty() }
-                        .sorted()
-                        .forEach { col ->
-                            matched.addElement(
-                                LookupElementBuilder.create(col)
-                                    .withPresentableText(col)
-                                    .withTypeText("$modelClass · $table", true)
-                                    .withIcon(KonaIcons.KONA_13),
-                            )
-                        }
+
+                    AttributeKeyPatterns.keyContextAt(snap.text, snap.offset)?.let { keyCtx ->
+                        val modelClass = resolveModelClass(snap.text, keyCtx.receiver) ?: return
+                        if (ModelIndex.find(root, modelClass) == null) return
+                        offer(root, modelClass, mode, keyCtx.prefix, result)
+                        return
+                    }
+
+                    val prop = ModelPropertyPatterns.propertyAt(snap.text, snap.offset) ?: return
+                    val modelClass = prop.modelClass ?: return
+                    if (ModelIndex.find(root, modelClass) == null) return
+                    offer(root, modelClass, mode, prop.prefix, result)
                 }
             },
         )
+    }
+
+    companion object {
+        fun resolveModelClass(text: CharSequence, receiver: String?): String? {
+            if (receiver.isNullOrBlank()) return null
+            return if (receiver[0].isUpperCase()) {
+                receiver
+            } else {
+                ModelPropertyPatterns.resolveModelClass(text, receiver)
+            }
+        }
+
+        fun offer(
+            root: java.nio.file.Path,
+            modelClass: String,
+            mode: ColumnSourceMode,
+            prefix: String,
+            result: CompletionResultSet,
+        ) {
+            val attrs =
+                ModelAttributeIndex.attributesFor(
+                    root,
+                    modelClass,
+                    mode = mode,
+                    probeJdbc = true,
+                )
+            if (attrs.isEmpty()) return
+            val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
+            attrs
+                .filter { it.name.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
+                .sortedBy { it.name }
+                .forEach { attr ->
+                    matched.addElement(
+                        LookupElementBuilder.create(attr.name)
+                            .withPresentableText(attr.name)
+                            .withTypeText(attr.typeText, true)
+                            .withIcon(KonaIcons.KONA_13),
+                    )
+                }
+        }
     }
 }

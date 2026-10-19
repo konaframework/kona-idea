@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.11
+
+- **Cadence model attribute completion** — `user.` completes DB columns (migrations
+  and/or JDBC), accessors (`getFullNameAttribute` → `full_name` / `fullName`),
+  appends, and relations (`posts`, `profile`, …). Same keys inside
+  `getAttribute` / `setAttribute` / `attribute` / `hasAttribute` /
+  `getRawAttribute` / `setRawAttribute`. Only for discovered Cadence models.
+- **Fix** — completion text/offset resolves from the position file (not
+  `originalFile` + clamped offset), so Kotlin’s `IntellijIdeaRulezzz` dummy no
+  longer blanked instance property suggestions.
+
 ## 0.5.10
 
 - **Env value completion** — for known option-like keys (`DB_CONNECTION`,

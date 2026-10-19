@@ -25,7 +25,7 @@ object ModelPropertyPatterns {
         var i = offset - 1
         while (i >= 0 && isPropPart(text[i])) i--
         if (i < 0 || text[i] != '.') return null
-        val propPrefix = text.subSequence(i + 1, offset).toString()
+        val propPrefix = CompletionText.stripDummy(text.subSequence(i + 1, offset).toString())
         var j = i - 1
         while (j >= 0 && isIdentStart(text[j])) j--
         if (j == i - 1) return null
