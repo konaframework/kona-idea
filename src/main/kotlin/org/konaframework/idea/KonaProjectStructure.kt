@@ -31,7 +31,8 @@ object KonaProjectStructure {
                 KonaLayout.AppLanguage.JAVA -> "src/main/java"
                 else -> "src/main/kotlin"
             }
-        val candidates =
+        // All directory kinds first (scaffold order), then root files — never interleave.
+        val directories =
             listOf(
                 Entry("$src/bootstrap", "bootstrap", Kind.SOURCE_PACKAGE),
                 Entry("$src/app", "app", Kind.SOURCE_PACKAGE),
@@ -42,12 +43,15 @@ object KonaProjectStructure {
                 Entry("src/main/resources", "resources", Kind.RESOURCE),
                 Entry("src/main/resources/public", "public", Kind.RESOURCE),
                 Entry("storage", "storage", Kind.ROOT_DIR),
+            )
+        val files =
+            listOf(
                 Entry("grind", "grind", Kind.ROOT_FILE),
                 Entry("grind.bat", "grind.bat", Kind.ROOT_FILE),
                 Entry(".env", ".env", Kind.ROOT_FILE),
                 Entry(".env.example", ".env.example", Kind.ROOT_FILE),
             )
-        return candidates.filter { exists(it.relativePath) }
+        return (directories + files).filter { exists(it.relativePath) }
     }
 
     fun entriesForRoot(rootExists: (String) -> Boolean, detection: KonaLayout.Detection): List<Entry> =
