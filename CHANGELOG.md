@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.3
+
+- **Marketplace description** — opens with “Kona Framework IDE support in IDEA”
+  and lists Crema, Brew, Inertia, Cadence, and Grind.
+- **Getting started** — install, restart, open a Crema view, type `@` / `wire:`,
+  run Serve from the Kona tool window, and jump to a view with Ctrl+B.
+- **Listing art** — 1920×1080 slides in `marketplace/media/` for the Marketplace
+  Media section (upload those in the plugin admin; they are not inside the zip).
+
 ## 0.5.2
 
 - **Supported IDEs** — Marketplace compatibility is IntelliJ IDEA only

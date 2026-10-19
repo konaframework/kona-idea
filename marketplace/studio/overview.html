@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Crema editor</title>
+  <link rel="stylesheet" href="ide.css"/>
+</head>
+<body>
+  <div class="ide">
+    <div class="toolbar">
+      <img class="mug lg" src="brand/pluginIcon.svg" alt=""/>
+      <div class="project-name">kona-app</div>
+      <div class="run"><span class="play"></span> Grind Serve</div>
+    </div>
+    <div class="body">
+      <div class="tree">
+        <div class="pane-title">Project</div>
+        <div class="row dir"><span class="chev"></span> src/main/kotlin</div>
+        <div class="row file indent-1">routes/WebRoutes.kt</div>
+        <div class="row file indent-1">app/HomeController.kt</div>
+        <div class="row dir"><span class="chev"></span> src/main/resources</div>
+        <div class="row dir indent-1"><span class="chev"></span> views</div>
+        <div class="row file indent-2 on"><img class="mug" src="brand/pluginIcon.svg" alt=""/> welcome.crema.html</div>
+        <div class="row file indent-2">layouts/app.crema.html</div>
+        <div class="row dir"><span class="chev"></span> database/migrations</div>
+      </div>
+      <div class="editor">
+        <div class="tabs">
+          <div class="tab">WebRoutes.kt</div>
+          <div class="tab on"><img class="mug" src="brand/pluginIcon.svg" alt=""/> welcome.crema.html</div>
+        </div>
+        <div class="code">
+          <div class="ln"><span>1</span><span><span class="kw">@extends</span>(<span class="str">"layouts.app"</span>)</span></div>
+          <div class="ln"><span>2</span><span></span></div>
+          <div class="ln"><span>3</span><span><span class="kw">@section</span>(<span class="str">"content"</span>)</span></div>
+          <div class="ln"><span>4</span><span>  <span class="tag">&lt;h1&gt;</span><span class="echo">{{ title }}</span><span class="tag">&lt;/h1&gt;</span></span></div>
+          <div class="ln"><span>5</span><span>  <span class="kw">@foreach</span> (items as item)</span></div>
+          <div class="ln"><span>6</span><span>    <span class="tag">&lt;p</span> <span class="attr">wire:click</span>=<span class="str">"choose"</span><span class="tag">&gt;</span><span class="echo">{{ item.name }}</span><span class="tag">&lt;/p&gt;</span></span></div>
+          <div class="ln"><span>7</span><span>  <span class="kw">@endforeach</span></span></div>
+          <div class="ln"><span>8</span><span><span class="kw">@endsection</span></span></div>
+        </div>
+      </div>
+      <div class="tools">
+        <h2><img class="mug lg" src="brand/pluginIcon.svg" alt=""/> Kona</h2>
+        <h3>Grind</h3>
+        <div class="btn primary">Serve (Netty :4000)</div>
+        <div class="btn">List commands</div>
+        <div class="btn">Migrate</div>
+        <h3>Create</h3>
+        <div class="btn">New Crema View</div>
+        <h3>Help</h3>
+        <div class="btn">Project layout</div>
+        <div class="btn">Brew + Inertia</div>
+        <p class="note">Type @ for directives. Type wire: on a tag. Ctrl+B opens a view.</p>
+      </div>
+    </div>
+    <div class="status"><span>Crema</span><span>UTF-8</span><span>4:6</span><span>Kona Framework</span></div>
+  </div>
+</body>
+</html>

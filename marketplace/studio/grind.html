@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Grind and the Kona tool window</title>
+  <link rel="stylesheet" href="ide.css"/>
+</head>
+<body>
+  <div class="ide">
+    <div class="toolbar">
+      <img class="mug lg" src="brand/pluginIcon.svg" alt=""/>
+      <div class="project-name">kona-app</div>
+      <div class="run"><span class="play"></span> Grind Serve · :4000</div>
+    </div>
+    <div class="body">
+      <div class="tree">
+        <div class="pane-title">Project</div>
+        <div class="row file">gradle.properties</div>
+        <div class="row file">.env</div>
+        <div class="row file on"><img class="mug" src="brand/pluginIcon.svg" alt=""/> welcome.crema.html</div>
+      </div>
+      <div class="editor">
+        <div class="tabs">
+          <div class="tab on">Grind Serve</div>
+        </div>
+        <div class="code" style="padding: 36px 48px; font-family: var(--ui); font-size: 18px; line-height: 1.4;">
+          <div style="display:grid; grid-template-columns: 220px 420px; gap: 16px 20px; align-items: center;">
+            <div>Grind arguments</div>
+            <div style="height: 36px; border: 1px solid #c9ccd6; border-radius: 6px; background:#fff; display:flex; align-items:center; padding: 0 12px; font-family: var(--mono);">serve</div>
+            <div>Host (serve)</div>
+            <div style="height: 36px; border: 1px solid #c9ccd6; border-radius: 6px; background:#fff; display:flex; align-items:center; padding: 0 12px; font-family: var(--mono);">127.0.0.1</div>
+            <div>Port (serve)</div>
+            <div style="height: 36px; border: 1px solid #c9ccd6; border-radius: 6px; background:#fff; display:flex; align-items:center; padding: 0 12px; font-family: var(--mono);">4000</div>
+          </div>
+          <p class="note" style="margin-top: 28px; max-width: 640px;">For serve: Netty HTTP adapter and virtual threads. Default bind 127.0.0.1:4000.</p>
+        </div>
+      </div>
+      <div class="tools">
+        <h2><img class="mug lg" src="brand/pluginIcon.svg" alt=""/> Kona</h2>
+        <h3>Grind</h3>
+        <div class="btn primary">Serve (Netty :4000)</div>
+        <div class="btn">List commands</div>
+        <div class="btn">Migrate</div>
+        <div class="btn">Queue work</div>
+        <div class="btn">Schedule work</div>
+        <h3>Create</h3>
+        <div class="btn">New Crema View</div>
+        <h3>Docs</h3>
+        <div class="btn">Kona docs</div>
+        <div class="btn">IntelliJ guide</div>
+      </div>
+    </div>
+    <div class="status"><span>Run</span><span>127.0.0.1:4000</span><span>Kona</span></div>
+  </div>
+</body>
+</html>
