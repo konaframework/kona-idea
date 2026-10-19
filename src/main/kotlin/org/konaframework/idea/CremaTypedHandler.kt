@@ -64,18 +64,26 @@ class CremaTypedHandler : TypedHandlerDelegate() {
                 return Result.STOP
             }
             CremaDirectives.isIdentPart(c) -> {
-                if (!directivePrefixAtCaret(editor) && !xComponentContext(editor)) {
+                if (!directivePrefixAtCaret(editor) &&
+                    !xComponentContext(editor) &&
+                    !brewMemberContext(editor)
+                ) {
                     return Result.CONTINUE
                 }
                 popup.scheduleAutoPopup(editor)
                 return Result.STOP
             }
-            c == '<' || c == '-' || c == '/' || c == '.' || c == ':' -> {
-                // Schedule; contributors no-op when not in an x-component context.
+            c == '<' || c == '-' || c == '/' || c == '.' || c == ':' || c == '"' || c == '\'' -> {
+                // Schedule; contributors no-op when not in an x-component / wire context.
                 popup.scheduleAutoPopup(editor)
                 return Result.STOP
             }
-            c == '{' || c == '}' -> return Result.STOP
+            c == '{' || c == '}' -> {
+                if (brewMemberContext(editor)) {
+                    popup.scheduleAutoPopup(editor)
+                }
+                return Result.STOP
+            }
         }
         return Result.CONTINUE
     }
@@ -91,6 +99,13 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         val offset = editor.caretModel.offset.coerceIn(0, text.length)
         return XComponentPatterns.tagPrefixAt(text, offset) != null ||
             XComponentPatterns.wantsSlotChild(text, offset)
+    }
+
+    private fun brewMemberContext(editor: Editor): Boolean {
+        val text = editor.document.charsSequence
+        val offset = editor.caretModel.offset.coerceIn(0, text.length)
+        return BrewWirePatterns.valueContextAt(text, offset) != null ||
+            BrewWirePatterns.echoContextAt(text, offset) != null
     }
 
     private fun looksLikeCrema(file: PsiFile): Boolean =

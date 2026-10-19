@@ -52,7 +52,10 @@ object ViewNavHelp {
         Autocomplete: Ctrl+Space inside the view / page name string.
         Crema directives: type @ in a *.crema.html view (native completion).
         Brew: type wire: on HTML tags for Brew attribute completion.
+        Inside wire:submit / wire:click / wire:model (and {{ }} echoes), Ctrl+Space
+        completes actions and properties from the owning app.brew component class.
         Known wire:* names are legal HTML attributes in Crema views.
+        Project tool window: switch the view dropdown to “Kona” for the scaffold tree.
 
         Env keys (Env.get / getOrDefault / require in config):
           • Ctrl+Space completes keys from .env, .env.example, and other Env lookups.
@@ -75,6 +78,10 @@ object BrewInertiaHelp {
             wire:target, wire:ignore, wire:key, wire:dirty, wire:offline, wire:confirm,
             wire:poll, wire:init, wire:show, wire:transition (+ common modifiers).
           • Autocomplete + weak warnings for unknown wire:* names in *.crema.html.
+          • wire:submit / wire:click / wire:init / wire:target values complete actions
+            from the paired app.brew component (views/brew/todos ↔ Todos).
+          • wire:model / wire:show / wire:text and {{ }} echoes complete properties
+            and @Computed members from that class.
 
         Inertia (org.konaframework:kona-inertia)
           • Page names in Inertia.render(…) / manager.render(…) get the same completion

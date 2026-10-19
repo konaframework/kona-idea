@@ -219,4 +219,47 @@ class CompletionUxTest {
         assertTrue(hints.contains("footer"))
         assertFalse(hints.contains("slot"))
     }
+
+    @Test
+    fun konaProjectStructureListsScaffoldEntries() {
+        val present =
+            setOf(
+                "src/main/kotlin/bootstrap",
+                "src/main/kotlin/app",
+                "src/main/kotlin/routes",
+                "src/main/resources/views",
+                "storage",
+                "grind",
+                ".env",
+            )
+        val detection =
+            KonaLayout.Detection(
+                root = Files.createTempDirectory("kona-struct"),
+                language = KonaLayout.AppLanguage.KOTLIN,
+                score = 10,
+                presentPackages = listOf("bootstrap", "app", "routes", "src/main/resources/views"),
+                hasGrind = true,
+                hasDevKonaDependency = true,
+            )
+        val entries = KonaProjectStructure.entries(detection) { it in present }
+        assertEquals(
+            listOf("bootstrap", "app", "routes", "views", "storage", "grind", ".env"),
+            entries.map { it.displayName },
+        )
+        assertTrue(entries.any { it.relativePath == "src/main/resources/views" })
+        assertTrue(
+            KonaProjectStructure.entries(
+                detection.copy(score = 0),
+            ) { true }.isEmpty(),
+        )
+
+        val javaDetection = detection.copy(language = KonaLayout.AppLanguage.JAVA)
+        val javaEntries =
+            KonaProjectStructure.entriesForRoot(
+                { it == "src/main/java/app" || it == "storage" },
+                javaDetection,
+            )
+        assertEquals(listOf("app", "storage"), javaEntries.map { it.displayName })
+        assertTrue(javaEntries.first().relativePath.startsWith("src/main/java/"))
+    }
 }
