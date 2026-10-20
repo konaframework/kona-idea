@@ -10,6 +10,8 @@ import java.nio.file.Path
 object ModelAttributeIndex {
     enum class Kind {
         COLUMN,
+        FILLABLE,
+        CAST,
         ACCESSOR,
         APPEND,
         RELATION,
@@ -55,6 +57,27 @@ object ModelAttributeIndex {
     private val JAVA_APPENDS_GETTER =
         Regex("""(?:getAppends|appends)\s*\(\s*\)\s*\{[^}]*?(?:Set\.of|List\.of)\s*\(([^)]*)\)""")
 
+    private val KT_STRING_SET =
+        Regex(
+            """(?:override\s+)?(?:val|var)\s+(fillable|hidden|visible|guarded)\s*=\s*(?:setOf|listOf|mutableSetOf)\s*\(([^)]*)\)""",
+        )
+    private val JAVA_STRING_SET_FIELD =
+        Regex(
+            """(?:protected|public|private)?\s*(?:final\s+)?Set\s*<\s*String\s*>\s+(fillable|hidden|visible|guarded)\s*=\s*Set\.of\s*\(([^)]*)\)""",
+        )
+    private val JAVA_STRING_SET_GETTER =
+        Regex(
+            """get(Fillable|Hidden|Visible|Guarded)\s*\(\s*\)\s*\{[^}]*?(?:Set\.of|List\.of)\s*\(([^)]*)\)""",
+        )
+    private val KT_CASTS =
+        Regex("""(?:override\s+)?(?:val|var)\s+casts\s*=\s*mapOf\s*\(([^)]*)\)""")
+    private val JAVA_CASTS =
+        Regex("""getCasts\s*\(\s*\)\s*\{[\s\S]{0,800}?Map\.of\s*\(([^)]*)\)""")
+    private val KT_TIMESTAMPS_OFF =
+        Regex("""(?:override\s+)?(?:val|var)\s+timestamps\s*=\s*false""")
+    private val JAVA_TIMESTAMPS_OFF =
+        Regex("""getTimestamps\s*\(\s*\)\s*\{[^}]*return\s*false""")
+
     private val KT_RELATION =
         Regex(
             """fun\s+(\w+)\s*\([^)]*\)\s*(?::[^{=]+)?\s*(?:=\s*|\{\s*(?:return\s+)?)($RELATION_ALT)\s*\(""",
@@ -73,13 +96,20 @@ object ModelAttributeIndex {
         mode: ColumnSourceMode = ColumnSourceMode.BOTH,
         probeJdbc: Boolean = true,
     ): List<Attribute> {
-        val info = ModelIndex.find(projectRoot, className) ?: return emptyList()
-        val source = info.sourcePath?.takeIf { Files.isRegularFile(it) }?.let { Files.readString(it) }.orEmpty()
+        val simple = className.substringAfterLast('.')
+        if (simple.isEmpty() || !simple[0].isUpperCase()) return emptyList()
+        val info = ModelIndex.find(projectRoot, simple)
+        val table = info?.table ?: ModelIndex.tableForClass(projectRoot, simple) ?: return emptyList()
+        val source = info?.sourcePath?.takeIf { Files.isRegularFile(it) }?.let { Files.readString(it) }.orEmpty()
         val parsed = parseSource(source)
         val columns =
             DbColumnIndex.collect(projectRoot, mode = mode, probeJdbc = probeJdbc)
-                .columnsForTable(info.table)
-        return merge(columns, info.table, parsed)
+                .columnsForTable(table)
+                .toMutableSet()
+        val known = info != null || columns.isNotEmpty() || parsed.isNotEmpty()
+        if (!known) return emptyList()
+        columns += typicalCadenceColumns(source)
+        return merge(columns, table, parsed)
     }
 
     fun parseSource(source: String): List<Attribute> {
@@ -105,6 +135,12 @@ object ModelAttributeIndex {
         }
         for (name in appendNames(source)) {
             put(name, Kind.APPEND, "append")
+        }
+        for ((field, names) in stringSetFields(source)) {
+            for (name in names) put(name, Kind.FILLABLE, field)
+        }
+        for (name in castKeys(source)) {
+            put(name, Kind.CAST, "cast")
         }
         for ((method, rel) in relationMethods(source)) {
             val label = rel.replaceFirstChar { it.uppercaseChar() }
@@ -151,6 +187,40 @@ object ModelAttributeIndex {
                 ?: JAVA_APPENDS_GETTER.find(source)?.groupValues?.get(1)
                 ?: return emptyList()
         return STRING_LIT.findAll(raw).map { it.groupValues[1] }.filter { it.isNotEmpty() }.toList()
+    }
+
+    fun stringSetFields(source: String): List<Pair<String, List<String>>> {
+        val out = linkedMapOf<String, List<String>>()
+        fun put(field: String, raw: String) {
+            val names = STRING_LIT.findAll(raw).map { it.groupValues[1] }.filter { it.isNotEmpty() }.toList()
+            if (names.isNotEmpty()) out.putIfAbsent(field.lowercase(), names)
+        }
+        KT_STRING_SET.findAll(source).forEach { put(it.groupValues[1], it.groupValues[2]) }
+        JAVA_STRING_SET_FIELD.findAll(source).forEach { put(it.groupValues[1], it.groupValues[2]) }
+        JAVA_STRING_SET_GETTER.findAll(source).forEach { put(it.groupValues[1], it.groupValues[2]) }
+        return out.entries.map { it.key to it.value }
+    }
+
+    fun castKeys(source: String): List<String> {
+        val raw =
+            KT_CASTS.find(source)?.groupValues?.get(1)
+                ?: JAVA_CASTS.find(source)?.groupValues?.get(1)
+                ?: return emptyList()
+        return STRING_LIT.findAll(raw).map { it.groupValues[1] }.filter { it.isNotEmpty() }.toList()
+    }
+
+    fun typicalCadenceColumns(source: String): Set<String> {
+        val cols = linkedSetOf("id")
+        val timestampsOff =
+            KT_TIMESTAMPS_OFF.containsMatchIn(source) || JAVA_TIMESTAMPS_OFF.containsMatchIn(source)
+        if (!timestampsOff) {
+            cols += "created_at"
+            cols += "updated_at"
+        }
+        if (source.contains("SoftDeletes") || Regex("""\bsoftDeletes\s*\(""").containsMatchIn(source)) {
+            cols += "deleted_at"
+        }
+        return cols
     }
 
     fun relationMethods(source: String): List<Pair<String, String>> {

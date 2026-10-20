@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.11** |
+| Version | **0.5.12** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,16 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.12 ships
+
+- Cadence **instance** completion actually fires for queried locals (`val user =
+  User.query().first()` → `user.` / `user.getAttribute(` / `user.get("` /
+  `user["`). Columns come from migrations/JDBC **or** fillable/casts even if
+  `ModelIndex.find` misses the source file. `fillCompletionVariants` + dummy
+  rewind (including trailing space / partial dummy).
+- `Grind.call` / `callSilently` command-name completion (built-ins +
+  `META-INF/kona/commands` + `app/console` `ConsoleCommand` classes).
 
 ## What 0.5.11 ships
 
@@ -126,7 +136,8 @@ src/main/kotlin/org/konaframework/idea/
   KonaProjectViewPane.kt / KonaProjectRootNode.kt / KonaProjectStructure.kt
   View*.kt                  # view index, patterns, refs, goto (+ Inertia)
   Db*.kt / Migration*.kt / Model*.kt / ModelAttributeIndex.kt / CompletionText.kt
-  AttributeKeyPatterns.kt / CadenceTableNames.kt
+  AttributeKeyPatterns.kt / CadenceTableNames.kt / ModelCompletion.kt
+  GrindCall*.kt / GrindCommandIndex.kt
   KonaIdeaSettings.kt / KonaConfigurable.kt
   KonaToolWindowFactory.kt / GrindQuickActions.kt
   Grind*.kt / KonaLayout.kt / KonaIcons.kt

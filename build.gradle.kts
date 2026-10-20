@@ -174,6 +174,8 @@ kover {
                     "org.konaframework.idea.DbColumnCompletionContributor$*",
                     "org.konaframework.idea.ModelPropertyCompletionContributor",
                     "org.konaframework.idea.ModelPropertyCompletionContributor$*",
+                    "org.konaframework.idea.GrindCallCompletionContributor",
+                    "org.konaframework.idea.GrindCallCompletionContributor$*",
                     "org.konaframework.idea.XComponentCompletionContributor",
                     "org.konaframework.idea.XComponentCompletionContributor$*",
                     "org.konaframework.idea.BrewTagCompletionContributor",

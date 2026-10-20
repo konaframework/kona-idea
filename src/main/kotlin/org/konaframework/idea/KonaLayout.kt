@@ -89,6 +89,20 @@ object KonaLayout {
         return null
     }
 
+    /**
+     * Walk parents from [start] until [isKonaApp] succeeds. Used by completion so a
+     * file in a Kona app still resolves when IDEA's guessed project dir is a parent
+     * folder (monorepo / multi-module).
+     */
+    fun appRootNear(start: Path?): Path? {
+        var dir: Path? = start?.toAbsolutePath()?.normalize()
+        while (dir != null) {
+            if (isKonaApp(dir)) return dir
+            dir = dir.parent
+        }
+        return null
+    }
+
     fun detect(root: Path): Detection {
         val abs = root.toAbsolutePath().normalize()
         val kotlinRoot = abs.resolve("src/main/kotlin")

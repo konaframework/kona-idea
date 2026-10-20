@@ -32,7 +32,11 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
                     val project = parameters.position.project
                     val root = project.guessProjectDir()?.toNioPath() ?: return
                     if (!KonaLayout.isKonaApp(root)) return
-                    val snap = CompletionText.of(parameters)
+                    val snap =
+                        CompletionText.fromContents(
+                            parameters.position.containingFile.viewProvider.contents,
+                            parameters.offset,
+                        )
                     val ctx = DbColumnPatterns.columnContextAt(snap.text, snap.offset) ?: return
                     val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
                     val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = true)
