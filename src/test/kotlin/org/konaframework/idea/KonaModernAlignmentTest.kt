@@ -92,6 +92,31 @@ class KonaModernAlignmentTest {
         assertTrue(GrindCommands.names().contains("queue:work"))
         assertTrue(GrindCommands.PRESET_CONFIGS.any { it.name == "serve" })
         assertTrue(GrindCommands.BUILTIN.first { it.name == "serve" }.summary.contains("Netty"))
+        assertTrue(
+            GrindCommands.names().containsAll(
+                listOf(
+                    "migrate",
+                    "migrate:rollback",
+                    "migrate:reset",
+                    "migrate:status",
+                    "db:seed",
+                    "make:migration",
+                    "make:seeder",
+                    "make:factory",
+                    "migrate:fresh",
+                    "migrate:refresh",
+                    "migrate:install",
+                    "db:wipe",
+                    "db:show",
+                    "db:table",
+                    "schema:dump",
+                ),
+            ),
+        )
+        assertEquals(
+            "Drop all tables and re-run migrations (--seed)",
+            GrindCommands.find("migrate:fresh")!!.summary,
+        )
     }
 
     @Test
