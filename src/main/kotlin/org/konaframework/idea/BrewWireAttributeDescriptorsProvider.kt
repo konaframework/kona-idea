@@ -29,8 +29,7 @@ class BrewWireAttributeDescriptorsProvider : XmlAttributeDescriptorsProvider {
 
     private fun isCrema(context: XmlTag?): Boolean {
         val file = context?.containingFile ?: return false
-        return file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
+        return CremaPsi.isCrema(file)
     }
 
     private class Descriptor(private val attrName: String) : XmlAttributeDescriptor {

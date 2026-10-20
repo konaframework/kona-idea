@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.14
+
+- **Crema language injection** — Java/Kotlin strings that are inline Brew/Crema
+  markup get full Crema highlighting and completion:
+  - Return literals of `@CremaTemplate` methods and of `template()` overrides
+    (`Component.template()`, including Java text blocks and Kotlin `"""` +
+    `trimIndent()` / `trimMargin()`)
+  - First argument of `inline(` / `BrewView.inline(` and parameters annotated
+    `@CremaTemplate`
+  - Strings preceded by `// language=Crema` (or `/* language=Crema */`)
+- **Injected completion** — `@` directives, `<brew:*>`, `wire:*`, and `{{ }}`
+  members work inside injected fragments. Brew member completion resolves the
+  **host Component class**, not a sibling `.crema.html`.
+
 ## 0.5.13
 
 - **Cadence type-based instance completion** — `user.` / `getAttribute` / `get("` /

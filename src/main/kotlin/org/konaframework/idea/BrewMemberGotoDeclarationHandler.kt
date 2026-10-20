@@ -16,12 +16,8 @@ class BrewMemberGotoDeclarationHandler : GotoDeclarationHandler {
     ): Array<PsiElement>? {
         if (sourceElement == null) return null
         val file = sourceElement.containingFile ?: return null
-        if (!isCremaFile(file)) return null
+        if (!CremaPsi.isCrema(file)) return null
         val target = BrewMemberNavigation.resolveTarget(sourceElement.project, file, offset) ?: return null
         return arrayOf(target)
     }
-
-    private fun isCremaFile(file: com.intellij.psi.PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }

@@ -42,9 +42,7 @@ class ViewNameReferenceContributor : PsiReferenceContributor() {
 
                     val file = element.containingFile ?: return PsiReference.EMPTY_ARRAY
                     if (element !== file) return PsiReference.EMPTY_ARRAY
-                    if (file.viewProvider.baseLanguage !== CremaLanguage &&
-                        !CremaFileType.isCremaFileName(file.name)
-                    ) {
+                    if (!CremaPsi.isCrema(file)) {
                         return PsiReference.EMPTY_ARRAY
                     }
                     val hits = ViewNamePatterns.findAll(text)

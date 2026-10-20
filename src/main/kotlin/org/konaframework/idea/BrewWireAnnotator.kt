@@ -12,7 +12,7 @@ import com.intellij.psi.PsiElement
  */
 class BrewWireAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (element.containingFile.viewProvider.baseLanguage !== CremaLanguage) return
+        if (!CremaPsi.isCrema(element.containingFile)) return
         if (element.parent !is CremaFile && element !is CremaFile) return
         val file = element.containingFile
         if (element !== file) return

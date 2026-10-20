@@ -16,11 +16,16 @@ object BrewMemberNavigation {
         if (!KonaLayout.isKonaApp(root)) return null
         val text = viewFile.viewProvider.contents
         val ref = BrewWirePatterns.memberReferenceAt(text, offset) ?: return null
-        val vf = viewFile.virtualFile ?: return null
-        val nio = runCatching { VfsUtilCore.virtualToIoFile(vf).toPath() }.getOrNull() ?: return null
+        val host = CremaPsi.hostFile(viewFile)
+        val nio = CremaPsi.hostPath(viewFile)
+            ?: viewFile.virtualFile?.let { vf ->
+                runCatching { VfsUtilCore.virtualToIoFile(vf).toPath() }.getOrNull()
+            }
+            ?: return null
 
-        // Prefer Brew component that owns this view (views/brew/…).
-        BrewComponentIndex.ownerForViewFile(root, nio)?.let { owner ->
+        // Prefer Brew component that owns this view, or the host Component class
+        // when the buffer is an injected `template()` string.
+        BrewInjectionOwners.ownerFor(root, nio, host.text)?.let { owner ->
             elementForOwnerMember(project, owner, ref)?.let { return it }
         }
 

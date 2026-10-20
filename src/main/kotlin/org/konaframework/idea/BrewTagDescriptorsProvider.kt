@@ -56,8 +56,7 @@ class BrewTagDescriptorsProvider : XmlElementDescriptorProvider, XmlTagNameProvi
 
     private fun isCrema(tag: XmlTag?): Boolean {
         val file = tag?.containingFile ?: return false
-        return file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
+        return CremaPsi.isCrema(file)
     }
 
     /**

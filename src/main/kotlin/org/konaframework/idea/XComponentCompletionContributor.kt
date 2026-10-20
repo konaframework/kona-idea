@@ -29,11 +29,11 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    if (!isCremaFile(parameters.originalFile)) return
+                    val snap = CremaPsi.snapshot(parameters) ?: return
                     val project = parameters.position.project
                     val root = project.guessProjectDir()?.toNioPath()
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
+                    val text = snap.text
+                    val offset = snap.offset
 
                     if (XComponentPatterns.wantsSlotChild(text, offset)) {
                         val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
@@ -143,7 +143,4 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
             ctx.editor.caretModel.moveToOffset(start + "x-slot name=\"".length)
         }
 
-    private fun isCremaFile(file: com.intellij.psi.PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }

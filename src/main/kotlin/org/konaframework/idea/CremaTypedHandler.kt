@@ -25,7 +25,7 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         editor: Editor,
         file: PsiFile,
     ): Result {
-        if (!isCrema(file)) return Result.CONTINUE
+        if (!CremaPsi.isCrema(file)) return Result.CONTINUE
 
         if (c != '{') return Result.CONTINUE
         val document = editor.document
@@ -55,7 +55,7 @@ class CremaTypedHandler : TypedHandlerDelegate() {
         file: PsiFile,
     ): Result {
         // PSI may be stale — gate on file name / view-provider base language only.
-        if (!looksLikeCrema(file)) return Result.CONTINUE
+        if (!CremaPsi.isCrema(file)) return Result.CONTINUE
 
         val popup = AutoPopupController.getInstance(project)
         when {
@@ -115,11 +115,4 @@ class CremaTypedHandler : TypedHandlerDelegate() {
             BrewWirePatterns.echoContextAt(text, offset) != null
     }
 
-    private fun looksLikeCrema(file: PsiFile): Boolean =
-        CremaFileType.isCremaFileName(file.name) ||
-            file.viewProvider.baseLanguage === CremaLanguage
-
-    private fun isCrema(file: PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }
