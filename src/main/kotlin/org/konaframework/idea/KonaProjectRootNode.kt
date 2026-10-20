@@ -71,7 +71,7 @@ class KonaProjectRootNode(
     override fun getVirtualFile(): VirtualFile? = myProject.guessProjectDir()
 }
 
-/** Psi directory node with a short scaffold label (e.g. `public` not `resources/public`). */
+/** Psi directory node with a short scaffold label (`app`, `public`, `resources`, …). */
 private class KonaScaffoldDirectoryNode(
     project: Project,
     value: PsiDirectory,
@@ -86,8 +86,11 @@ private class KonaScaffoldDirectoryNode(
 }
 
 /**
- * Custom `resources` node: lists children of `src/main/resources` except `public`,
- * which is promoted to its own top-level Kona Project View entry.
+ * Custom `resources` node for `src/main/resources` (`views`, `lang`, `css`, `js`).
+ *
+ * A nested `public` directory is not the HTTP document root. When the project
+ * root has `public/`, that nested duplicate is omitted so the top-level node is
+ * the only web root in the tree.
  *
  * Extends [PsiDirectoryNode] so the Project View type-sort treats it as a folder
  * (folders first), not as a trailing miscellaneous node after `.env` / scripts.
@@ -102,8 +105,15 @@ private class KonaResourcesDirectoryNode(
         val psi = PsiManager.getInstance(myProject)
         val dirs = mutableListOf<AbstractTreeNode<*>>()
         val files = mutableListOf<AbstractTreeNode<*>>()
+        val hideNestedPublic = rootWebPublicExists()
         for (child in directory.virtualFile.children.orEmpty().sortedBy { it.name.lowercase() }) {
-            if (child.isDirectory && child.name.equals("public", ignoreCase = true)) {
+            if (
+                KonaProjectStructure.hideNestedPublicDirectory(
+                    child.name,
+                    child.isDirectory,
+                    hideNestedPublic,
+                )
+            ) {
                 continue
             }
             if (child.isDirectory) {
@@ -120,8 +130,14 @@ private class KonaResourcesDirectoryNode(
     override fun contains(file: VirtualFile): Boolean {
         val root = virtualFile ?: return false
         if (!file.path.startsWith(root.path)) return false
-        val publicDir = root.findChild("public")
+        if (!rootWebPublicExists()) return true
+        val publicDir = root.findChild(KonaLayout.PUBLIC_DIR)
         return publicDir == null || !file.path.startsWith(publicDir.path)
+    }
+
+    private fun rootWebPublicExists(): Boolean {
+        val projectDir = myProject.guessProjectDir() ?: return false
+        return projectDir.findChild(KonaLayout.PUBLIC_DIR)?.isDirectory == true
     }
 
     override fun update(data: PresentationData) {

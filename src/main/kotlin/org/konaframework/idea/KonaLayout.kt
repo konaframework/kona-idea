@@ -6,9 +6,10 @@ import java.nio.file.Path
 /**
  * Canonical Kona application layout from `kona new` / grind scaffolds.
  *
- * Mirrors the tree under `src/main/{kotlin|java}` plus `resources/`, `storage/`,
- * and app-local `./grind`. Detection is used for run configs and project markers —
- * not for inventing source roots (Gradle owns those).
+ * Mirrors the tree under `src/main/{kotlin|java}` plus `resources/`, the
+ * project-root HTTP document directory `public/`, `storage/`, and app-local
+ * `./grind`. Detection is used for run configs and project markers — not for
+ * inventing source roots (Gradle owns those).
  */
 object KonaLayout {
     /** Laravel-shaped packages under the language source root. */
@@ -29,14 +30,21 @@ object KonaLayout {
             "database/seeders",
         )
 
+    /**
+     * Resource folders under `src/main/resources`. Views, lang, css, and js live
+     * here. The HTTP document root is [PUBLIC_DIR] at the project root, not a
+     * `public` child of this tree.
+     */
     val RESOURCE_DIRS: List<String> =
         listOf(
             "src/main/resources/views",
-            "src/main/resources/public",
             "src/main/resources/lang",
             "src/main/resources/css",
             "src/main/resources/js",
         )
+
+    /** Project-root HTTP document directory (Vite writes `public/build`). */
+    const val PUBLIC_DIR: String = "public"
 
     val ROOT_MARKERS: List<String> =
         listOf(
@@ -125,7 +133,8 @@ object KonaLayout {
             }
         val present =
             APP_PACKAGES.filter { Files.isDirectory(sourceRoot.resolve(it)) } +
-                RESOURCE_DIRS.filter { Files.isDirectory(abs.resolve(it)) }
+                RESOURCE_DIRS.filter { Files.isDirectory(abs.resolve(it)) } +
+                listOf(PUBLIC_DIR).filter { Files.isDirectory(abs.resolve(it)) }
 
         var score = 0
         if (ROOT_MARKERS.any { Files.isRegularFile(abs.resolve(it)) }) score += 1
@@ -159,7 +168,7 @@ object KonaLayout {
                 AppLanguage.JAVA -> "src/main/java"
                 else -> "src/main/kotlin"
             }
-        return APP_PACKAGES.map { "$src/$it" } + RESOURCE_DIRS + listOf("storage")
+        return APP_PACKAGES.map { "$src/$it" } + RESOURCE_DIRS + listOf(PUBLIC_DIR, "storage")
     }
 
     fun summarize(detection: Detection): String {

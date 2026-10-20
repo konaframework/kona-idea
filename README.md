@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.15)
+## Features (0.5.16)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -151,11 +151,13 @@ Cadence Kotlin/Java
 ### Project structure
 Recognizes the scaffold tree from `kona new`:
 `bootstrap/`, `app/`, `routes/`, `config/`, `database/`, `resources/` (views,
-lang, css, js), top-level `public/`, `storage/`, app-local `./grind`, and
-`org.konaframework:*` (or legacy `dev.kona:*`) Gradle dependencies. Canonical
-folders use the official Kona brand mark. For Kona apps, the Project tool window
-defaults to the **Kona** pane (scaffold folders with short names); Project /
-Packages remain available.
+lang, css, js), top-level `public/` (HTTP document root; Vite writes
+`public/build`), `storage/`, app-local `./grind`, and `org.konaframework:*`
+(or legacy `dev.kona:*`) Gradle dependencies. The Kona Project View lists that
+root `public/` beside `resources`. A `public` folder nested under `resources`
+is not the document root. Canonical folders use the official Kona brand mark.
+For Kona apps, the Project tool window defaults to the **Kona** pane (scaffold
+folders with short names); Project / Packages remain available.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments

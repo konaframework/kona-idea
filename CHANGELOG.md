@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.16
+
+- **Kona Project View `public`** — the HTTP document root is the project-root
+  `public/` folder (Vite writes `public/build`). It is a top-level scaffold
+  node beside `app`, `routes`, and `resources`. A `public` directory under
+  `resources` or `src/main/resources` is not that node; when root `public/`
+  exists, the nested duplicate is hidden.
+
 ## 0.5.15
 
 - **Grind database commands** — built-in completion / run-config list now

@@ -7,8 +7,9 @@ import com.intellij.psi.PsiElement
 import javax.swing.Icon
 
 /**
- * Marks canonical Kona layout folders (bootstrap, routes, views, storage, …)
- * with the official Kona brand mark in the project view.
+ * Marks canonical Kona layout folders (bootstrap, routes, views, root `public`,
+ * storage, …) with the official Kona brand mark in the project view. Nested
+ * `resources/public` is not a marker — the document root is project-root `public/`.
  */
 class KonaFolderIconProvider : IconProvider() {
     override fun getIcon(element: PsiElement, flags: Int): Icon? {

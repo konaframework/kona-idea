@@ -204,6 +204,8 @@ class NativeIdeFeaturesTest {
     @Test
     fun layoutAndTemplateAccessorsCovered() {
         assertTrue(KonaLayout.RESOURCE_DIRS.any { it.contains("views") })
+        assertFalse(KonaLayout.RESOURCE_DIRS.any { it.endsWith("/public") })
+        assertEquals("public", KonaLayout.PUBLIC_DIR)
         assertTrue(KonaLayout.KONA_ROOT_PATHS.contains("grind"))
         assertTrue(KonaLayout.APP_PACKAGES.contains("routes"))
         assertTrue(KonaLayout.ROOT_MARKERS.contains("settings.gradle.kts"))

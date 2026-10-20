@@ -39,9 +39,10 @@ object KonaProjectStructure {
                 Entry("$src/routes", "routes", Kind.SOURCE_PACKAGE),
                 Entry("$src/config", "config", Kind.SOURCE_PACKAGE),
                 Entry("$src/database", "database", Kind.SOURCE_PACKAGE),
-                // views / lang / css / js stay under resources; public is its own top-level node.
+                // views / lang / css / js stay under resources.
                 Entry("src/main/resources", "resources", Kind.RESOURCE),
-                Entry("src/main/resources/public", "public", Kind.RESOURCE),
+                // HTTP document root is <project>/public, never resources/public.
+                Entry(KonaLayout.PUBLIC_DIR, "public", Kind.ROOT_DIR),
                 Entry("storage", "storage", Kind.ROOT_DIR),
             )
         val files =
@@ -51,8 +52,42 @@ object KonaProjectStructure {
                 Entry(".env", ".env", Kind.ROOT_FILE),
                 Entry(".env.example", ".env.example", Kind.ROOT_FILE),
             )
-        return (directories + files).filter { exists(it.relativePath) }
+        return (directories + files)
+            .filter { exists(it.relativePath) }
+            .filterNot { isNestedResourcesPublic(it.relativePath) }
     }
+
+    /**
+     * True when [relativePath] is the project-root document directory, not a
+     * `public` folder nested under `resources`.
+     */
+    fun isProjectWebPublic(relativePath: String): Boolean =
+        normalize(relativePath) == KonaLayout.PUBLIC_DIR
+
+    /**
+     * A `public` directory under `resources` or `src/main/resources` is not the
+     * HTTP document root. The Kona Project View must not re-parent it as `public`.
+     */
+    fun isNestedResourcesPublic(relativePath: String): Boolean {
+        val norm = normalize(relativePath)
+        return norm == "resources/public" ||
+            norm == "src/main/resources/public" ||
+            norm.endsWith("/resources/public")
+    }
+
+    /**
+     * Hide a nested `public` child of `resources` when the project-root
+     * document directory is the one shown in the tree.
+     */
+    fun hideNestedPublicDirectory(
+        childName: String,
+        isDirectory: Boolean,
+        projectWebPublicExists: Boolean,
+    ): Boolean =
+        projectWebPublicExists && isDirectory && childName.equals(KonaLayout.PUBLIC_DIR, ignoreCase = true)
+
+    private fun normalize(relativePath: String): String =
+        relativePath.replace('\\', '/').trim().trim('/')
 
     fun entriesForRoot(rootExists: (String) -> Boolean, detection: KonaLayout.Detection): List<Entry> =
         entries(detection, rootExists)

@@ -16,7 +16,8 @@ import javax.swing.tree.DefaultTreeModel
 
 /**
  * Project View presentation for Kona apps: top-level scaffold folders
- * (`app`, `routes`, `resources`, `storage`, …) instead of deep package paths.
+ * (`app`, `routes`, `resources`, project-root `public`, `storage`, …) instead
+ * of deep package paths.
  *
  * Available alongside the default Project / Packages views. For Kona apps this
  * pane is the default ([isDefaultPane]).
