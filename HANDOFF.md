@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.13** |
+| Version | **0.5.14** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -32,7 +32,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
 
-## What 0.5.13 ships
+## What 0.5.14 ships
 
 - **Crema language injection** into Java/Kotlin strings: `@CremaTemplate`
   methods / `template()` overrides (`Component.template()`), `inline(source)`
@@ -43,6 +43,16 @@ Paste this file (or its path) into a new chat so another agent can continue with
   (`CremaContexts` + `InjectedLanguageManager`), not only `originalFile` name.
 - Brew members inside an injected `template()` resolve the **host Component
   class** (`BrewInjectionOwners`).
+
+## What 0.5.13 ships
+
+- Cadence **type-based** instance completion: `Auth.user() as? User` /
+  `as User` / `val user: User?` / Java `(User) Auth.user()` resolve the
+  variable or cast type (Cadence `Model` subclass) and offer columns +
+  fillable/casts/accessors/relations. Query assignment still works.
+- **Lookup ranking:** `KonaLookup` wraps every Kona `LookupElement` with
+  `PrioritizedLookupElement` (1e6) + userData marker; `KonaCompletionWeigher`
+  (`order="first"`) boosts those items above Java/Kotlin members.
 
 ## What 0.5.12 ships
 
@@ -151,6 +161,7 @@ src/main/kotlin/org/konaframework/idea/
   View*.kt                  # view index, patterns, refs, goto (+ Inertia)
   Db*.kt / Migration*.kt / Model*.kt / ModelAttributeIndex.kt / CompletionText.kt
   AttributeKeyPatterns.kt / CadenceTableNames.kt / ModelCompletion.kt
+  KonaLookup.kt / KonaCompletionWeigher.kt
   GrindCall*.kt / GrindCommandIndex.kt
   KonaIdeaSettings.kt / KonaConfigurable.kt
   KonaToolWindowFactory.kt / GrindQuickActions.kt

@@ -11,7 +11,7 @@
       <li><b>Kona Project View</b> — default Project tool window view for Kona apps (scaffold folders: <code>app</code>, <code>routes</code>, <code>resources</code>, …); still available beside Project / Packages.</li>
       <li><b>Views and Inertia</b> — page-name completion for <code>Crema.view</code>, <code>Brew.view</code>, and <code>Inertia.render</code>. <b>Ctrl+B</b> or Ctrl+Click opens the file (⌘B on macOS).</li>
       <li><b>Env</b> — key completion for <code>Env.get</code> / <code>getOrDefault</code> / <code>require</code>; value completion for known option-like keys (<code>DB_CONNECTION</code>, log drivers, session/cache/queue, booleans, <code>APP_ENV</code>, …) in <code>.env</code> / <code>.env.*</code> and <code>getOrDefault</code> defaults.</li>
-      <li><b>Cadence</b> — on a model instance (<code>user.</code>), complete DB columns, fillable/casts, accessors, and relations; the same keys inside <code>getAttribute("…")</code> / <code>get("…")</code> / <code>user["…"]</code> (and with the caret still inside empty parentheses). Column strings in <code>User.where("…")</code> still complete from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>.</li>
+      <li><b>Cadence</b> — on a model instance (<code>user.</code>), complete DB columns, fillable/casts, accessors, and relations; the same keys inside <code>getAttribute("…")</code> / <code>get("…")</code> / <code>user["…"]</code> (and with the caret still inside empty parentheses). Receivers typed or cast as a Cadence model also complete — <code>Auth.user() as? User</code>, <code>as User</code>, <code>val user: User?</code>, Java <code>(User) Auth.user()</code>. Column strings in <code>User.where("…")</code> still complete from migrations and, when <code>.env</code> can connect, from the database. Pick the source in <b>Settings → Tools → Kona</b>. Kona suggestions sort at the top of the lookup list.</li>
       <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>Grind.call("…")</code> / <code>callSilently</code> complete built-in and custom command names. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
       <li><b>Templates</b> — file and live templates for typed Router handlers, Cadence, Auth, disks, Queue, Schedule, Crema, and Inertia.</li>
     </ul>
@@ -75,18 +75,19 @@
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewTagAttributeCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewWireCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.BrewMemberCompletionContributor" order="first"/>
-    <completion.contributor language="any" implementationClass="org.konaframework.idea.ViewNameCompletionContributor"/>
-    <completion.contributor language="any" implementationClass="org.konaframework.idea.DbColumnCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.ViewNameCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.DbColumnCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.ModelPropertyCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.GrindCallCompletionContributor" order="first"/>
+    <weigher key="completion" implementationClass="org.konaframework.idea.KonaCompletionWeigher" id="konaPriority" order="first"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.CremaAnnotator"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.BrewWireAnnotator"/>
     <xml.attributeDescriptorsProvider implementation="org.konaframework.idea.BrewWireAttributeDescriptorsProvider"/>
     <xml.elementDescriptorProvider implementation="org.konaframework.idea.BrewTagDescriptorsProvider"/>
     <xml.tagNameProvider implementation="org.konaframework.idea.BrewTagDescriptorsProvider"/>
 
-    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvKeyCompletionContributor"/>
-    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvValueCompletionContributor"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvKeyCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.EnvValueCompletionContributor" order="first"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.ViewNameReferenceContributor"/>
     <psi.referenceContributor language="any" implementation="org.konaframework.idea.EnvKeyReferenceContributor"/>
     <gotoDeclarationHandler implementation="org.konaframework.idea.ViewGotoDeclarationHandler"/>

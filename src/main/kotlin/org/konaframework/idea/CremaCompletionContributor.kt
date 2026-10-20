@@ -41,7 +41,8 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(effectivePrefix))
                     // Always show the full filtered set on autopopup (do not wait for Ctrl+Space).
                     CremaDirectives.completionsForPrefix(effectivePrefix).forEach { label ->
-                        matched.addElement(
+                        KonaLookup.add(
+                            matched,
                             LookupElementBuilder.create(label)
                                 .withPresentableText(label)
                                 .withTypeText("Crema", true)
