@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.17)
+## Features (0.5.18)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -92,6 +92,9 @@ Cadence Kotlin/Java
 - **`<brew:*>` components** — complete tags from `app.brew` (`Counter` →
   `<brew:counter />`); HTML unknown-tag warnings suppressed
 - Unknown-directive warnings (emails like `hi@example.com` ignored)
+- **Reformat Code** — Ctrl+Alt+L (macOS: ⌥⌘L) formats tags with HTML code-style
+  rules; indent size matches **Settings → Editor → Code Style → HTML**. Crema
+  `@directives` and `{{ }}` are left intact
 - `{{` auto-closes as `{{  }}`
 - **Inline injection** — Java/Kotlin strings marked `@CremaTemplate`,
   `Component.template()` overrides, `inline("…")`, or `// language=Crema`
