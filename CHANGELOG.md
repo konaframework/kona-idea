@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.18
+
+- **Crema HTML reformat** — **Reformat Code** (Ctrl+Alt+L / ⌥⌘L) and indent-on-enter
+  follow **Settings → Editor → Code Style → HTML** (indent size, tabs vs spaces,
+  attribute wrapping). `@directives`, `{{ }}`, `{!! !!}`, and `{{-- --}}` are
+  outer-language spans and are not rewritten as tags.
+
 ## 0.5.17
 
 - **Crema echo helpers** — typing inside `{{ }}` / `{!! !!}` completes every

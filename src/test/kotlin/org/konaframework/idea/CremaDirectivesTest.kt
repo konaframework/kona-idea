@@ -121,4 +121,35 @@ class CremaDirectivesTest {
         lexer.advance()
         assertEquals(null, lexer.tokenType)
     }
+
+    @Test
+    fun cremaFormattingFollowsHtmlHostAndFreezesCremaSpans() {
+        assertTrue(CremaFormatting.appliesToFileName("welcome.crema.html"))
+        assertTrue(CremaFormatting.appliesToFileName("partial.crema.kt"))
+        assertFalse(CremaFormatting.appliesToFileName("welcome.html"))
+        assertFalse(CremaFormatting.appliesToFileName("App.kt"))
+        assertFalse(CremaFormatting.isFrozenToken(null))
+        assertFalse(CremaFormatting.isFrozenToken(CremaTokens.TEMPLATE_DATA))
+        assertTrue(CremaFormatting.isFrozenToken(CremaTokens.ECHO))
+        assertTrue(CremaFormatting.isFrozenToken(CremaTokens.DIRECTIVE))
+        assertTrue(CremaFormatting.frozenRanges("").isEmpty())
+        assertTrue(CremaFormatting.frozenRanges("<div class=\"card\"></div>").isEmpty())
+        val echo = "{{ url('/x') }}"
+        assertEquals(listOf(0 until echo.length), CremaFormatting.frozenRanges(echo))
+        val raw = "{!! html !!}"
+        assertEquals(listOf(0 until raw.length), CremaFormatting.frozenRanges(raw))
+        val comment = "{{-- note --}}"
+        assertEquals(listOf(0 until comment.length), CremaFormatting.frozenRanges(comment))
+        val mixed = "<p>{{ name }}</p>@csrf"
+        val ranges = CremaFormatting.frozenRanges(mixed)
+        assertEquals(2, ranges.size)
+        assertEquals("{{ name }}", mixed.substring(ranges[0].first, ranges[0].last + 1))
+        assertEquals("@csrf", mixed.substring(ranges[1].first, ranges[1].last + 1))
+        val block = "@if(true)<li>{{ item }}</li>@endif"
+        val frozen = CremaFormatting.frozenRanges(block)
+        assertEquals(3, frozen.size)
+        assertEquals("@if(true)", block.substring(frozen[0].first, frozen[0].last + 1))
+        assertEquals("{{ item }}", block.substring(frozen[1].first, frozen[1].last + 1))
+        assertEquals("@endif", block.substring(frozen[2].first, frozen[2].last + 1))
+    }
 }
