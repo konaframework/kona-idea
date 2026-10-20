@@ -11,7 +11,7 @@ import com.intellij.codeInsight.lookup.Lookup
 class CremaCharFilter : CharFilter() {
     override fun acceptChar(c: Char, prefixLength: Int, lookup: Lookup): Result? {
         val file = lookup.psiFile ?: return null
-        if (!isCrema(file)) return null
+        if (!CremaPsi.isCrema(file)) return null
         if (!lookup.isCompletion) return null
 
         val editor = lookup.editor
@@ -47,7 +47,4 @@ class CremaCharFilter : CharFilter() {
         return null
     }
 
-    private fun isCrema(file: com.intellij.psi.PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }

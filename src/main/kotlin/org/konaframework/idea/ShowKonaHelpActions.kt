@@ -92,9 +92,11 @@ object BrewInertiaHelp {
           • Crema HTML attributes: wire:model, wire:click, wire:submit, wire:loading,
             wire:target, wire:ignore, wire:key, wire:dirty, wire:offline, wire:confirm,
             wire:poll, wire:init, wire:show, wire:transition (+ common modifiers).
-          • Autocomplete + weak warnings for unknown wire:* names in *.crema.html.
+          • Autocomplete + weak warnings for unknown wire:* names in *.crema.html
+            and in injected template() / @CremaTemplate / // language=Crema strings.
           • wire:submit / wire:click / wire:init / wire:target values complete actions
-            from the paired app.brew component (views/brew/todos ↔ Todos).
+            from the paired app.brew component (views/brew/todos ↔ Todos) or the
+            host Component class for inline template() strings.
           • wire:model / wire:show / wire:text and {{ }} echoes complete properties
             and @Computed members from that class.
           • Ctrl+B / Ctrl+Click on <brew:name> opens the class; on attributes / wire

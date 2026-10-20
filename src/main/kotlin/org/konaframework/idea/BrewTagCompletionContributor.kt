@@ -29,12 +29,12 @@ class BrewTagCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    if (!isCremaFile(parameters.originalFile)) return
+                    val snap = CremaPsi.snapshot(parameters) ?: return
                     val project = parameters.position.project
                     val root = project.guessProjectDir()?.toNioPath() ?: return
                     if (!KonaLayout.isKonaApp(root)) return
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
+                    val text = snap.text
+                    val offset = snap.offset
                     val tag = BrewTagPatterns.tagPrefixAt(text, offset) ?: return
                     val components = BrewComponentIndex.collect(root)
                     if (components.isEmpty()) return
@@ -99,7 +99,4 @@ class BrewTagCompletionContributor : CompletionContributor(), DumbAware {
             ctx.editor.caretModel.moveToOffset(start + insertion.length)
         }
 
-    private fun isCremaFile(file: com.intellij.psi.PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }

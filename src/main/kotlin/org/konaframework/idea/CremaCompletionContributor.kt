@@ -9,7 +9,6 @@ import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
-import com.intellij.psi.PsiFile
 import com.intellij.util.ProcessingContext
 
 /**
@@ -33,9 +32,9 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    if (!isCremaFile(parameters.originalFile)) return
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
+                    val snap = CremaPsi.snapshot(parameters) ?: return
+                    val text = snap.text
+                    val offset = snap.offset
                     val prefix = CremaCompletion.prefixBefore(text, offset)
                     if (prefix.isEmpty() && !CremaCompletion.justTypedAt(text, offset)) return
                     val effectivePrefix = prefix.ifEmpty { "@" }
@@ -65,9 +64,6 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
         )
     }
 
-    private fun isCremaFile(file: PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }
 
 /** Pure helpers for Crema `@` directive completion. */

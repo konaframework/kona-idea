@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.13 — Inject Crema into Java/Kotlin strings: <code>@CremaTemplate</code>
+                  / <code>template()</code> overrides, <code>inline(source)</code>, and
+                  <code>// language=Crema</code>. Completion and navigation work inside
+                  those injected fragments (host Component class for Brew members).</li>
               <li>0.5.11 — Cadence model attribute completion on <code>user.</code>
                   (columns, accessors, relations) and in
                   <code>getAttribute</code> / <code>setAttribute</code> /
@@ -154,6 +158,10 @@ kover {
                     "org.konaframework.idea.CremaLanguage",
                     "org.konaframework.idea.CremaLanguage$*",
                     "org.konaframework.idea.CremaLanguageKt",
+                    "org.konaframework.idea.CremaLanguageInjector",
+                    "org.konaframework.idea.CremaLanguageInjector$*",
+                    "org.konaframework.idea.CremaPsi",
+                    "org.konaframework.idea.CremaPsi$*",
                     "org.konaframework.idea.CremaBraceMatcher",
                     "org.konaframework.idea.CremaTypedHandler",
                     "org.konaframework.idea.CremaSyntaxHighlighter",

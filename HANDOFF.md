@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.12** |
+| Version | **0.5.13** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,18 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.13 ships
+
+- **Crema language injection** into Java/Kotlin strings: `@CremaTemplate`
+  methods / `template()` overrides (`Component.template()`), `inline(source)`
+  / `@CremaTemplate` parameters, and `// language=Crema`. Java text blocks and
+  Kotlin `"""` + `trimIndent()` / `trimMargin()` use ElementManipulators for
+  indent. Community Edition `LanguageInjector` (no IntelliLang XML).
+- Completion / navigation / annotators treat injected fragments as Crema
+  (`CremaContexts` + `InjectedLanguageManager`), not only `originalFile` name.
+- Brew members inside an injected `template()` resolve the **host Component
+  class** (`BrewInjectionOwners`).
 
 ## What 0.5.12 ships
 
@@ -129,6 +141,8 @@ Paste this file (or its path) into a new chat so another agent can continue with
 ```text
 src/main/kotlin/org/konaframework/idea/
   Crema*.kt                 # language support + @ completion + CharFilter
+  CremaInjectionSites.kt    # @CremaTemplate / language=Crema / template() sites
+  CremaLanguageInjector.kt  # LanguageInjector (Java/Kotlin strings → Crema)
   XComponent*.kt            # <x-*> index + patterns + contributor
   BrewTag*.kt               # <brew:*> patterns + contributor + HTML descriptors
   BrewWire*.kt              # wire:* attributes
@@ -146,7 +160,7 @@ src/main/resources/
   META-INF/plugin.xml
   icons/ … fileTemplates/ liveTemplates/
 src/test/kotlin/org/konaframework/idea/
-  CremaLexerTest.kt / CremaDirectivesTest.kt
+  CremaLexerTest.kt / CremaDirectivesTest.kt / CremaInjectionTest.kt
   KonaModernAlignmentTest.kt / NativeIdeFeaturesTest.kt
   CompletionUxTest.kt / BrewInertiaSupportTest.kt
 ```

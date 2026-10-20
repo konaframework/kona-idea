@@ -27,9 +27,9 @@ class BrewWireCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    if (!isCremaFile(parameters.originalFile)) return
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
+                    val snap = CremaPsi.snapshot(parameters) ?: return
+                    val text = snap.text
+                    val offset = snap.offset
                     val prefix = BrewWirePatterns.attributePrefixAt(text, offset) ?: return
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
                     BrewWireAttributes.completionsForPrefix(prefix).forEach { label ->
@@ -71,7 +71,4 @@ class BrewWireCompletionContributor : CompletionContributor(), DumbAware {
             }
         }
 
-    private fun isCremaFile(file: com.intellij.psi.PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }

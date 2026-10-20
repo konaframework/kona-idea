@@ -35,9 +35,11 @@ Kona app (kona new / grind scaffold)
         └── Crema + view/DB completion + live/file templates
 
 *.crema.html / *.crema.kt
+  @CremaTemplate / template() / // language=Crema strings
         │
         ▼
   Crema file type (overrider + detector beat HTML)
+  LanguageInjector (Java/Kotlin hosts → Crema fragments)
         ├── Native CremaLexer + layered HTML highlighter
         ├── @directive autopopup + <x-*> / <brew:*> completion
         ├── View name refs → Ctrl+B / Ctrl+Click
@@ -73,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.4.0)
+## Features (0.5.13)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -86,6 +88,9 @@ Cadence Kotlin/Java
   `<brew:counter />`); HTML unknown-tag warnings suppressed
 - Unknown-directive warnings (emails like `hi@example.com` ignored)
 - `{{` auto-closes as `{{  }}`
+- **Inline injection** — Java/Kotlin strings marked `@CremaTemplate`,
+  `Component.template()` overrides, `inline("…")`, or `// language=Crema`
+  highlight and complete as Crema (text blocks + `trimIndent()` / `trimMargin()`)
 - **New → Crema View**
 
 ### View names
@@ -103,7 +108,8 @@ Cadence Kotlin/Java
 - Completes **actions** (`wire:submit="add"`) and **properties** /
   `@Computed` (`wire:model="draft"`, `{{ remaining }}`) from the owning
   `app.brew` component class paired with the view
-  (`views/brew/todos.crema.html` ↔ `Todos`)
+  (`views/brew/todos.crema.html` ↔ `Todos`), or from the **host class** when
+  the markup lives in an injected `template()` string
 - Known `wire:*` names are registered as HTML attributes, so IDEA does not
   report them as “attribute is not allowed here”
 - Weak warnings for unknown `wire:*` names

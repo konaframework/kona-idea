@@ -9,7 +9,6 @@ import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiFile
 import com.intellij.util.ProcessingContext
@@ -31,13 +30,14 @@ class BrewMemberCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    if (!isCremaFile(parameters.originalFile)) return
+                    val snap = CremaPsi.snapshot(parameters) ?: return
                     val project = parameters.position.project
                     val root = project.guessProjectDir()?.toNioPath() ?: return
                     if (!KonaLayout.isKonaApp(root)) return
-                    val owner = resolveOwner(root, parameters.originalFile) ?: return
-                    val text = parameters.originalFile.viewProvider.contents
-                    val offset = parameters.offset.coerceIn(0, text.length)
+                    val cremaFile = CremaPsi.completionFile(parameters) ?: return
+                    val owner = resolveOwner(root, cremaFile) ?: return
+                    val text = snap.text
+                    val offset = snap.offset
 
                     val value = BrewWirePatterns.valueContextAt(text, offset)
                     if (value != null) {
@@ -93,12 +93,8 @@ class BrewMemberCompletionContributor : CompletionContributor(), DumbAware {
     }
 
     private fun resolveOwner(root: Path, file: PsiFile): BrewComponentIndex.ComponentInfo? {
-        val vf = file.virtualFile ?: return null
-        val nio = runCatching { VfsUtilCore.virtualToIoFile(vf).toPath() }.getOrNull() ?: return null
-        return BrewComponentIndex.ownerForViewFile(root, nio)
+        val host = CremaPsi.hostFile(file)
+        val hostPath = CremaPsi.hostPath(file)
+        return BrewInjectionOwners.ownerFor(root, hostPath, host.text)
     }
-
-    private fun isCremaFile(file: PsiFile): Boolean =
-        file.viewProvider.baseLanguage === CremaLanguage ||
-            CremaFileType.isCremaFileName(file.name)
 }
