@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.17
+
+- **Crema echo helpers** — typing inside `{{ }}` / `{!! !!}` completes every
+  Kona helper (`url`, `route`, `asset`, `csrf_token`, `old`, `env`, `config`,
+  `trans`, `__`, `lang`, `isset`, `empty`) and conventional variables
+  (`errors`, `user`, `auth_user`, `_token`, `asset_url`, `slot`, `loop.*`).
+  Autopopup already fired in echoes; this release fills the list even when the
+  view is not paired with a Brew component. Selecting `url` inserts `url('')`
+  with the caret between the quotes.
+
 ## 0.5.16
 
 - **Kona Project View `public`** — the HTTP document root is the project-root
