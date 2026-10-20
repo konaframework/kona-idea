@@ -77,6 +77,9 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.18 — Reformat Crema views with HTML code-style rules
+                  (Ctrl+Alt+L / indent-on-enter). Directives and echoes stay
+                  frozen; indent size matches Settings → Editor → Code Style → HTML.</li>
               <li>0.5.17 — Complete Crema echo helpers and conventional variables
                   inside <code>{{ }}</code> / <code>{!! !!}</code> (<code>url</code>,
                   <code>route</code>, <code>asset</code>, <code>csrf_token</code>,
@@ -181,6 +184,10 @@ kover {
                     "org.konaframework.idea.CremaPsi",
                     "org.konaframework.idea.CremaPsi$*",
                     "org.konaframework.idea.CremaBraceMatcher",
+                    "org.konaframework.idea.CremaFormattingModelBuilder",
+                    "org.konaframework.idea.CremaFormattingModelBuilder$*",
+                    "org.konaframework.idea.CremaFileIndentOptionsProvider",
+                    "org.konaframework.idea.CremaFileIndentOptionsProvider$*",
                     "org.konaframework.idea.CremaTypedHandler",
                     "org.konaframework.idea.CremaSyntaxHighlighter",
                     "org.konaframework.idea.CremaSyntaxHighlighter*",
