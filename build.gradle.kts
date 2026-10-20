@@ -77,6 +77,12 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.17 — Complete Crema echo helpers and conventional variables
+                  inside <code>{{ }}</code> / <code>{!! !!}</code> (<code>url</code>,
+                  <code>route</code>, <code>asset</code>, <code>csrf_token</code>,
+                  <code>old</code>, <code>env</code>, <code>config</code>,
+                  <code>trans</code>, <code>lang</code>, <code>loop.index</code>,
+                  …) even when the view is not a Brew component.</li>
               <li>0.5.16 — Kona Project View treats project-root <code>public/</code>
                   as the HTTP document directory (Vite <code>public/build</code>).
                   A <code>public</code> folder under <code>resources</code> is not
@@ -182,6 +188,8 @@ kover {
                     "org.konaframework.idea.CremaColors",
                     "org.konaframework.idea.CremaCompletionContributor",
                     "org.konaframework.idea.CremaCompletionContributor$*",
+                    "org.konaframework.idea.CremaEchoCompletionContributor",
+                    "org.konaframework.idea.CremaEchoCompletionContributor$*",
                     "org.konaframework.idea.CremaCharFilter",
                     "org.konaframework.idea.CremaAnnotator",
                     "org.konaframework.idea.ViewNameCompletionContributor",

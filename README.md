@@ -75,13 +75,18 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.16)
+## Features (0.5.17)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
 - Native highlighter: HTML + `@directives`, `{{ }}`, `{!! !!}`, `{{-- --}}`
 - **`@` directive autopopup** — type `@` to see all directives; type `@com` to
   filter without Ctrl+Space (HTML template layer supported)
+- **Echo helpers** — inside `{{ }}` / `{!! !!}`, type `url` (or `route`,
+  `asset`, `csrf_token`, `old`, `env`, `config`, `trans`, `lang`, `isset`,
+  `empty`, `errors`, `loop.index`, …) to complete every Kona helper and
+  conventional view variable; selecting a helper inserts `url('')` with the
+  caret between the quotes
 - **`<x-*>` components** — complete tags from `views/components/**`; `<x-slot>` /
   `<x-slot:name>` hints for named slots
 - **`<brew:*>` components** — complete tags from `app.brew` (`Counter` →

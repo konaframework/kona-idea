@@ -29,6 +29,26 @@ class CremaDirectivesTest {
     }
 
     @Test
+    fun echoCatalogCompletesHelpersAndVariables() {
+        assertTrue(CremaEchoCatalog.completions("").any { it.name == "url" })
+        assertTrue(CremaEchoCatalog.completions("ur").map { it.name } == listOf("url"))
+        assertEquals("url('')", CremaEchoCatalog.completions("ur").first().insertText)
+        assertTrue(CremaEchoCatalog.completions("loop.").any { it.name == "loop.index" })
+        assertTrue(CremaEchoCatalog.completions("loop.").any { it.name == "loop.remaining" })
+        assertTrue(CremaEchoCatalog.completions("csrf").any { it.name == "csrf_token" })
+        assertTrue(CremaEchoCatalog.completions("").any { it.name == "errors" })
+        assertTrue(CremaEchoCatalog.HELPERS.all { it.helper })
+        assertTrue(CremaEchoCatalog.VARIABLES.none { it.helper })
+        assertTrue(CremaEchoCatalog.completions("zzz").isEmpty())
+        assertEquals(5, CremaEchoCompletion.caretOffsetInInsert("url('')"))
+        assertEquals(11, CremaEchoCompletion.caretOffsetInInsert("csrf_token()"))
+        assertEquals(6, CremaEchoCompletion.caretOffsetInInsert("errors"))
+        val echo = BrewWirePatterns.echoContextAt("{{ ur", 5)
+        assertEquals("ur", echo!!.prefix)
+        assertTrue(CremaEchoCatalog.completions(echo.prefix).any { it.name == "url" })
+    }
+
+    @Test
     fun completionsForPrefix() {
         assertTrue(CremaDirectives.completionsForPrefix("@cs").contains("@csrf"))
         assertTrue(CremaDirectives.completionsForPrefix("inc").any { it.startsWith("@include") })
