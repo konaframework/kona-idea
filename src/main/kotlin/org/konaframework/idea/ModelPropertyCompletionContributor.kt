@@ -2,56 +2,49 @@ package org.konaframework.idea
 
 import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionParameters
-import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
-import com.intellij.codeInsight.completion.CompletionType
+import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.PlainPrefixMatcher
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.patterns.PlatformPatterns
-import com.intellij.util.ProcessingContext
 
 /**
  * Completes Cadence model attributes on instance access and attribute-key APIs:
- * - `user.` / `user.em` — columns, accessors, relations
- * - `user.getAttribute("…")` / `setAttribute` / `attribute` / `hasAttribute` /
- *   `getRawAttribute` / `setRawAttribute` — string keys
+ * - `user.` / `user.em` / `user?.em` — columns, fillable, accessors, relations
+ * - `user.getAttribute("…")` / `get("` / `user["…"]` — string keys
+ * - `user.getAttribute(<caret>)` — same keys, inserts quotes
  *
- * Only fires when the receiver resolves to a discovered Cadence model
- * ([ModelIndex.find]), so unrelated locals are not spammed.
+ * Uses [fillCompletionVariants] (not `extend` patterns) so Kotlin member
+ * completion still receives our variants, and strips IDEA's dummy identifier
+ * from the prefix matcher.
  */
 class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
-    init {
-        extend(
-            CompletionType.BASIC,
-            PlatformPatterns.psiElement(),
-            object : CompletionProvider<CompletionParameters>() {
-                override fun addCompletions(
-                    parameters: CompletionParameters,
-                    context: ProcessingContext,
-                    result: CompletionResultSet,
-                ) {
-                    val project = parameters.position.project
-                    val root = project.guessProjectDir()?.toNioPath() ?: return
-                    if (!KonaLayout.isKonaApp(root)) return
-                    val snap = CompletionText.of(parameters)
-                    val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
-
-                    AttributeKeyPatterns.keyContextAt(snap.text, snap.offset)?.let { keyCtx ->
-                        val modelClass = resolveModelClass(snap.text, keyCtx.receiver) ?: return
-                        if (ModelIndex.find(root, modelClass) == null) return
-                        offer(root, modelClass, mode, keyCtx.prefix, result)
-                        return
-                    }
-
-                    val prop = ModelPropertyPatterns.propertyAt(snap.text, snap.offset) ?: return
-                    val modelClass = prop.modelClass ?: return
-                    if (ModelIndex.find(root, modelClass) == null) return
-                    offer(root, modelClass, mode, prop.prefix, result)
-                }
-            },
-        )
+    override fun fillCompletionVariants(
+        parameters: CompletionParameters,
+        result: CompletionResultSet,
+    ) {
+        val root = appRoot(parameters) ?: return
+        val snap =
+            CompletionText.fromContents(
+                parameters.position.containingFile.viewProvider.contents,
+                parameters.offset,
+            )
+        val matcherPrefix = CompletionText.stripDummy(result.prefixMatcher.prefix)
+        val original =
+            CompletionText.fromContents(
+                parameters.originalFile.viewProvider.contents,
+                parameters.offset,
+            )
+        val request =
+            ModelCompletion.requestAt(snap.text, snap.offset)
+                ?: ModelCompletion.requestAt(original.text, original.offset)
+                ?: return
+        val prefix = request.prefix.ifEmpty { matcherPrefix }
+        val mode = KonaIdeaSettings.getInstance(parameters.position.project).columnSourceMode
+        offer(root, request.modelClass, mode, prefix, request.quoted, result)
     }
 
     companion object {
@@ -64,11 +57,22 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
             }
         }
 
+        fun appRoot(parameters: CompletionParameters): java.nio.file.Path? {
+            val fromFile =
+                parameters.originalFile.virtualFile?.parent?.let { vf ->
+                    runCatching { vf.toNioPath() }.getOrNull()
+                }
+            KonaLayout.appRootNear(fromFile)?.let { return it }
+            val guessed = parameters.position.project.guessProjectDir()?.toNioPath() ?: return null
+            return guessed.takeIf { KonaLayout.isKonaApp(it) }
+        }
+
         fun offer(
             root: java.nio.file.Path,
             modelClass: String,
             mode: ColumnSourceMode,
             prefix: String,
+            quoted: Boolean,
             result: CompletionResultSet,
         ) {
             val attrs =
@@ -84,13 +88,21 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
                 .filter { it.name.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
                 .sortedBy { it.name }
                 .forEach { attr ->
-                    matched.addElement(
+                    var builder =
                         LookupElementBuilder.create(attr.name)
                             .withPresentableText(attr.name)
                             .withTypeText(attr.typeText, true)
-                            .withIcon(KonaIcons.KONA_13),
-                    )
+                            .withIcon(KonaIcons.KONA_13)
+                    if (!quoted) {
+                        builder = builder.withInsertHandler(quoteInsertHandler(attr.name))
+                    }
+                    matched.addElement(PrioritizedLookupElement.withPriority(builder, 1000.0))
                 }
         }
+
+        private fun quoteInsertHandler(name: String): InsertHandler<LookupElement> =
+            InsertHandler { ctx, _ ->
+                ctx.document.replaceString(ctx.startOffset, ctx.tailOffset, "\"$name\"")
+            }
     }
 }

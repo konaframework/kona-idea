@@ -1,59 +1,81 @@
 package org.konaframework.idea
 
-import com.intellij.codeInsight.completion.CompletionParameters
-
 /**
  * Resolves the buffer and caret offset used by pattern-based completion.
  *
  * Kotlin (and some other) completion inserts [DUMMY] into a *copy* of the file;
- * [CompletionParameters.offset] points into that copy. Reading
- * [CompletionParameters.originalFile] and clamping the offset to its length
- * moves the caret to the wrong place and breaks prefix / context detection.
+ * [CompletionParameters.offset] points into that copy. The dummy is sometimes
+ * only a prefix (`Intell`) or has a trailing space (`DUMMY_IDENTIFIER`).
  *
- * Always prefer [CompletionParameters.position]'s containing file, then rewind
- * the offset so the dummy identifier is not part of the typed prefix.
+ * Contributors should read `parameters.position.containingFile` (the copy) and
+ * rewind with [offsetBeforeDummy] so the dummy is not part of the typed prefix.
  */
 object CompletionText {
     /** [com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED] */
     const val DUMMY: String = "IntellijIdeaRulezzz"
+
+    /** [com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER] */
+    const val DUMMY_WITH_SPACE: String = "$DUMMY "
 
     data class Snapshot(
         val text: CharSequence,
         val offset: Int,
     )
 
-    fun of(parameters: CompletionParameters): Snapshot =
-        fromContents(
-            parameters.position.containingFile.viewProvider.contents,
-            parameters.offset,
-        )
-
-    /** Pure helper for tests and [of]. */
+    /** Pure helper for tests and completion contributors. */
     fun fromContents(text: CharSequence, offset: Int): Snapshot {
         val raw = offset.coerceIn(0, text.length)
         return Snapshot(text, offsetBeforeDummy(text, raw))
     }
 
     /**
-     * If the identifier ending at [offset] contains [DUMMY], return the index of
-     * the dummy start so walkers only see the real typed prefix (or empty).
+     * If a dummy identifier sits just before [offset], return the index of the dummy start
+     * so walkers only see the real typed prefix (or empty).
      */
     fun offsetBeforeDummy(text: CharSequence, offset: Int): Int {
-        if (offset <= 0) return 0
-        var i = offset.coerceIn(0, text.length) - 1
-        while (i >= 0 && isIdentPart(text[i])) i--
-        val start = i + 1
         val end = offset.coerceIn(0, text.length)
+        if (end <= 0) return 0
+        val searchStart = (end - DUMMY.length - 8).coerceAtLeast(0)
+        val window = text.subSequence(searchStart, end).toString()
+        val full = window.lastIndexOf(DUMMY)
+        if (full >= 0) return searchStart + full
+        var i = end - 1
+        while (i >= 0 && (isIdentPart(text[i]) || text[i] == ' ')) {
+            if (text[i] == ' ') {
+                i--
+                break
+            }
+            i--
+        }
+        val start = i + 1
         if (start >= end) return end
-        val ident = text.subSequence(start, end).toString()
-        val dummyAt = ident.indexOf(DUMMY)
+        val ident = text.subSequence(start, end).toString().trimEnd()
+        val dummyAt = indexOfDummy(ident)
         return if (dummyAt >= 0) start + dummyAt else end
     }
 
     /** Strip a trailing / embedded completion dummy from a collected prefix. */
     fun stripDummy(prefix: String): String {
-        val idx = prefix.indexOf(DUMMY)
-        return if (idx >= 0) prefix.substring(0, idx) else prefix
+        val exact = prefix.indexOf(DUMMY)
+        if (exact >= 0) return prefix.substring(0, exact)
+        val dummyAt = indexOfDummy(prefix)
+        return if (dummyAt >= 0) prefix.substring(0, dummyAt) else prefix
+    }
+
+    /**
+     * Index of a full dummy, or of a suffix that is a prefix of [DUMMY]
+     * (caret in the middle of the dummy identifier).
+     */
+    fun indexOfDummy(ident: String): Int {
+        val exact = ident.indexOf(DUMMY)
+        if (exact >= 0) return exact
+        val max = minOf(ident.length, DUMMY.length)
+        var n = max
+        while (n >= 4) {
+            if (DUMMY.startsWith(ident.takeLast(n))) return ident.length - n
+            n--
+        }
+        return -1
     }
 
     fun isIdentPart(c: Char): Boolean = c == '_' || c.isLetterOrDigit()

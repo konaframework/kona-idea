@@ -248,6 +248,22 @@ class ModelAttributeTest {
         )
         assertNull(ModelIndex.tableForClass(root, "notAClass"))
         assertEquals("ghosts", ModelIndex.tableForClass(root, "Ghost"))
+        assertTrue(
+            ModelAttributeIndex.attributesFor(
+                root,
+                "",
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            ).isEmpty(),
+        )
+        assertTrue(
+            ModelAttributeIndex.attributesFor(
+                root,
+                "user",
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            ).isEmpty(),
+        )
     }
 
     @Test
@@ -271,5 +287,183 @@ class ModelAttributeTest {
             "User",
             ModelPropertyCompletionContributor.resolveModelClass("val user = User.find(1)", "user"),
         )
+        assertEquals(
+            "User",
+            ModelPropertyCompletionContributor.resolveModelClass("fun show(user: User) { user. }", "user"),
+        )
+    }
+
+    @Test
+    fun dummyIdentifierWithSpaceAndPartialPrefix() {
+        val spaced = "user." + CompletionText.DUMMY_WITH_SPACE
+        val off = CompletionText.offsetBeforeDummy(spaced, spaced.length)
+        val prop = ModelPropertyPatterns.propertyAt(spaced, off)!!
+        assertEquals("user", prop.receiver)
+        assertEquals("", prop.prefix)
+
+        val dummyStart = CompletionText.indexOfDummy("emIntell")
+        assertTrue(dummyStart > 0)
+        assertEquals("em", CompletionText.stripDummy("emIntell"))
+        assertEquals(-1, CompletionText.indexOfDummy("email"))
+        assertTrue(CompletionText.DUMMY_WITH_SPACE.endsWith(' '))
+        val trailingSpace = "user.em "
+        assertEquals(trailingSpace.length, CompletionText.offsetBeforeDummy(trailingSpace, trailingSpace.length))
+    }
+
+    @Test
+    fun getAttributeUnquotedAndGetAndIndex() {
+        val bare = "user.getAttribute("
+        val ctx = AttributeKeyPatterns.keyContextAt(bare, bare.length)!!
+        assertEquals("", ctx.prefix)
+        assertEquals("user", ctx.receiver)
+        assertFalse(ctx.quoted)
+
+        val get = """user.get("em"""
+        val g = AttributeKeyPatterns.keyContextAt(get, get.length)!!
+        assertEquals("em", g.prefix)
+        assertEquals("user", g.receiver)
+        assertTrue(g.quoted)
+
+        val idx = """user["na"""
+        val i = AttributeKeyPatterns.keyContextAt(idx, idx.length)!!
+        assertEquals("na", i.prefix)
+        assertEquals("user", i.receiver)
+
+        val safeIdx = """user?.["id"""
+        assertEquals("user", AttributeKeyPatterns.keyContextAt(safeIdx, safeIdx.length)!!.receiver)
+
+        val staticGet = "User.get("
+        assertNull(AttributeKeyPatterns.unquotedCallContext(staticGet, staticGet.length))
+
+        val setBare = "user.set("
+        val setCtx = AttributeKeyPatterns.unquotedCallContext(setBare, setBare.length)!!
+        assertEquals("user", setCtx.receiver)
+        assertFalse(setCtx.quoted)
+
+        val indexQuote = "user[\""
+        assertTrue(AttributeKeyPatterns.isAttributeKeyContext(indexQuote, indexQuote.length - 1))
+        assertEquals("user", AttributeKeyPatterns.receiverBeforeQuote(indexQuote, indexQuote.length - 1))
+
+        val dirty = """user.isDirty("em"""
+        assertEquals("user", AttributeKeyPatterns.keyContextAt(dirty, dirty.length)!!.receiver)
+    }
+
+    @Test
+    fun kotlinParamAndJavaParamResolveModel() {
+        val kt = "fun show(user: User?) {\n  user.em"
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(kt, "user"))
+        val java = "void show(User user) {\n  user.em"
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(java, "user"))
+        val javaGeneric = "void show(User<String> user) { user."
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(javaGeneric, "user"))
+    }
+
+    @Test
+    fun safeCallPropertyAccess() {
+        val src = "user?.em"
+        val prop = ModelPropertyPatterns.propertyAt(src, src.length)!!
+        assertEquals("user", prop.receiver)
+        assertEquals("em", prop.prefix)
+    }
+
+    @Test
+    fun fillableCastsAndTypicalColumns() {
+        val source =
+            """
+            class User : Cadence<User>(), SoftDeletes {
+              override val fillable = setOf("name", "email")
+              override val hidden = setOf("password")
+              override val casts = mapOf("admin" to CastType.BOOLEAN)
+            }
+            """.trimIndent()
+        val parsed = ModelAttributeIndex.parseSource(source)
+        assertTrue(parsed.any { it.name == "name" && it.kind == ModelAttributeIndex.Kind.FILLABLE })
+        assertTrue(parsed.any { it.name == "admin" && it.kind == ModelAttributeIndex.Kind.CAST })
+        assertTrue(parsed.any { it.name == "password" })
+        val typical = ModelAttributeIndex.typicalCadenceColumns(source)
+        assertTrue(typical.containsAll(listOf("id", "created_at", "updated_at", "deleted_at")))
+        val noTs = ModelAttributeIndex.typicalCadenceColumns("override val timestamps = false")
+        assertTrue(noTs.contains("id"))
+        assertFalse(noTs.contains("created_at"))
+        val javaTs = ModelAttributeIndex.typicalCadenceColumns("boolean getTimestamps() { return false; }")
+        assertFalse(javaTs.contains("updated_at"))
+    }
+
+    @Test
+    fun javaFillableAndCasts() {
+        val java =
+            """
+            public class User extends Cadence<User> {
+              private final Set<String> fillable = Set.of("name");
+              public Set<String> getFillable() { return Set.of("email"); }
+              public Set<String> getHidden() { return Set.of("password"); }
+              public Map<String, Object> getCasts() { return Map.of("admin", CastType.BOOLEAN); }
+            }
+            """.trimIndent()
+        val parsed = ModelAttributeIndex.parseSource(java)
+        assertTrue(parsed.any { it.name == "name" })
+        assertTrue(parsed.any { it.name == "password" })
+        assertTrue(parsed.any { it.name == "admin" && it.kind == ModelAttributeIndex.Kind.CAST })
+    }
+
+    @Test
+    fun attributesForUsesMigrationsWithoutModelFile() {
+        val root = Files.createTempDirectory("kona-nofil")
+        val mig = root.resolve("src/main/kotlin/database/migrations")
+        Files.createDirectories(mig)
+        Files.writeString(
+            mig.resolve("CreateUsersTable.kt"),
+            """schema.create("users") { id(); string("email"); timestamps() }""",
+        )
+        val attrs =
+            ModelAttributeIndex.attributesFor(
+                root,
+                "User",
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        val names = attrs.map { it.name }.toSet()
+        assertTrue(names.containsAll(listOf("id", "email", "created_at", "updated_at")))
+        assertTrue(ModelIndex.modelSearchRoots(root).isNotEmpty())
+
+        val domain = root.resolve("src/main/kotlin/app/domain")
+        Files.createDirectories(domain)
+        Files.writeString(domain.resolve("Account.kt"), "class Account : Cadence<Account>()")
+        assertNotNull(ModelIndex.find(root, "Account"))
+        assertEquals("accounts", ModelIndex.find(root, "Account")!!.table)
+    }
+
+    @Test
+    fun modelCompletionRequestAtPropertyAndKey() {
+        val propSrc = "val user = User.query().first()\nuser."
+        val prop = ModelCompletion.requestAt(propSrc, propSrc.length)!!
+        assertEquals("User", prop.modelClass)
+        assertEquals("", prop.prefix)
+        assertFalse(prop.isKey)
+
+        val keySrc = """user.getAttribute("""
+        val key = ModelCompletion.requestAt(keySrc, keySrc.length)!!
+        assertEquals("User", key.modelClass)
+        assertTrue(key.isKey)
+        assertFalse(key.quoted)
+
+        assertNull(ModelCompletion.requestAt("println(", "println(".length))
+    }
+
+    @Test
+    fun appRootNearWalksToKonaApp() {
+        val root = Files.createTempDirectory("kona-approot")
+        Files.writeString(root.resolve("build.gradle.kts"), "implementation(\"org.konaframework:kona-http:1\")\n")
+        Files.writeString(root.resolve("grind"), "#!/bin/sh\n")
+        Files.createDirectories(root.resolve("src/main/kotlin/bootstrap"))
+        Files.createDirectories(root.resolve("src/main/kotlin/routes"))
+        val nested = root.resolve("src/main/kotlin/app/http/controllers")
+        Files.createDirectories(nested)
+        assertEquals(
+            root.toAbsolutePath().normalize(),
+            KonaLayout.appRootNear(nested),
+        )
+        assertNull(KonaLayout.appRootNear(null))
+        assertNull(KonaLayout.appRootNear(Files.createTempDirectory("not-kona").resolve("src")))
     }
 }

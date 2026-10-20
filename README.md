@@ -126,8 +126,10 @@ Cadence Kotlin/Java
 - Completes column names in Cadence / QueryBuilder call sites (`where`, `select`,
   `orderBy`, `create(mapOf(…))`, …), **scoped to the receiver model’s table**
   (`User.where("` → `users` columns only)
-- Completes **model attributes** on instances (`val project = Project.find(1)` →
-  `project.description` / `project.name`)
+- Completes **model attributes** on instances (`val user = User.query().first()` →
+  `user.email` / `user.name`), including fillable/casts, accessors, and relations
+- Completes the same keys in `user.getAttribute("…")`, `user.get("…")`,
+  `user["…"]`, and when the caret is still inside `getAttribute()`
 - Column sources (configurable):
   1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
   2. **JDBC** — if `.env` has `DB_URL` (and optional `DB_USERNAME` / `DB_PASSWORD` /
@@ -154,6 +156,9 @@ Packages remain available.
 - Host / port fields for `serve` (defaults `127.0.0.1` / `4000`)
 - Auto-creates **Grind Serve** when opening a detected Kona app
 - Serve uses the framework’s **Netty** `KonaHttpServer` + **virtual threads**
+- **`Grind.call("…")` / `callSilently`** complete built-in commands (`migrate`,
+  `make:model`, `db:seed`, …) and custom `ConsoleCommand` names from
+  `META-INF/kona/commands` and `app/console`
 
 ### Tooling / APIs
 - Live templates: `kroute`, `jroute`, `kcadence`, `kauth`, `kdisk`, `kqueue`,

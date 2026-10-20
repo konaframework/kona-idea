@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.12
+
+- **Cadence instance completion** — `user.` / `user?.` completes table columns
+  even when `User.kt` is not in `app/models` (falls back to the `users` table
+  from migrations, plus fillable / casts / `id` / timestamps). Completes inside
+  `getAttribute()` with no quotes yet, Java `get("…")` / `set("…")`, and Kotlin
+  `user["…"]`. Dummy identifiers with a trailing space or a partial
+  `IntellijIdeaRulezzz` no longer wipe the prefix.
+- **Grind.call** — `Grind.call("…")` / `callSilently` complete built-in grind
+  commands and custom `ConsoleCommand` names from `META-INF/kona/commands` and
+  `app/console`.
+
 ## 0.5.11
 
 - **Cadence model attribute completion** — `user.` completes DB columns (migrations

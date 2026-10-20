@@ -2,6 +2,7 @@ package org.konaframework.idea
 
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.isDirectory
 import kotlin.io.path.isRegularFile
 
 /**
@@ -45,10 +46,20 @@ object ModelIndex {
             projectRoot.resolve("src/main/java/Models"),
         )
 
+    /** Broader scan so `app/domain/User.kt` still counts as a Cadence model. */
+    fun modelSearchRoots(projectRoot: Path): List<Path> =
+        (
+            modelDirs(projectRoot) +
+                listOf(
+                    projectRoot.resolve("src/main/kotlin/app"),
+                    projectRoot.resolve("src/main/java/app"),
+                )
+            ).distinct()
+
     fun collect(projectRoot: Path): List<ModelInfo> {
         val results = linkedMapOf<String, ModelInfo>()
-        for (dir in modelDirs(projectRoot)) {
-            if (!Files.isDirectory(dir)) continue
+        for (dir in modelSearchRoots(projectRoot)) {
+            if (!dir.isDirectory()) continue
             Files.walk(dir).use { stream ->
                 stream.filter { it.isRegularFile() }.forEach { file ->
                     val name = file.fileName.toString()
