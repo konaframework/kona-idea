@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.13
+
+- **Cadence type-based instance completion** — `user.` / `getAttribute` / `get("` /
+  `user["` resolve the Kotlin/Java **type** of the receiver, so
+  `val user = Auth.user() as? User`, `as User`, `val user: User?`, and Java
+  `(User) Auth.user()` complete Cadence columns, fillable, casts, accessors, and
+  relations (same as `User.query().first()`).
+- **Kona lookups first** — every Kona suggestion is wrapped with
+  `PrioritizedLookupElement` (priority `1_000_000`) and a `CompletionWeigher`
+  (`order="first"`) so columns, grind commands, env keys, views, brew tags/wire,
+  and Crema directives appear at the top of the list instead of under Java/Kotlin
+  members.
+
 ## 0.5.12
 
 - **Cadence instance completion** — `user.` / `user?.` completes table columns

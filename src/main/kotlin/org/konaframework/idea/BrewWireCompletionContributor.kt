@@ -33,7 +33,8 @@ class BrewWireCompletionContributor : CompletionContributor(), DumbAware {
                     val prefix = BrewWirePatterns.attributePrefixAt(text, offset) ?: return
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
                     BrewWireAttributes.completionsForPrefix(prefix).forEach { label ->
-                        matched.addElement(
+                        KonaLookup.add(
+                            matched,
                             LookupElementBuilder.create(label)
                                 .withPresentableText(label)
                                 .withTypeText("Brew wire", true)

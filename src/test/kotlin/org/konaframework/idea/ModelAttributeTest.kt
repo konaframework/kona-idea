@@ -451,6 +451,131 @@ class ModelAttributeTest {
     }
 
     @Test
+    fun authUserSafeCastResolvesCadenceModel() {
+        val src =
+            """
+            val user = Auth.user() as? User
+            user.
+            """.trimIndent()
+        val prop = ModelPropertyPatterns.propertyAt(src, src.length)!!
+        assertEquals("user", prop.receiver)
+        assertEquals("User", prop.modelClass)
+        val req = ModelCompletion.requestAt(src, src.length)!!
+        assertEquals("User", req.modelClass)
+        assertFalse(req.isKey)
+    }
+
+    @Test
+    fun authUserUnsafeCastResolvesCadenceModel() {
+        val src =
+            """
+            val user = Auth.user() as User
+            user.em
+            """.trimIndent()
+        val prop = ModelPropertyPatterns.propertyAt(src, src.length)!!
+        assertEquals("User", prop.modelClass)
+        assertEquals("em", prop.prefix)
+        assertEquals(
+            "User",
+            ModelPropertyPatterns.resolveModelClass(src, "user"),
+        )
+    }
+
+    @Test
+    fun authUserJavaCastResolvesCadenceModel() {
+        val src =
+            """
+            User user = (User) Auth.user();
+            user.em
+            """.trimIndent()
+        val prop = ModelPropertyPatterns.propertyAt(src, src.length)!!
+        assertEquals("user", prop.receiver)
+        assertEquals("User", prop.modelClass)
+        val varCast =
+            """
+            var user = (User) Auth.user();
+            user.
+            """.trimIndent()
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(varCast, "user"))
+    }
+
+    @Test
+    fun nullableUserTypeAnnotationResolvesModel() {
+        val typed =
+            """
+            val user: User? = Auth.user()
+            user.
+            """.trimIndent()
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(typed, "user"))
+        val explicit =
+            """
+            val user: User = Auth.user() as User
+            user.getAttribute("
+            """.trimIndent()
+        val key = ModelCompletion.requestAt(explicit, explicit.length)!!
+        assertEquals("User", key.modelClass)
+        assertTrue(key.isKey)
+        val index =
+            """
+            lateinit var user: User
+            user["em
+            """.trimIndent()
+        assertEquals("User", ModelCompletion.requestAt(index, index.length)!!.modelClass)
+    }
+
+    @Test
+    fun wrappedCastAndGetSetIndexStayTypeBased() {
+        val wrapped =
+            """
+            val user = Auth.user()
+                as? User
+            user.get("
+            """.trimIndent()
+        assertEquals("User", ModelCompletion.requestAt(wrapped, wrapped.length)!!.modelClass)
+        val setSrc =
+            """
+            val user = Auth.user() as User
+            user.set("
+            """.trimIndent()
+        assertEquals("User", ModelCompletion.requestAt(setSrc, setSrc.length)!!.modelClass)
+        val getAttr =
+            """
+            val user = Auth.user() as? User
+            user.getAttribute(
+            """.trimIndent()
+        val unquoted = ModelCompletion.requestAt(getAttr, getAttr.length)!!
+        assertEquals("User", unquoted.modelClass)
+        assertFalse(unquoted.quoted)
+    }
+
+    @Test
+    fun simpleClassNameStripsNullabilityAndPackages() {
+        assertEquals("User", ModelPropertyPatterns.simpleClassName("User?"))
+        assertEquals("User", ModelPropertyPatterns.simpleClassName("app.models.User"))
+        assertEquals("User", ModelPropertyPatterns.simpleClassName("User<T>"))
+        assertNull(ModelPropertyPatterns.simpleClassName(null))
+        assertNull(ModelPropertyPatterns.simpleClassName(""))
+        assertNull(ModelPropertyPatterns.simpleClassName("user"))
+        assertNull(ModelPropertyPatterns.simpleClassName("String"))
+        assertNull(ModelPropertyPatterns.resolveModelClass("x", ""))
+        assertNull(ModelPropertyPatterns.resolveModelClass("x", "  "))
+    }
+
+    @Test
+    fun uncastAuthUserFallsBackToConvention() {
+        val src = "val user = Auth.user()\nuser."
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(src, "user"))
+        val java =
+            """
+            foo account = something();
+            account.
+            """.trimIndent()
+        assertEquals("Account", ModelPropertyPatterns.resolveModelClass(java, "account"))
+        val endCast = "val user = Auth.user() as? User"
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(endCast, "user"))
+    }
+
+    @Test
     fun appRootNearWalksToKonaApp() {
         val root = Files.createTempDirectory("kona-approot")
         Files.writeString(root.resolve("build.gradle.kts"), "implementation(\"org.konaframework:kona-http:1\")\n")
