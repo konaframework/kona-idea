@@ -128,7 +128,8 @@ internal fun layoutDoc(language: KonaLayout.AppLanguage): String {
           $src/config        — executable ConfigFile objects
           $src/database      — migrations, factories, seeders
           src/main/resources/views   — Crema (*.crema.html)
-          src/main/resources/public  — static assets
+          src/main/resources — lang, css, js (not the document root)
+          public/            — HTTP document root (Vite writes public/build)
           storage/           — writable runtime data
           ./grind            — app-local CLI
 

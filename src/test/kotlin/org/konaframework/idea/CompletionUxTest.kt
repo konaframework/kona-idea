@@ -247,7 +247,9 @@ class CompletionUxTest {
                 "src/main/kotlin/app",
                 "src/main/kotlin/routes",
                 "src/main/resources",
+                "public",
                 "src/main/resources/public",
+                "resources/public",
                 "storage",
                 "grind",
                 ".env",
@@ -276,7 +278,11 @@ class CompletionUxTest {
         )
         assertTrue(entries.drop(firstFile).all { it.kind == KonaProjectStructure.Kind.ROOT_FILE })
         assertTrue(entries.any { it.relativePath == "src/main/resources" })
-        assertTrue(entries.any { it.relativePath == "src/main/resources/public" })
+        val publicEntry = entries.single { it.displayName == "public" }
+        assertEquals("public", publicEntry.relativePath)
+        assertEquals(KonaProjectStructure.Kind.ROOT_DIR, publicEntry.kind)
+        assertTrue(KonaProjectStructure.isProjectWebPublic(publicEntry.relativePath))
+        assertFalse(entries.any { KonaProjectStructure.isNestedResourcesPublic(it.relativePath) })
         assertFalse(entries.any { it.displayName == "views" || it.displayName == "css" })
         assertTrue(
             KonaProjectStructure.entries(
@@ -292,5 +298,47 @@ class CompletionUxTest {
             )
         assertEquals(listOf("app", "storage"), javaEntries.map { it.displayName })
         assertTrue(javaEntries.first().relativePath.startsWith("src/main/java/"))
+    }
+
+    @Test
+    fun konaProjectStructureDoesNotPromoteNestedPublic() {
+        val detection =
+            KonaLayout.Detection(
+                root = Files.createTempDirectory("kona-struct-public"),
+                language = KonaLayout.AppLanguage.KOTLIN,
+                score = 10,
+                presentPackages = emptyList(),
+                hasGrind = true,
+                hasDevKonaDependency = true,
+            )
+        val onlyNested =
+            KonaProjectStructure.entries(detection) {
+                it == "src/main/resources" || it == "src/main/resources/public" || it == "resources/public"
+            }
+        assertEquals(listOf("resources"), onlyNested.map { it.displayName })
+        assertFalse(onlyNested.any { it.displayName == "public" })
+
+        val both =
+            KonaProjectStructure.entries(detection) {
+                it == "public" || it == "src/main/resources" || it == "src/main/resources/public"
+            }
+        assertEquals(listOf("resources", "public"), both.map { it.displayName })
+        assertEquals("public", both.single { it.displayName == "public" }.relativePath)
+
+        assertTrue(KonaProjectStructure.isNestedResourcesPublic("src/main/resources/public"))
+        assertTrue(KonaProjectStructure.isNestedResourcesPublic("resources/public"))
+        assertTrue(KonaProjectStructure.isNestedResourcesPublic("src\\main\\resources\\public"))
+        assertTrue(KonaProjectStructure.isNestedResourcesPublic("/resources/public/"))
+        assertFalse(KonaProjectStructure.isNestedResourcesPublic("public"))
+        assertFalse(KonaProjectStructure.isNestedResourcesPublic("src/main/resources/views"))
+        assertTrue(KonaProjectStructure.isProjectWebPublic("public"))
+        assertTrue(KonaProjectStructure.isProjectWebPublic("/public/"))
+        assertFalse(KonaProjectStructure.isProjectWebPublic("src/main/resources/public"))
+
+        assertTrue(KonaProjectStructure.hideNestedPublicDirectory("public", true, true))
+        assertTrue(KonaProjectStructure.hideNestedPublicDirectory("Public", true, true))
+        assertFalse(KonaProjectStructure.hideNestedPublicDirectory("public", true, false))
+        assertFalse(KonaProjectStructure.hideNestedPublicDirectory("public", false, true))
+        assertFalse(KonaProjectStructure.hideNestedPublicDirectory("views", true, true))
     }
 }

@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.16 — Kona Project View treats project-root <code>public/</code>
+                  as the HTTP document directory (Vite <code>public/build</code>).
+                  A <code>public</code> folder under <code>resources</code> is not
+                  that root.</li>
               <li>0.5.15 — Grind completion includes <code>migrate:fresh</code>,
                   <code>migrate:refresh</code>, <code>migrate:install</code>,
                   <code>db:wipe</code>, <code>db:show</code>, <code>db:table</code>,

@@ -41,6 +41,8 @@ class KonaModernAlignmentTest {
         Files.createDirectories(root.resolve("src/main/kotlin/app/http/controllers"))
         Files.createDirectories(root.resolve("src/main/kotlin/config"))
         Files.createDirectories(root.resolve("src/main/resources/views"))
+        Files.createDirectories(root.resolve("src/main/resources/public"))
+        Files.createDirectories(root.resolve("public/build"))
 
         val detection = KonaLayout.detect(root)
         assertTrue(detection.isKonaApp)
@@ -49,7 +51,14 @@ class KonaModernAlignmentTest {
         assertTrue(detection.hasDevKonaDependency)
         assertEquals(root.toAbsolutePath().normalize(), KonaLayout.findProjectRoot(root.resolve("src/main/kotlin/routes")))
         assertTrue(KonaLayout.summarize(detection).contains("Netty"))
-        assertTrue(KonaLayout.relativeMarkerDirs(KonaLayout.AppLanguage.KOTLIN).any { it.contains("bootstrap") })
+        assertTrue(detection.presentPackages.contains("public"))
+        assertFalse(detection.presentPackages.any { it.endsWith("resources/public") })
+        val markers = KonaLayout.relativeMarkerDirs(KonaLayout.AppLanguage.KOTLIN)
+        assertTrue(markers.any { it.contains("bootstrap") })
+        assertTrue(markers.contains(KonaLayout.PUBLIC_DIR))
+        assertFalse(markers.any { it.endsWith("resources/public") })
+        assertTrue(KonaLayout.RESOURCE_DIRS.any { it.contains("views") })
+        assertFalse(KonaLayout.RESOURCE_DIRS.any { it == "public" || it.endsWith("/public") })
     }
 
     @Test
@@ -136,6 +145,11 @@ class KonaModernAlignmentTest {
         assertTrue(KonaLiveTemplates.abbreviations().contains("kdisk"))
         assertTrue(KonaLiveTemplates.abbreviations().contains("kinertia"))
         assertTrue(layoutDoc(KonaLayout.AppLanguage.JAVA).contains("src/main/java"))
+        val layout = layoutDoc(KonaLayout.AppLanguage.KOTLIN)
+        assertTrue(layout.contains("public/"))
+        assertTrue(layout.contains("public/build"))
+        assertFalse(layout.contains("resources/public"))
+        assertFalse(layout.contains("src/main/resources/public"))
         assertTrue(ViewNavHelp.text().contains("Ctrl+B"))
         assertTrue(BrewInertiaHelp.text().contains("kona-brew"))
     }
