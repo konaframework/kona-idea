@@ -44,10 +44,12 @@ class BrewTagDescriptorsProvider : XmlElementDescriptorProvider, XmlTagNameProvi
                 info.componentName.startsWith(p, ignoreCase = true)
             ) {
                 elements +=
-                    LookupElementBuilder.create(html)
-                        .withPresentableText("<$html />")
-                        .withTypeText(info.viewName, true)
-                        .withIcon(KonaIcons.KONA_13)
+                    KonaLookup.wrap(
+                        LookupElementBuilder.create(html)
+                            .withPresentableText("<$html />")
+                            .withTypeText(info.viewName, true)
+                            .withIcon(KonaIcons.KONA_13),
+                    )
             }
         }
     }

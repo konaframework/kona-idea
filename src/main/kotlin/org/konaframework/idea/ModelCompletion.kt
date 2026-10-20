@@ -3,6 +3,9 @@ package org.konaframework.idea
 /**
  * Decides whether the caret is on a Cadence instance member or attribute-key
  * call, and which model class to complete for.
+ *
+ * The model class is the Kotlin/Java **type** of the receiver (cast,
+ * annotation, or query assignment) via [ModelPropertyPatterns.resolveModelClass].
  */
 object ModelCompletion {
     data class Request(

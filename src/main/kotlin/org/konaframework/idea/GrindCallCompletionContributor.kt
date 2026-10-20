@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.PlainPrefixMatcher
-import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -65,7 +64,7 @@ class GrindCallCompletionContributor : CompletionContributor(), DumbAware {
                     if (!quoted) {
                         builder = builder.withInsertHandler(quoteInsertHandler(cmd.name))
                     }
-                    matched.addElement(PrioritizedLookupElement.withPriority(builder, 1000.0))
+                    KonaLookup.add(matched, builder)
                 }
         }
 

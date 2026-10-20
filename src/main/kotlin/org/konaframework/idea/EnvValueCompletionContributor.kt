@@ -54,7 +54,7 @@ class EnvValueCompletionContributor : CompletionContributor(), DumbAware {
                         if (option.tailText != null) {
                             element = element.withTailText(" (${option.tailText})", true)
                         }
-                        matched.addElement(element)
+                        KonaLookup.add(matched, element)
                     }
                 }
             },

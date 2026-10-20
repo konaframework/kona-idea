@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.13 — Cadence columns after <code>Auth.user() as? User</code>
+                  / typed locals / Java casts; Kona completions sort first.</li>
+              <li>0.5.12 — Cadence instance completion on queried locals;
+                  <code>Grind.call</code> command-name completion.</li>
               <li>0.5.11 — Cadence model attribute completion on <code>user.</code>
                   (columns, accessors, relations) and in
                   <code>getAttribute</code> / <code>setAttribute</code> /
@@ -174,6 +178,8 @@ kover {
                     "org.konaframework.idea.DbColumnCompletionContributor$*",
                     "org.konaframework.idea.ModelPropertyCompletionContributor",
                     "org.konaframework.idea.ModelPropertyCompletionContributor$*",
+                    "org.konaframework.idea.KonaCompletionWeigher",
+                    "org.konaframework.idea.KonaCompletionWeigher$*",
                     "org.konaframework.idea.GrindCallCompletionContributor",
                     "org.konaframework.idea.GrindCallCompletionContributor$*",
                     "org.konaframework.idea.XComponentCompletionContributor",

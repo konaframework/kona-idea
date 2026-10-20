@@ -159,6 +159,17 @@ class CompletionUxTest {
 
         assertEquals("users", DbColumnCompletionContributor.resolveTable(root, "User"))
         assertEquals("projects", DbColumnCompletionContributor.resolveTable(root, "project"))
+        val authSrc =
+            """
+            val user = Auth.user() as? User
+            user.where("
+            """.trimIndent()
+        assertEquals(
+            "users",
+            DbColumnCompletionContributor.resolveTable(root, "user", authSrc),
+        )
+        assertNull(DbColumnCompletionContributor.resolveTable(root, null))
+        assertNull(DbColumnCompletionContributor.resolveTable(root, ""))
     }
 
     @Test

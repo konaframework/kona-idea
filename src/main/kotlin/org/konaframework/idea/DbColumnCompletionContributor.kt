@@ -40,7 +40,7 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
                     val ctx = DbColumnPatterns.columnContextAt(snap.text, snap.offset) ?: return
                     val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
                     val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = true)
-                    val table = resolveTable(root, ctx.receiver)
+                    val table = resolveTable(root, ctx.receiver, snap.text)
                     val columns =
                         if (table != null) {
                             snapshot.columnsForTable(table)
@@ -64,7 +64,8 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
                                     append(sourceHint)
                                     if (table != null) append(" · ").append(table)
                                 }
-                            matched.addElement(
+                            KonaLookup.add(
+                                matched,
                                 LookupElementBuilder.create(col)
                                     .withPresentableText(col)
                                     .withTypeText(typeText, true)
@@ -77,14 +78,20 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
     }
 
     companion object {
-        fun resolveTable(projectRoot: java.nio.file.Path, receiver: String?): String? {
+        fun resolveTable(
+            projectRoot: java.nio.file.Path,
+            receiver: String?,
+            source: CharSequence? = null,
+        ): String? {
             if (receiver.isNullOrBlank()) return null
-            // PascalCase → model class
-            if (receiver[0].isUpperCase()) {
-                return ModelIndex.tableForClass(projectRoot, receiver)
-            }
-            // camelCase variable → conventional model class
-            val modelClass = receiver.replaceFirstChar { it.uppercaseChar() }
+            val modelClass =
+                if (receiver[0].isUpperCase()) {
+                    receiver
+                } else if (source != null) {
+                    ModelPropertyPatterns.resolveModelClass(source, receiver) ?: return null
+                } else {
+                    receiver.replaceFirstChar { it.uppercaseChar() }
+                }
             return ModelIndex.tableForClass(projectRoot, modelClass)
         }
     }
