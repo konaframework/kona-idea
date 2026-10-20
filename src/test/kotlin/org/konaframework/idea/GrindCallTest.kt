@@ -122,7 +122,26 @@ class GrindCallTest {
         assertTrue(custom.any { it.name == "app:report" })
 
         val all = GrindCommandIndex.commands(root).map { it.name }.toSet()
-        assertTrue(all.containsAll(listOf("serve", "migrate", "make:model", "install", "down", "up", "ide:lsp")))
+        assertTrue(
+            all.containsAll(
+                listOf(
+                    "serve",
+                    "migrate",
+                    "make:model",
+                    "install",
+                    "down",
+                    "up",
+                    "ide:lsp",
+                    "migrate:fresh",
+                    "migrate:refresh",
+                    "migrate:install",
+                    "db:wipe",
+                    "db:show",
+                    "db:table",
+                    "schema:dump",
+                ),
+            ),
+        )
         assertTrue(all.contains("mail:send"))
         assertTrue(GrindCommandIndex.names(root).contains("app:report"))
         assertTrue(GrindCommandIndex.consoleDirs(root).isNotEmpty())

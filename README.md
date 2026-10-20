@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.14)
+## Features (0.5.15)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -163,7 +163,8 @@ Packages remain available.
 - Auto-creates **Grind Serve** when opening a detected Kona app
 - Serve uses the framework’s **Netty** `KonaHttpServer` + **virtual threads**
 - **`Grind.call("…")` / `callSilently`** complete built-in commands (`migrate`,
-  `make:model`, `db:seed`, …) and custom `ConsoleCommand` names from
+  `migrate:fresh`, `db:wipe`, `db:show`, `schema:dump`, `make:model`,
+  `db:seed`, …) and custom `ConsoleCommand` names from
   `META-INF/kona/commands` and `app/console`
 
 ### Tooling / APIs

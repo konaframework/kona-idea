@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.15
+
+- **Grind database commands** — built-in completion / run-config list now
+  includes `migrate:fresh`, `migrate:refresh`, `migrate:install`, `db:wipe`,
+  `db:show`, `db:table`, and `schema:dump` (aligned with grind
+  `ListCommand.BUILTIN`). Existing migrate/rollback/reset/status, `db:seed`,
+  and `make:migration` / `make:seeder` / `make:factory` names are unchanged.
+
 ## 0.5.14
 
 - **Crema language injection** — Java/Kotlin strings that are inline Brew/Crema

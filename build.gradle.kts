@@ -77,6 +77,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.15 — Grind completion includes <code>migrate:fresh</code>,
+                  <code>migrate:refresh</code>, <code>migrate:install</code>,
+                  <code>db:wipe</code>, <code>db:show</code>, <code>db:table</code>,
+                  and <code>schema:dump</code>.</li>
               <li>0.5.14 — Inject Crema into Java/Kotlin strings: <code>@CremaTemplate</code>
                   / <code>template()</code> overrides, <code>inline(source)</code>, and
                   <code>// language=Crema</code>. Completion and navigation work inside

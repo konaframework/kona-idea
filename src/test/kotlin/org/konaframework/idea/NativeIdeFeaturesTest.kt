@@ -186,6 +186,19 @@ class NativeIdeFeaturesTest {
     fun grindCommandsNoLongerAdvertiseLsp() {
         assertNull(GrindCommands.find("ide:lsp"))
         assertTrue(GrindCommands.names().contains("serve"))
+        assertTrue(
+            GrindCommands.names().containsAll(
+                listOf(
+                    "migrate:fresh",
+                    "migrate:refresh",
+                    "migrate:install",
+                    "db:wipe",
+                    "db:show",
+                    "db:table",
+                    "schema:dump",
+                ),
+            ),
+        )
     }
 
     @Test
