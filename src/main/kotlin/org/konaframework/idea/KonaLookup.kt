@@ -1,6 +1,5 @@
 package org.konaframework.idea
 
-import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementDecorator
@@ -13,10 +12,15 @@ import com.intellij.openapi.util.Key
  * not sort order versus Java/Kotlin members. Every Kona [LookupElement] is
  * wrapped with [PrioritizedLookupElement] at [PRIORITY] and marked with
  * [MARKER] so [KonaCompletionWeigher] (`order="first"`) can boost them again.
+ *
+ * Priority stays in the same order of magnitude as 0.5.12 (`1000`). A value
+ * like `1_000_000` overflowed some platform/ML ranking weights to negative
+ * ints and dropped the items from the list — which is how Cadence column
+ * completion disappeared after the “Kona first” ranking change.
  */
 object KonaLookup {
-    /** High enough to beat typical Java/Kotlin member priorities (~0–1000). */
-    const val PRIORITY: Double = 1_000_000.0
+    /** High enough to beat typical Java/Kotlin member priorities (~0–100). */
+    const val PRIORITY: Double = 1_000.0
 
     val MARKER: Key<Boolean> = Key.create("kona.lookup")
 
@@ -27,17 +31,17 @@ object KonaLookup {
         return prioritized
     }
 
-    fun add(result: CompletionResultSet, element: LookupElement) {
-        result.addElement(wrap(element))
+    fun add(sink: (LookupElement) -> Unit, element: LookupElement) {
+        sink(wrap(element))
     }
 
     fun isKona(element: LookupElement): Boolean {
         var current: LookupElement? = element
-        while (current != null) {
+        var hops = 0
+        while (current != null && hops < 8) {
             if (current.getUserData(MARKER) == true) return true
-            val prioritized = current as? PrioritizedLookupElement<*>
-            if (prioritized != null && prioritized.priority >= PRIORITY) return true
             current = (current as? LookupElementDecorator<*>)?.delegate
+            hops++
         }
         return false
     }
@@ -47,10 +51,12 @@ object KonaLookup {
 
     fun priorityOf(element: LookupElement): Double? {
         var current: LookupElement? = element
-        while (current != null) {
+        var hops = 0
+        while (current != null && hops < 8) {
             val prioritized = current as? PrioritizedLookupElement<*>
             if (prioritized != null) return prioritized.priority
             current = (current as? LookupElementDecorator<*>)?.delegate
+            hops++
         }
         return null
     }

@@ -60,7 +60,7 @@ class BrewTagCompletionContributor : CompletionContributor(), DumbAware {
                                     BrewTagPatterns.htmlTag(info.componentName)
                                 }
                             KonaLookup.add(
-                                matched,
+                                matched::addElement,
                                 LookupElementBuilder.create(lookup)
                                     .withPresentableText(
                                         "<${BrewTagPatterns.htmlTag(info.componentName)} />",

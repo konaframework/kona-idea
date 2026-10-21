@@ -42,7 +42,7 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
                     // Always show the full filtered set on autopopup (do not wait for Ctrl+Space).
                     CremaDirectives.completionsForPrefix(effectivePrefix).forEach { label ->
                         KonaLookup.add(
-                            matched,
+                            matched::addElement,
                             LookupElementBuilder.create(label)
                                 .withPresentableText(label)
                                 .withTypeText("Crema", true)

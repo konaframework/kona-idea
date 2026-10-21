@@ -77,6 +77,7 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.19 — Restore Cadence model column completion (user. / getAttribute / where)
               <li>0.5.18 — Reformat Crema views with HTML code-style rules
                   (Ctrl+Alt+L / indent-on-enter). Directives and echoes stay
                   frozen; indent size matches Settings → Editor → Code Style → HTML.</li>

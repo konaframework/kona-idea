@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.19
+
+- **Fix Cadence model column completion** — ranking Kona lookups first (0.5.13)
+  no longer drops columns. `user.`, `getAttribute()` / `get()` / `user["…"]`,
+  and `User.where("…")` complete from migrations/DB again, including when
+  IDEA inserts `IntellijIdeaRulezzz`, the project dir is a parent of the app,
+  or the prefix matcher still holds a dummy residue. Ranking now uses
+  `PrioritizedLookupElement` at `1000` plus the weigher marker (not `1e6`).
+
 ## 0.5.18
 
 - **Crema HTML reformat** — **Reformat Code** (Ctrl+Alt+L / ⌥⌘L) and indent-on-enter

@@ -47,7 +47,7 @@ class CremaEchoCompletionContributor : CompletionContributor(), DumbAware {
                                     .withTailText("()", true)
                                     .withInsertHandler(helperInsertHandler(item.insertText))
                         }
-                        KonaLookup.add(matched, builder)
+                        KonaLookup.add(matched::addElement, builder)
                     }
                 }
             },

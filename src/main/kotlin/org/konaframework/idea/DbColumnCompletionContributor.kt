@@ -8,7 +8,6 @@ import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
-import com.intellij.openapi.project.guessProjectDir
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.util.ProcessingContext
 
@@ -29,49 +28,45 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
                     context: ProcessingContext,
                     result: CompletionResultSet,
                 ) {
-                    val project = parameters.position.project
-                    val root = project.guessProjectDir()?.toNioPath() ?: return
-                    if (!KonaLayout.isKonaApp(root)) return
-                    val snap =
-                        CompletionText.fromContents(
-                            parameters.position.containingFile.viewProvider.contents,
+                    val root = ModelPropertyCompletionContributor.appRoot(parameters) ?: return
+                    val matcherPrefix =
+                        CompletionText.effectivePrefix("", result.prefixMatcher.prefix)
+                    val mode = KonaIdeaSettings.getInstance(parameters.position.project).columnSourceMode
+                    val copyText = parameters.position.containingFile.viewProvider.contents
+                    var suggestions =
+                        CadenceCompletion.columnSuggestions(
+                            root,
+                            copyText,
                             parameters.offset,
+                            mode = mode,
+                            probeJdbc = true,
+                            matcherPrefix = matcherPrefix,
                         )
-                    val ctx = DbColumnPatterns.columnContextAt(snap.text, snap.offset) ?: return
-                    val mode = KonaIdeaSettings.getInstance(project).columnSourceMode
-                    val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = true)
-                    val table = resolveTable(root, ctx.receiver, snap.text)
-                    val columns =
-                        if (table != null) {
-                            snapshot.columnsForTable(table)
-                        } else {
-                            snapshot.allColumns
-                        }
-                    if (columns.isEmpty()) return
-                    val sourceHint =
-                        when {
-                            snapshot.fromJdbc && snapshot.fromMigrations -> "migration+JDBC"
-                            snapshot.fromJdbc -> "JDBC"
-                            else -> "migration"
-                        }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(ctx.prefix))
-                    columns
-                        .filter { it.startsWith(ctx.prefix, ignoreCase = true) || ctx.prefix.isEmpty() }
-                        .sorted()
-                        .forEach { col ->
-                            val typeText =
-                                buildString {
-                                    append(sourceHint)
-                                    if (table != null) append(" · ").append(table)
-                                }
-                            KonaLookup.add(
-                                matched,
-                                LookupElementBuilder.create(col)
-                                    .withPresentableText(col)
-                                    .withTypeText(typeText, true)
-                                    .withIcon(KonaIcons.KONA_13),
+                    if (suggestions.isEmpty()) {
+                        val original = parameters.originalFile.viewProvider.contents
+                        val origOffset =
+                            CompletionText.offsetInOriginal(parameters.offset, original.length)
+                        suggestions =
+                            CadenceCompletion.columnSuggestions(
+                                root,
+                                original,
+                                origOffset,
+                                mode = mode,
+                                probeJdbc = true,
+                                matcherPrefix = matcherPrefix,
                             )
-                        }
+                    }
+                    if (suggestions.isEmpty()) return
+                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
+                    suggestions.forEach { col ->
+                        KonaLookup.add(
+                            matched::addElement,
+                            LookupElementBuilder.create(col.name)
+                                .withPresentableText(col.name)
+                                .withTypeText(col.typeText, true)
+                                .withIcon(KonaIcons.KONA_13),
+                        )
+                    }
                 }
             },
         )
@@ -82,17 +77,6 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
             projectRoot: java.nio.file.Path,
             receiver: String?,
             source: CharSequence? = null,
-        ): String? {
-            if (receiver.isNullOrBlank()) return null
-            val modelClass =
-                if (receiver[0].isUpperCase()) {
-                    receiver
-                } else if (source != null) {
-                    ModelPropertyPatterns.resolveModelClass(source, receiver) ?: return null
-                } else {
-                    receiver.replaceFirstChar { it.uppercaseChar() }
-                }
-            return ModelIndex.tableForClass(projectRoot, modelClass)
-        }
+        ): String? = CadenceCompletion.resolveTable(projectRoot, receiver, source)
     }
 }
