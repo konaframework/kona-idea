@@ -164,9 +164,12 @@ lang, css, js), top-level `public/` (HTTP document root; Vite writes
 `public/build`), `storage/`, app-local `./grind`, and `org.konaframework:*`
 (or legacy `dev.kona:*`) Gradle dependencies. The Kona Project View lists that
 root `public/` beside `resources`. A `public` folder nested under `resources`
-is not the document root. Canonical folders use the official Kona brand mark.
-For Kona apps, the Project tool window defaults to the **Kona** pane (scaffold
-folders with short names); Project / Packages remain available.
+is not the document root. Root files that exist are listed after the folders:
+`./grind`, `.env`, `README.md`, `package.json`, lockfiles, `tsconfig.json`,
+`vite.config.js`, and related Vite / Svelte config. Canonical folders use the
+official Kona brand mark. For Kona apps, the Project tool window defaults to
+the **Kona** pane (scaffold folders with short names); Project / Packages
+remain available.
 
 ### Grind + Netty HTTP
 - **Grind** run configuration type with persisted arguments

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.20
+
+- **Kona Project View frontend files** — the scaffold pane lists root
+  `README.md`, `package.json`, lockfiles (`package-lock.json`, `pnpm-lock.yaml`,
+  `yarn.lock`, `bun.lock` / `bun.lockb`), `tsconfig.json` / `jsconfig.json`,
+  `vite.config.js` / `.ts` / `.mjs`, `svelte.config.js`, and Vite ambient
+  `env.d.ts` / `vite-env.d.ts` when those files exist, after `./grind` and `.env`.
+
 ## 0.5.19
 
 - **Fix Cadence model column completion** — ranking Kona lookups first (0.5.13)

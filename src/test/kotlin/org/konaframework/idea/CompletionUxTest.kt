@@ -253,6 +253,11 @@ class CompletionUxTest {
                 "storage",
                 "grind",
                 ".env",
+                "README.md",
+                "package.json",
+                "package-lock.json",
+                "tsconfig.json",
+                "vite.config.js",
             )
         val detection =
             KonaLayout.Detection(
@@ -265,7 +270,21 @@ class CompletionUxTest {
             )
         val entries = KonaProjectStructure.entries(detection) { it in present }
         assertEquals(
-            listOf("bootstrap", "app", "routes", "resources", "public", "storage", "grind", ".env"),
+            listOf(
+                "bootstrap",
+                "app",
+                "routes",
+                "resources",
+                "public",
+                "storage",
+                "grind",
+                ".env",
+                "README.md",
+                "package.json",
+                "package-lock.json",
+                "tsconfig.json",
+                "vite.config.js",
+            ),
             entries.map { it.displayName },
         )
         val firstFile = entries.indexOfFirst { it.kind == KonaProjectStructure.Kind.ROOT_FILE }
@@ -298,6 +317,12 @@ class CompletionUxTest {
             )
         assertEquals(listOf("app", "storage"), javaEntries.map { it.displayName })
         assertTrue(javaEntries.first().relativePath.startsWith("src/main/java/"))
+        assertFalse(entries.any { it.displayName == "pnpm-lock.yaml" || it.displayName == "svelte.config.js" })
+        val withTsVite =
+            KonaProjectStructure.entries(detection) {
+                it in present || it == "vite.config.ts" || it == "svelte.config.js" || it == "env.d.ts"
+            }
+        assertTrue(withTsVite.map { it.displayName }.containsAll(listOf("vite.config.ts", "svelte.config.js", "env.d.ts")))
     }
 
     @Test
