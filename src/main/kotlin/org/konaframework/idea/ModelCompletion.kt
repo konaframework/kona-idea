@@ -23,7 +23,7 @@ object ModelCompletion {
             return Request(
                 receiver = key.receiver.orEmpty(),
                 modelClass = modelClass,
-                prefix = key.prefix,
+                prefix = CompletionText.stripDummy(key.prefix),
                 quoted = key.quoted,
                 isKey = true,
             )
@@ -33,7 +33,7 @@ object ModelCompletion {
         return Request(
             receiver = prop.receiver,
             modelClass = modelClass,
-            prefix = prop.prefix,
+            prefix = CompletionText.stripDummy(prop.prefix),
             quoted = true,
             isKey = false,
         )

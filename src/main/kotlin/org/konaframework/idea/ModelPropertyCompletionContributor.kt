@@ -26,24 +26,11 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
         result: CompletionResultSet,
     ) {
         val root = appRoot(parameters) ?: return
-        val snap =
-            CompletionText.fromContents(
-                parameters.position.containingFile.viewProvider.contents,
-                parameters.offset,
-            )
-        val matcherPrefix = CompletionText.stripDummy(result.prefixMatcher.prefix)
-        val original =
-            CompletionText.fromContents(
-                parameters.originalFile.viewProvider.contents,
-                parameters.offset,
-            )
-        val request =
-            ModelCompletion.requestAt(snap.text, snap.offset)
-                ?: ModelCompletion.requestAt(original.text, original.offset)
-                ?: return
-        val prefix = request.prefix.ifEmpty { matcherPrefix }
+        val matcherPrefix = CompletionText.effectivePrefix("", result.prefixMatcher.prefix)
         val mode = KonaIdeaSettings.getInstance(parameters.position.project).columnSourceMode
-        offer(root, request.modelClass, mode, prefix, request.quoted, result)
+        val suggestions = suggestionsFor(parameters, root, mode, matcherPrefix)
+        if (suggestions.isEmpty()) return
+        offer(suggestions, result)
     }
 
     companion object {
@@ -66,6 +53,52 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
             return guessed.takeIf { KonaLayout.isKonaApp(it) }
         }
 
+        fun suggestionsFor(
+            parameters: CompletionParameters,
+            root: java.nio.file.Path,
+            mode: ColumnSourceMode,
+            matcherPrefix: String,
+        ): List<CadenceCompletion.Suggestion> {
+            val copyText = parameters.position.containingFile.viewProvider.contents
+            CadenceCompletion.modelSuggestions(
+                root,
+                copyText,
+                parameters.offset,
+                mode = mode,
+                probeJdbc = true,
+                matcherPrefix = matcherPrefix,
+            ).takeIf { it.isNotEmpty() }?.let { return it }
+            val original = parameters.originalFile.viewProvider.contents
+            val origOffset = CompletionText.offsetInOriginal(parameters.offset, original.length)
+            return CadenceCompletion.modelSuggestions(
+                root,
+                original,
+                origOffset,
+                mode = mode,
+                probeJdbc = true,
+                matcherPrefix = matcherPrefix,
+            )
+        }
+
+        fun offer(
+            suggestions: List<CadenceCompletion.Suggestion>,
+            result: CompletionResultSet,
+        ) {
+            if (suggestions.isEmpty()) return
+            val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
+            suggestions.forEach { attr ->
+                var builder =
+                    LookupElementBuilder.create(attr.name)
+                        .withPresentableText(attr.name)
+                        .withTypeText(attr.typeText, true)
+                        .withIcon(KonaIcons.KONA_13)
+                if (!attr.quoted) {
+                    builder = builder.withInsertHandler(quoteInsertHandler(attr.name))
+                }
+                KonaLookup.add(matched::addElement, builder)
+            }
+        }
+
         fun offer(
             root: java.nio.file.Path,
             modelClass: String,
@@ -81,22 +114,22 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
                     mode = mode,
                     probeJdbc = true,
                 )
-            if (attrs.isEmpty()) return
-            val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-            attrs
-                .filter { it.name.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
-                .sortedBy { it.name }
-                .forEach { attr ->
-                    var builder =
-                        LookupElementBuilder.create(attr.name)
-                            .withPresentableText(attr.name)
-                            .withTypeText(attr.typeText, true)
-                            .withIcon(KonaIcons.KONA_13)
-                    if (!quoted) {
-                        builder = builder.withInsertHandler(quoteInsertHandler(attr.name))
+            val suggestions =
+                attrs
+                    .filter {
+                        val p = CompletionText.effectivePrefix(prefix)
+                        p.isEmpty() || it.name.startsWith(p, ignoreCase = true)
+                    }.sortedBy { it.name }
+                    .map {
+                        CadenceCompletion.Suggestion(
+                            name = it.name,
+                            typeText = it.typeText,
+                            kind = if (quoted) CadenceCompletion.Kind.KEY else CadenceCompletion.Kind.PROPERTY,
+                            quoted = quoted,
+                            modelClass = modelClass,
+                        )
                     }
-                    KonaLookup.add(matched, builder)
-                }
+            offer(suggestions, result)
         }
 
         private fun quoteInsertHandler(name: String): InsertHandler<LookupElement> =

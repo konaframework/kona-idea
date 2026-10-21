@@ -38,7 +38,7 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                     if (XComponentPatterns.wantsSlotChild(text, offset)) {
                         val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
                         KonaLookup.add(
-                            matched,
+                            matched::addElement,
                             LookupElementBuilder.create("x-slot name=\"\"")
                                 .withPresentableText("<x-slot name=\"…\">")
                                 .withTypeText("Crema slot", true)
@@ -46,7 +46,7 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                                 .withInsertHandler(slotNameInsertHandler()),
                         )
                         KonaLookup.add(
-                            matched,
+                            matched::addElement,
                             LookupElementBuilder.create("x-slot:")
                                 .withPresentableText("<x-slot:…>")
                                 .withTypeText("Crema slot", true)
@@ -68,7 +68,7 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                             .sorted()
                             .forEach { name ->
                                 KonaLookup.add(
-                                    matched,
+                                    matched::addElement,
                                     LookupElementBuilder.create(name)
                                         .withPresentableText(name)
                                         .withTypeText("x-slot", true)
@@ -92,7 +92,7 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                         }
                         .forEach { info ->
                             KonaLookup.add(
-                                matched,
+                                matched::addElement,
                                 LookupElementBuilder.create(info.tagName)
                                     .withPresentableText("<x-${info.tagName}>")
                                     .withTypeText(info.viewName, true)
@@ -111,7 +111,7 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
     private fun offerBareXSlot(result: CompletionResultSet, prefix: String) {
         if (!"slot".startsWith(prefix, ignoreCase = true) && prefix.isNotEmpty()) return
         KonaLookup.add(
-            result,
+            result::addElement,
             LookupElementBuilder.create("slot")
                 .withPresentableText("<x-slot>")
                 .withTypeText("Crema named slot", true)

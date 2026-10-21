@@ -44,7 +44,7 @@ class BrewTagAttributeCompletionContributor : CompletionContributor(), DumbAware
                         .sorted()
                         .forEach { name ->
                             KonaLookup.add(
-                                matched,
+                                matched::addElement,
                                 LookupElementBuilder.create(name)
                                     .withPresentableText(name)
                                     .withTypeText("${info.className} · Brew attr", true)

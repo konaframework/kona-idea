@@ -64,7 +64,7 @@ class GrindCallCompletionContributor : CompletionContributor(), DumbAware {
                     if (!quoted) {
                         builder = builder.withInsertHandler(quoteInsertHandler(cmd.name))
                     }
-                    KonaLookup.add(matched, builder)
+                    KonaLookup.add(matched::addElement, builder)
                 }
         }
 

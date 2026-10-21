@@ -84,7 +84,7 @@ class BrewMemberCompletionContributor : CompletionContributor(), DumbAware {
             .sorted()
             .forEach { name ->
                 KonaLookup.add(
-                    matched,
+                    matched::addElement,
                     LookupElementBuilder.create(name)
                         .withPresentableText(name)
                         .withTypeText("${owner.className} · $typeText", true)

@@ -12,5 +12,5 @@ class KonaCompletionWeigher : CompletionWeigher() {
     override fun weigh(
         element: LookupElement,
         location: CompletionLocation,
-    ): Comparable<*> = KonaLookup.weighScore(element)
+    ): Comparable<*> = runCatching { KonaLookup.weighScore(element) }.getOrDefault(0)
 }

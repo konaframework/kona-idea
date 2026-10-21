@@ -38,7 +38,7 @@ class ViewNameCompletionContributor : CompletionContributor() {
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
                     names.filter { it.startsWith(prefix) || prefix.isEmpty() }.forEach { name ->
                         KonaLookup.add(
-                            matched,
+                            matched::addElement,
                             LookupElementBuilder.create(name)
                                 .withPresentableText(name)
                                 .withTypeText("Crema view", true)

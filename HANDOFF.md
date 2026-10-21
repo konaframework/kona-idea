@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.18** |
+| Version | **0.5.19** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,14 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.19 ships
+
+- Cadence column completion is restored: `CadenceCompletion` is the testable
+  pipeline for `user.` / `getAttribute` / `get(` / `user["` / `User.where("`.
+  Dummy rewind looks inside the dummy; dummy prefix-matcher residue is empty;
+  `DbColumnCompletionContributor` uses `appRootNear`; `KonaLookup.PRIORITY` is
+  `1000` (weigher + marker rank items first — `1e6` hid the list).
 
 ## What 0.5.18 ships
 

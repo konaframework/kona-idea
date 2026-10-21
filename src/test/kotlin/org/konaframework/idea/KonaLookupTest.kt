@@ -40,15 +40,48 @@ class KonaLookupTest {
     }
 
     @Test
-    fun highPriorityWithoutMarkerStillCounts() {
+    fun rankingUsesMarkerNotHugePriority() {
         val raw = testLookup("email")
-        val prioritized = PrioritizedLookupElement.withPriority(raw, KonaLookup.PRIORITY)
-        assertTrue(KonaLookup.isKona(prioritized))
-        assertEquals(1, KonaLookup.weighScore(prioritized))
+        val prioritized = PrioritizedLookupElement.withPriority(raw, 1_000_000.0)
+        assertFalse(KonaLookup.isKona(prioritized))
+        assertEquals(0, KonaLookup.weighScore(prioritized))
+        assertEquals(1_000_000.0, KonaLookup.priorityOf(prioritized)!!, 0.0)
         val low = PrioritizedLookupElement.withPriority(testLookup("toString"), 10.0)
         assertFalse(KonaLookup.isKona(low))
         assertEquals(0, KonaLookup.weighScore(low))
         assertEquals(10.0, KonaLookup.priorityOf(low)!!, 0.0)
+        assertEquals(1_000.0, KonaLookup.PRIORITY, 0.0)
+    }
+
+    @Test
+    fun unmarkedDecoratorChainIsNotKona() {
+        var el: LookupElement = testLookup("toString")
+        repeat(10) { el = PrioritizedLookupElement.withPriority(el, 1.0) }
+        assertFalse(KonaLookup.isKona(el))
+        assertEquals(0, KonaLookup.weighScore(el))
+        assertEquals(1.0, KonaLookup.priorityOf(el)!!, 0.0)
+    }
+
+    @Test
+    fun addSinksWrappedElement() {
+        val items = mutableListOf<LookupElement>()
+        KonaLookup.add(items::add, testLookup("email"))
+        assertEquals(1, items.size)
+        assertEquals("email", items.single().lookupString)
+        assertTrue(KonaLookup.isKona(items.single()))
+        assertEquals(KonaLookup.PRIORITY, KonaLookup.priorityOf(items.single())!!, 0.0)
+    }
+
+    @Test
+    fun wrapPreservesLookupElementBuilderString() {
+        val raw =
+            com.intellij.codeInsight.lookup.LookupElementBuilder.create("email")
+                .withTypeText("column · users", true)
+        val wrapped = KonaLookup.wrap(raw)
+        assertEquals("email", wrapped.lookupString)
+        assertTrue(KonaLookup.isKona(wrapped))
+        assertEquals(1, KonaLookup.weighScore(wrapped))
+        assertEquals(KonaLookup.PRIORITY, KonaLookup.priorityOf(wrapped)!!, 0.0)
     }
 
     private fun testLookup(name: String): LookupElement =

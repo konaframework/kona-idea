@@ -53,7 +53,7 @@ class EnvKeyCompletionContributor : CompletionContributor(), DumbAware {
                     val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
                     EnvKeys.matching(keys, prefix).forEach { name ->
                         KonaLookup.add(
-                            matched,
+                            matched::addElement,
                             LookupElementBuilder.create(name)
                                 .withPresentableText(name)
                                 .withTypeText(typeText, true)
