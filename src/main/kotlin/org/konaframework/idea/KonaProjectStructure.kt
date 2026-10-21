@@ -51,6 +51,21 @@ object KonaProjectStructure {
                 Entry("grind.bat", "grind.bat", Kind.ROOT_FILE),
                 Entry(".env", ".env", Kind.ROOT_FILE),
                 Entry(".env.example", ".env.example", Kind.ROOT_FILE),
+                Entry("README.md", "README.md", Kind.ROOT_FILE),
+                Entry("package.json", "package.json", Kind.ROOT_FILE),
+                Entry("package-lock.json", "package-lock.json", Kind.ROOT_FILE),
+                Entry("pnpm-lock.yaml", "pnpm-lock.yaml", Kind.ROOT_FILE),
+                Entry("yarn.lock", "yarn.lock", Kind.ROOT_FILE),
+                Entry("bun.lock", "bun.lock", Kind.ROOT_FILE),
+                Entry("bun.lockb", "bun.lockb", Kind.ROOT_FILE),
+                Entry("tsconfig.json", "tsconfig.json", Kind.ROOT_FILE),
+                Entry("jsconfig.json", "jsconfig.json", Kind.ROOT_FILE),
+                Entry("vite.config.js", "vite.config.js", Kind.ROOT_FILE),
+                Entry("vite.config.ts", "vite.config.ts", Kind.ROOT_FILE),
+                Entry("vite.config.mjs", "vite.config.mjs", Kind.ROOT_FILE),
+                Entry("svelte.config.js", "svelte.config.js", Kind.ROOT_FILE),
+                Entry("env.d.ts", "env.d.ts", Kind.ROOT_FILE),
+                Entry("vite-env.d.ts", "vite-env.d.ts", Kind.ROOT_FILE),
             )
         return (directories + files)
             .filter { exists(it.relativePath) }
