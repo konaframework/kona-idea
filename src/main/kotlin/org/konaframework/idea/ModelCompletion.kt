@@ -19,7 +19,8 @@ object ModelCompletion {
     fun requestAt(text: CharSequence, offset: Int): Request? {
         AttributeKeyPatterns.keyContextAt(text, offset)?.let { key ->
             val modelClass =
-                ModelPropertyCompletionContributor.resolveModelClass(text, key.receiver) ?: return@let null
+                ModelPropertyCompletionContributor.resolveModelClass(text, key.receiver, offset)
+                    ?: return@let null
             return Request(
                 receiver = key.receiver.orEmpty(),
                 modelClass = modelClass,

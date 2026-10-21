@@ -22,7 +22,7 @@ Paste this file (or its path) into a new chat so another agent can continue with
 |------|--------|
 | Repo | https://github.com/konaframework/kona-idea |
 | Plugin id | `org.konaframework.idea` |
-| Version | **0.5.20** |
+| Version | **0.5.21** |
 | Platform | IntelliJ IDEA Community/Ultimate — `platformType=IC`, `platformVersion=2024.2.5`, `sinceBuild=242` |
 | Package | `org.konaframework.idea` |
 | Coverage | Kover ≥ **98%** line on verified set (Platform wiring excluded in `build.gradle.kts`) |
@@ -31,6 +31,14 @@ Paste this file (or its path) into a new chat so another agent can continue with
 | Release | Tag `v*` → `.github/workflows/publish.yml` attaches zip to GitHub Release + Marketplace |
 
 **Marketplace id:** changing the plugin id from `dev.kona.idea` to `org.konaframework.idea` may require a **new Marketplace listing** (ids are immutable once published). Sideload/GitHub Release zips are unaffected.
+
+## What 0.5.21 ships
+
+- Cadence column completion uses the real `kona new` tree (`app/models`,
+  users migration). `this.` / bare `getAttribute("` inside a model, Java
+  `User.QUERY.find` / `where`, relative JDBC URLs, and drivers from
+  `build/kona-runtime.classpath` all work. `KonaLayout.completionRootNear`
+  finds the app from a nested file even without `./grind`.
 
 ## What 0.5.20 ships
 

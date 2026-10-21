@@ -19,6 +19,12 @@ repositories {
     }
 }
 
+val sqliteJdbc: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+    isVisible = false
+}
+
 dependencies {
     intellijPlatform {
         create(
@@ -31,11 +37,13 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.opentest4j:opentest4j:1.3.0")
     testImplementation("com.h2database:h2:2.3.232")
+    sqliteJdbc("org.xerial:sqlite-jdbc:3.49.1.0")
 }
 
 tasks.test {
     systemProperty("java.awt.headless", "true")
     systemProperty("idea.force.use.core.classloader", "true")
+    systemProperty("kona.sqlite.jdbc.jar", sqliteJdbc.asFileTree.singleFile.absolutePath)
 }
 
 kotlin {
@@ -77,6 +85,10 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.21 — Cadence columns from kona new migrations/models:
+                  <code>this.</code> / <code>getAttribute</code> in the model,
+                  Java <code>User.QUERY</code>, relative JDBC URLs, drivers from
+                  <code>kona-runtime.classpath</code></li>
               <li>0.5.19 — Restore Cadence model column completion (user. / getAttribute / where)
               <li>0.5.18 — Reformat Crema views with HTML code-style rules
                   (Ctrl+Alt+L / indent-on-enter). Directives and echoes stay

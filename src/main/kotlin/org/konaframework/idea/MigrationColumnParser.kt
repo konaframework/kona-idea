@@ -13,7 +13,7 @@ object MigrationColumnParser {
 
     private val COLUMN_CALL =
         Regex(
-            """\b(?:string|text|integer|bigInteger|boolean|bool|timestamp|foreignId|softDeletes|id)\s*\(\s*(?:["']([^"']+)["'])?\s*""",
+            """\b(?:string|text|longText|json|integer|bigInteger|boolean|bool|timestamp|foreignId|softDeletes|id)\s*\(\s*(?:["']([^"']+)["'])?\s*""",
         )
 
     private val TIMESTAMPS = Regex("""\btimestamps\s*\(\s*\)""")

@@ -1,5 +1,6 @@
 package org.konaframework.idea
 
+import java.nio.file.Path
 import java.sql.DriverManager
 import java.util.Properties
 
@@ -8,11 +9,14 @@ import java.util.Properties
  * Failures are swallowed — callers fall back to migration parsing.
  */
 object JdbcColumnProbe {
+    @JvmOverloads
     fun columnsFor(
         settings: EnvFile.DbSettings,
+        projectRoot: Path? = null,
         loginTimeoutSeconds: Int = 2,
     ): Map<String, Set<String>> =
         runCatching {
+            ProjectJdbcDrivers.ensure(projectRoot, settings.driver)
             if (settings.driver != null) {
                 runCatching { Class.forName(settings.driver) }
             }

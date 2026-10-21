@@ -85,7 +85,7 @@ object CadenceCompletion {
         val ctx = DbColumnPatterns.columnContextAt(snap.text, snap.offset) ?: return emptyList()
         val prefix = CompletionText.effectivePrefix(ctx.prefix, matcherPrefix)
         val snapshot = DbColumnIndex.collect(root, mode = mode, probeJdbc = probeJdbc)
-        val table = resolveTable(root, ctx.receiver, snap.text)
+        val table = resolveTable(root, ctx.receiver, snap.text, snap.offset)
         val columns =
             if (table != null) {
                 snapshot.columnsForTable(table)
@@ -117,14 +117,12 @@ object CadenceCompletion {
         projectRoot: Path,
         receiver: String?,
         source: CharSequence? = null,
+        offset: Int? = null,
     ): String? {
-        if (receiver.isNullOrBlank()) return null
+        val at = offset ?: source?.length ?: 0
         val modelClass =
-            if (receiver[0].isUpperCase()) {
-                receiver
-            } else {
-                ModelPropertyPatterns.resolveModelClass(source ?: "", receiver)!!
-            }
+            ModelPropertyCompletionContributor.resolveModelClass(source ?: "", receiver, at)
+                ?: return null
         return ModelIndex.tableForClass(projectRoot, modelClass)
     }
 

@@ -82,6 +82,10 @@ object DbColumnPatterns {
     fun receiverBeforeQuote(text: CharSequence, quoteStart: Int): String? {
         val before = text.subSequence(0, quoteStart).toString()
         val window = before.takeLast(160)
+        // Java: User.QUERY.where("  Kotlin: User.Companion.where("
+        val queryField =
+            Regex("""\b(\w+)\s*\.\s*(?:QUERY|Companion)\s*\.\s*(?:$METHOD_ALT)\s*\(\s*$""")
+        queryField.find(window)?.groupValues?.get(1)?.let { return it }
         RECEIVER_CALL.find(window)?.groupValues?.get(1)?.let { return it }
         RECEIVER_MAP.find(window)?.groupValues?.get(1)?.let { return it }
         // Chained: User.query().where(" — still User

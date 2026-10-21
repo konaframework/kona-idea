@@ -59,12 +59,14 @@ object ModelPropertyPatterns {
         if (identEnd == j + 1) return null
         val receiver = text.subSequence(j + 1, identEnd).toString()
         if (receiver.isEmpty() || receiver[0].isUpperCase()) return null
-        val modelClass = resolveModelClass(text, receiver)
+        val modelClass = resolveModelClass(text, receiver, end)
         return PropertyContext(receiver, propPrefix, modelClass)
     }
 
-    fun resolveModelClass(text: CharSequence, receiver: String): String? {
-        if (receiver.isBlank()) return null
+    fun resolveModelClass(text: CharSequence, receiver: String, offset: Int = text.length): String? {
+        if (receiver.isBlank() || receiver == "this" || receiver == "super") {
+            return ModelIndex.enclosingCadenceClass(text, offset)
+        }
         val src = text.toString()
         typeFromLastKotlinBinding(src, receiver)?.let { return it }
         typeFromLastJavaBinding(src, receiver)?.let { return it }
@@ -141,7 +143,22 @@ object ModelPropertyPatterns {
 
     private fun typeFromModelCall(span: String): String? {
         val m = MODEL_CALL.find(span) ?: return null
-        return simpleClassName(m.groupValues[1])
+        return simpleModelName(m.groupValues[1])
+    }
+
+    /**
+     * `User`, `app.models.User`, `User.QUERY`, `User.Companion` → `User`.
+     * Java scaffolds keep a static `QUERY` companion field.
+     */
+    fun simpleModelName(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+        for (part in raw.trim().split('.').asReversed()) {
+            if (part.equals("QUERY", ignoreCase = true) || part.equals("Companion", ignoreCase = true)) {
+                continue
+            }
+            simpleClassName(part)?.let { return it }
+        }
+        return simpleClassName(raw)
     }
 
     /** Indented continuation lines after a declaration (`as? User` on the next line). */

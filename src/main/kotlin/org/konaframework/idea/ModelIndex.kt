@@ -60,17 +60,41 @@ object ModelIndex {
         val results = linkedMapOf<String, ModelInfo>()
         for (dir in modelSearchRoots(projectRoot)) {
             if (!dir.isDirectory()) continue
-            Files.walk(dir).use { stream ->
-                stream.filter { it.isRegularFile() }.forEach { file ->
-                    val name = file.fileName.toString()
-                    if (!name.endsWith(".kt") && !name.endsWith(".java")) return@forEach
-                    parseSource(Files.readString(file), file).forEach { info ->
-                        results[info.className] = info
+            runCatching {
+                Files.walk(dir).use { stream ->
+                    stream.filter { it.isRegularFile() }.forEach { file ->
+                        val name = file.fileName.toString()
+                        if (!name.endsWith(".kt") && !name.endsWith(".java")) return@forEach
+                        runCatching {
+                            parseSource(Files.readString(file), file).forEach { info ->
+                                results[info.className] = info
+                            }
+                        }
                     }
                 }
             }
         }
         return results.values.sortedBy { it.className }
+    }
+
+    /**
+     * Innermost Cadence/Extract class whose header appears before [offset].
+     * Used for `this.` / bare `getAttribute("` inside a model source file.
+     */
+    fun enclosingCadenceClass(source: CharSequence, offset: Int): String? {
+        if (offset <= 0 || source.isEmpty()) return null
+        val before = source.subSequence(0, offset.coerceIn(0, source.length)).toString()
+        var bestAt = -1
+        var bestName: String? = null
+        fun consider(name: String, at: Int) {
+            if (at >= bestAt) {
+                bestAt = at
+                bestName = name
+            }
+        }
+        KOTLIN_CLASS.findAll(before).forEach { consider(it.groupValues[1], it.range.first) }
+        JAVA_CLASS.findAll(before).forEach { consider(it.groupValues[1], it.range.first) }
+        return bestName
     }
 
     fun byClassName(projectRoot: Path): Map<String, ModelInfo> =
