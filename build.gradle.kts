@@ -85,6 +85,8 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.22 — Cadence columns on Kotlin safe-call
+                  <code>user?.getAttribute("…")</code> (DashboardController)</li>
               <li>0.5.21 — Cadence columns from kona new migrations/models:
                   <code>this.</code> / <code>getAttribute</code> in the model,
                   Java <code>User.QUERY</code>, relative JDBC URLs, drivers from

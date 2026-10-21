@@ -332,6 +332,17 @@ class ModelAttributeTest {
         val safeIdx = """user?.["id"""
         assertEquals("user", AttributeKeyPatterns.keyContextAt(safeIdx, safeIdx.length)!!.receiver)
 
+        val safeGet = """user?.getAttribute("na"""
+        val safeCtx = AttributeKeyPatterns.keyContextAt(safeGet, safeGet.length)!!
+        assertEquals("user", safeCtx.receiver)
+        assertEquals("na", safeCtx.prefix)
+
+        val bangGet = """user!!.getAttribute("em"""
+        assertEquals("user", AttributeKeyPatterns.keyContextAt(bangGet, bangGet.length)!!.receiver)
+
+        val safeUnquoted = "user?.getAttribute("
+        assertEquals("user", AttributeKeyPatterns.keyContextAt(safeUnquoted, safeUnquoted.length)!!.receiver)
+
         val staticGet = "User.get("
         assertNull(AttributeKeyPatterns.unquotedCallContext(staticGet, staticGet.length))
 
@@ -559,6 +570,24 @@ class ModelAttributeTest {
         assertNull(ModelPropertyPatterns.simpleClassName("String"))
         assertNull(ModelPropertyPatterns.resolveModelClass("x", ""))
         assertNull(ModelPropertyPatterns.resolveModelClass("x", "  "))
+    }
+
+    @Test
+    fun indentedSessionValDoesNotStealUserCast() {
+        val dashboard =
+            """
+            val user = Auth.user() as? User
+                val session = request.session() as Session
+            user.
+            """.trimIndent()
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(dashboard, "user"))
+        val wrappedCast =
+            """
+            val user = Auth.user()
+                as? User
+            user.
+            """.trimIndent()
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(wrappedCast, "user"))
     }
 
     @Test

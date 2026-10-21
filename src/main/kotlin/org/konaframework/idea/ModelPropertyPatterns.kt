@@ -161,6 +161,12 @@ object ModelPropertyPatterns {
         return simpleClassName(raw)
     }
 
+    /** New statement even when indented (DashboardController: `val session` after `val user`). */
+    private val NEW_STATEMENT =
+        Regex(
+            """^\s*(?:lateinit\s+)?(?:val|var|fun|return|if|for|while|when|class|object|override|public|private|protected|internal)\b""",
+        )
+
     /** Indented continuation lines after a declaration (`as? User` on the next line). */
     private fun continuedSpan(src: String, after: Int): String {
         if (after < 0 || after >= src.length) return ""
@@ -170,11 +176,9 @@ object ModelPropertyPatterns {
                 lines += line
                 continue
             }
-            if (line[0].isWhitespace()) {
-                lines += line
-                continue
-            }
-            break
+            if (!line[0].isWhitespace()) break
+            if (NEW_STATEMENT.containsMatchIn(line)) break
+            lines += line
         }
         return lines.joinToString("\n")
     }

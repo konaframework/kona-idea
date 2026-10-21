@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.21)
+## Features (0.5.22)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -143,10 +143,10 @@ Cadence Kotlin/Java
 - Completes **model attributes** on instances (`val user = User.query().first()` /
   `Auth.user() as? User` / Java `User user = User.QUERY.find(1)` →
   `user.email` / `user.name`), including fillable/casts, accessors, and relations
-- Completes the same keys in `user.getAttribute("…")`, `user.get("…")`,
-  `user["…"]`, `this.` / bare `getAttribute("` **inside the model class**, and
-  when the caret is still inside `getAttribute()`. Kona items stay at the top
-  of the list without replacing the column catalog.
+- Completes the same keys in `user.getAttribute("…")`, `user?.getAttribute("…")`,
+  `user.get("…")`, `user["…"]`, `this.` / bare `getAttribute("` **inside the
+  model class**, and when the caret is still inside `getAttribute()`. Kona
+  items stay at the top of the list without replacing the column catalog.
 - Column sources (configurable):
   1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
      (`app/models` from `kona new`, including `json` / `longText`)

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.22
+
+- **DashboardController columns** — `val session = request.session() as Session`
+  on the next line no longer steals the `Auth.user() as? User` cast (so `user.`
+  was resolving as `Session`). Kotlin `user?.getAttribute("…")` /
+  `user!!.where("…")` now keep the `user` receiver too.
+
 ## 0.5.21
 
 - **Cadence columns from real apps** — complete `email` / `name` / … from the

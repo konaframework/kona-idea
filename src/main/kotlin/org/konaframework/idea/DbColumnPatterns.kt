@@ -32,17 +32,20 @@ object DbColumnPatterns {
 
     private val METHOD_ALT = METHOD_PREFIXES.joinToString("|")
 
+    /** `.` / Kotlin `?.` / `!!.` — e.g. `user?.where("…")`. */
+    private const val DOT = """(?:\?\.|!!\.|\.)"""
+
     private val CALL =
         Regex("""\b(?:$METHOD_ALT)\s*\(\s*$""")
 
     private val RECEIVER_CALL =
-        Regex("""\b(\w+)\s*\.\s*(?:$METHOD_ALT)\s*\(\s*$""")
+        Regex("""\b(\w+)\s*$DOT\s*(?:$METHOD_ALT)\s*\(\s*$""")
 
     private val MAP_KEY =
         Regex("""\b(?:create|update|insert|fill|forceFill)\s*\(\s*(?:mapOf|Map\.of)\s*\([^)]*$""")
 
     private val RECEIVER_MAP =
-        Regex("""\b(\w+)\s*\.\s*(?:create|update|insert|fill|forceFill)\s*\(\s*(?:mapOf|Map\.of)\s*\([^)]*$""")
+        Regex("""\b(\w+)\s*$DOT\s*(?:create|update|insert|fill|forceFill)\s*\(\s*(?:mapOf|Map\.of)\s*\([^)]*$""")
 
     data class ColumnContext(
         val prefix: String,
@@ -90,7 +93,7 @@ object DbColumnPatterns {
         RECEIVER_MAP.find(window)?.groupValues?.get(1)?.let { return it }
         // Chained: User.query().where(" — still User
         val chained =
-            Regex("""\b(\w+)\s*\.\s*(?:query|newQuery|withTrashed|onlyTrashed)\s*\([^)]*\)\s*\.\s*(?:$METHOD_ALT)\s*\(\s*$""")
+            Regex("""\b(\w+)\s*$DOT\s*(?:query|newQuery|withTrashed|onlyTrashed)\s*\([^)]*\)\s*$DOT\s*(?:$METHOD_ALT)\s*\(\s*$""")
         chained.find(window)?.groupValues?.get(1)?.let { return it }
         return null
     }
