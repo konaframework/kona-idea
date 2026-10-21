@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -34,21 +33,23 @@ class CremaEchoCompletionContributor : CompletionContributor(), DumbAware {
                 ) {
                     val snap = CremaPsi.snapshot(parameters) ?: return
                     val echo = BrewWirePatterns.echoContextAt(snap.text, snap.offset) ?: return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(echo.prefix))
-                    CremaEchoCatalog.completions(echo.prefix).forEach { item ->
-                        var builder =
-                            LookupElementBuilder.create(item.name)
-                                .withPresentableText(item.name)
-                                .withTypeText(item.detail, true)
-                                .withIcon(KonaIcons.KONA_13)
-                        if (item.helper) {
-                            builder =
-                                builder
-                                    .withTailText("()", true)
-                                    .withInsertHandler(helperInsertHandler(item.insertText))
+                    val elements =
+                        CremaEchoCatalog.completions(echo.prefix).map { item ->
+                            var builder =
+                                LookupElementBuilder.create(item.name)
+                                    .withPresentableText(item.name)
+                                    .withTypeText(item.detail, true)
+                                    .bold()
+                                    .withIcon(KonaIcons.KONA_13)
+                            if (item.helper) {
+                                builder =
+                                    builder
+                                        .withTailText("()", true)
+                                        .withInsertHandler(helperInsertHandler(item.insertText))
+                            }
+                            builder
                         }
-                        KonaLookup.add(matched::addElement, builder)
-                    }
+                    result.addKona(echo.prefix, elements)
                 }
             },
         )

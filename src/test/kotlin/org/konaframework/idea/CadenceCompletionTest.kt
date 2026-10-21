@@ -190,7 +190,10 @@ class CadenceCompletionTest {
     fun collectFallsThroughWhenNotAModelSite() {
         val root = fixture()
         assertTrue(CadenceCompletion.collect(root, "println(", "println(".length).isEmpty())
-        assertTrue(CadenceCompletion.collect(root, """getAttribute("em""", """getAttribute("em""".length).isEmpty())
+        assertTrue(
+            CadenceCompletion.collect(root, """getAttribute("em""", """getAttribute("em""".length)
+                .any { it.name == "email" },
+        )
         assertFalse(CompletionText.isDummyResidue(""))
         assertTrue(CompletionText.isDummyResidue(CompletionText.DUMMY_WITH_SPACE))
         assertTrue(
@@ -220,6 +223,156 @@ class CadenceCompletionTest {
         assertEquals("JDBC", CadenceCompletion.sourceLabel(fromJdbc = true, fromMigrations = false))
         assertEquals("migration+JDBC", CadenceCompletion.sourceLabel(fromJdbc = true, fromMigrations = true))
         assertEquals("migration", CadenceCompletion.sourceLabel(fromJdbc = false, fromMigrations = false))
+    }
+
+    @Test
+    fun columnsCompleteAnywhereNotOnlyControllers() {
+        val root = fixture()
+        val service =
+            """
+            package app.services
+            import org.konaframework.auth.Authenticatable
+            class UserMailer {
+                fun greet(user: Authenticatable) {
+                    user.getAttribute("em
+            """.trimIndent()
+        assertSuggests(root, service, "email")
+        assertEquals(
+            "User",
+            CadenceCompletion.collect(root, service, service.length).first { it.name == "email" }.modelClass,
+        )
+
+        val seeder =
+            """
+            package database.seeders
+            class DatabaseSeeder {
+                fun run() {
+                    val user = User()
+                    user.
+            """.trimIndent()
+        assertSuggests(root, seeder, "email", "name")
+
+        val job =
+            """
+            package app.jobs
+            class SendWelcome {
+                fun handle(user: Authenticatable) {
+                    user.
+            """.trimIndent()
+        assertSuggests(root, job, "email")
+
+        val javaService =
+            """
+            package app.services;
+            import org.konaframework.auth.Authenticatable;
+            class UserMailer {
+              void greet(Authenticatable user) {
+                user.get("em
+            """.trimIndent()
+        assertSuggests(root, javaService, "email")
+
+        val list =
+            """
+            val list = listOf(1)
+            list.
+            """.trimIndent()
+        assertTrue(CadenceCompletion.collect(root, list, list.length).isEmpty())
+    }
+
+    @Test
+    fun attributesPreferringCadenceFallsBackFromNonModelTypes() {
+        val root = fixture()
+        val known =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "User",
+                "user",
+                unscopedKeys = false,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertEquals("User", known.modelClass)
+        assertTrue(known.attrs.any { it.name == "email" })
+
+        val auth =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "Authenticatable",
+                "user",
+                unscopedKeys = false,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertEquals("User", auth.modelClass)
+        assertTrue(auth.attrs.any { it.name == "email" })
+
+        val session =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "Session",
+                "session",
+                unscopedKeys = false,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertTrue(session.attrs.isEmpty())
+
+        val unscoped =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "",
+                "",
+                unscopedKeys = true,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertTrue(unscoped.attrs.any { it.name == "email" })
+
+        val empty =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "Ghost",
+                "ghost",
+                unscopedKeys = false,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertTrue(empty.attrs.isEmpty())
+
+        val nowhere = Files.createTempDirectory("kona-cadence-none")
+        val none =
+            CadenceCompletion.attributesPreferringCadence(
+                nowhere,
+                "",
+                "",
+                unscopedKeys = true,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertTrue(none.attrs.isEmpty())
+    }
+
+    @Test
+    fun attributesPreferringCadenceKeepsColumnsWithoutModelFile() {
+        val root = Files.createTempDirectory("kona-cadence-nofil")
+        val mig = root.resolve("src/main/kotlin/database/migrations")
+        Files.createDirectories(mig)
+        Files.writeString(
+            mig.resolve("CreateUsersTable.kt"),
+            """schema.create("users") { id(); string("email") }""",
+        )
+        val preferred =
+            CadenceCompletion.attributesPreferringCadence(
+                root,
+                "User",
+                "user",
+                unscopedKeys = false,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        assertEquals("User", preferred.modelClass)
+        assertTrue(preferred.attrs.any { it.name == "email" })
+        assertNull(ModelIndex.find(root, "User"))
     }
 
     @Test

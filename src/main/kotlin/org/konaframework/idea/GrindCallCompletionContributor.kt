@@ -4,7 +4,6 @@ import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -49,23 +48,25 @@ class GrindCallCompletionContributor : CompletionContributor(), DumbAware {
         ) {
             val commands = GrindCommandIndex.commands(root)
             if (commands.isEmpty()) return
-            val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-            commands
-                .filter { it.name.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
-                .sortedBy { it.name }
-                .forEach { cmd ->
-                    val typeText = if (cmd.custom) "grind · custom" else "grind"
-                    var builder =
-                        LookupElementBuilder.create(cmd.name)
-                            .withPresentableText(cmd.name)
-                            .withTypeText(typeText, true)
-                            .withTailText(if (cmd.summary.isNotEmpty()) "  ${cmd.summary}" else null, true)
-                            .withIcon(KonaIcons.KONA_13)
-                    if (!quoted) {
-                        builder = builder.withInsertHandler(quoteInsertHandler(cmd.name))
+            val elements =
+                commands
+                    .filter { it.name.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
+                    .sortedBy { it.name }
+                    .map { cmd ->
+                        val typeText = if (cmd.custom) "grind · custom" else "grind"
+                        var builder =
+                            LookupElementBuilder.create(cmd.name)
+                                .withPresentableText(cmd.name)
+                                .withTypeText(typeText, true)
+                                .withTailText(if (cmd.summary.isNotEmpty()) "  ${cmd.summary}" else null, true)
+                                .bold()
+                                .withIcon(KonaIcons.KONA_13)
+                        if (!quoted) {
+                            builder = builder.withInsertHandler(quoteInsertHandler(cmd.name))
+                        }
+                        builder
                     }
-                    KonaLookup.add(matched::addElement, builder)
-                }
+            result.addKona(prefix, elements)
         }
 
         private fun quoteInsertHandler(name: String): InsertHandler<LookupElement> =

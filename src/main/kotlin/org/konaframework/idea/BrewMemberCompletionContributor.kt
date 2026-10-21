@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
@@ -77,20 +76,19 @@ class BrewMemberCompletionContributor : CompletionContributor(), DumbAware {
         typeText: String,
     ) {
         if (names.isEmpty()) return
-        val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-        names
-            .filter { it.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
-            .distinct()
-            .sorted()
-            .forEach { name ->
-                KonaLookup.add(
-                    matched::addElement,
+        val elements =
+            names
+                .filter { it.startsWith(prefix, ignoreCase = true) || prefix.isEmpty() }
+                .distinct()
+                .sorted()
+                .map { name ->
                     LookupElementBuilder.create(name)
                         .withPresentableText(name)
                         .withTypeText("${owner.className} · $typeText", true)
-                        .withIcon(KonaIcons.KONA_13),
-                )
-            }
+                        .bold()
+                        .withIcon(KonaIcons.KONA_13)
+                }
+        result.addKona(prefix, elements)
     }
 
     private fun resolveOwner(root: Path, file: PsiFile): BrewComponentIndex.ComponentInfo? {

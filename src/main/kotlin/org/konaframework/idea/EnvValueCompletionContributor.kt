@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
@@ -44,18 +43,20 @@ class EnvValueCompletionContributor : CompletionContributor(), DumbAware {
                     }
                     val options = EnvValueOptions.optionsFor(key, root)
                     if (options.isEmpty()) return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-                    EnvValueOptions.matching(options, prefix).forEach { option ->
-                        var element =
-                            LookupElementBuilder.create(option.value)
-                                .withPresentableText(option.value)
-                                .withTypeText(option.typeText, true)
-                                .withIcon(KonaIcons.KONA_13)
-                        if (option.tailText != null) {
-                            element = element.withTailText(" (${option.tailText})", true)
+                    val elements =
+                        EnvValueOptions.matching(options, prefix).map { option ->
+                            var element =
+                                LookupElementBuilder.create(option.value)
+                                    .withPresentableText(option.value)
+                                    .withTypeText(option.typeText, true)
+                                    .bold()
+                                    .withIcon(KonaIcons.KONA_13)
+                            if (option.tailText != null) {
+                                element = element.withTailText(" (${option.tailText})", true)
+                            }
+                            element
                         }
-                        KonaLookup.add(matched::addElement, element)
-                    }
+                    result.addKona(prefix, elements)
                 }
             },
         )
