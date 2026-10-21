@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -46,30 +45,29 @@ class BrewTagCompletionContributor : CompletionContributor(), DumbAware {
                         } else {
                             typedAfterLt(text, offset).orEmpty()
                         }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(matcherPrefix))
-                    components
-                        .filter {
-                            it.componentName.startsWith(tag.prefix, ignoreCase = true) ||
-                                tag.prefix.isEmpty()
-                        }
-                        .forEach { info ->
-                            val lookup =
-                                if (tag.afterColon) {
-                                    info.componentName
-                                } else {
-                                    BrewTagPatterns.htmlTag(info.componentName)
-                                }
-                            KonaLookup.add(
-                                matched::addElement,
+                    val elements =
+                        components
+                            .filter {
+                                it.componentName.startsWith(tag.prefix, ignoreCase = true) ||
+                                    tag.prefix.isEmpty()
+                            }
+                            .map { info ->
+                                val lookup =
+                                    if (tag.afterColon) {
+                                        info.componentName
+                                    } else {
+                                        BrewTagPatterns.htmlTag(info.componentName)
+                                    }
                                 LookupElementBuilder.create(lookup)
                                     .withPresentableText(
                                         "<${BrewTagPatterns.htmlTag(info.componentName)} />",
                                     )
                                     .withTypeText(info.viewName, true)
+                                    .bold()
                                     .withIcon(KonaIcons.KONA_13)
-                                    .withInsertHandler(selfClosingInsertHandler(tag.afterColon)),
-                            )
-                        }
+                                    .withInsertHandler(selfClosingInsertHandler(tag.afterColon))
+                            }
+                    result.addKona(matcherPrefix, elements)
                 }
             },
         )

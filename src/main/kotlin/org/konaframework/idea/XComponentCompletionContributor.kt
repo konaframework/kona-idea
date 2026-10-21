@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -36,21 +35,21 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                     val offset = snap.offset
 
                     if (XComponentPatterns.wantsSlotChild(text, offset)) {
-                        val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
-                        KonaLookup.add(
-                            matched::addElement,
-                            LookupElementBuilder.create("x-slot name=\"\"")
-                                .withPresentableText("<x-slot name=\"…\">")
-                                .withTypeText("Crema slot", true)
-                                .withIcon(KonaIcons.KONA_13)
-                                .withInsertHandler(slotNameInsertHandler()),
-                        )
-                        KonaLookup.add(
-                            matched::addElement,
-                            LookupElementBuilder.create("x-slot:")
-                                .withPresentableText("<x-slot:…>")
-                                .withTypeText("Crema slot", true)
-                                .withIcon(KonaIcons.KONA_13),
+                        result.addKona(
+                            "",
+                            listOf(
+                                LookupElementBuilder.create("x-slot name=\"\"")
+                                    .withPresentableText("<x-slot name=\"…\">")
+                                    .withTypeText("Crema slot", true)
+                                    .bold()
+                                    .withIcon(KonaIcons.KONA_13)
+                                    .withInsertHandler(slotNameInsertHandler()),
+                                LookupElementBuilder.create("x-slot:")
+                                    .withPresentableText("<x-slot:…>")
+                                    .withTypeText("Crema slot", true)
+                                    .bold()
+                                    .withIcon(KonaIcons.KONA_13),
+                            ),
                         )
                         return
                     }
@@ -62,19 +61,18 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                             components.flatMap { it.slotNames }.toSet().ifEmpty {
                                 setOf("title", "footer", "header", "body")
                             }
-                        val matched = result.withPrefixMatcher(PlainPrefixMatcher(tag.prefix))
-                        slots
-                            .filter { it.startsWith(tag.prefix, ignoreCase = true) || tag.prefix.isEmpty() }
-                            .sorted()
-                            .forEach { name ->
-                                KonaLookup.add(
-                                    matched::addElement,
+                        val slotElements =
+                            slots
+                                .filter { it.startsWith(tag.prefix, ignoreCase = true) || tag.prefix.isEmpty() }
+                                .sorted()
+                                .map { name ->
                                     LookupElementBuilder.create(name)
                                         .withPresentableText(name)
                                         .withTypeText("x-slot", true)
-                                        .withIcon(KonaIcons.KONA_13),
-                                )
-                            }
+                                        .bold()
+                                        .withIcon(KonaIcons.KONA_13)
+                                }
+                        result.addKona(tag.prefix, slotElements)
                         return
                     }
 
@@ -84,24 +82,23 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
                         offerBareXSlot(result, tag.prefix)
                         return
                     }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(tag.prefix))
-                    components
-                        .filter {
-                            it.tagName.startsWith(tag.prefix, ignoreCase = true) ||
-                                tag.prefix.isEmpty()
-                        }
-                        .forEach { info ->
-                            KonaLookup.add(
-                                matched::addElement,
+                    val tagElements =
+                        components
+                            .filter {
+                                it.tagName.startsWith(tag.prefix, ignoreCase = true) ||
+                                    tag.prefix.isEmpty()
+                            }
+                            .map { info ->
                                 LookupElementBuilder.create(info.tagName)
                                     .withPresentableText("<x-${info.tagName}>")
                                     .withTypeText(info.viewName, true)
+                                    .bold()
                                     .withIcon(KonaIcons.KONA_13)
-                                    .withInsertHandler(componentInsertHandler(info.tagName)),
-                            )
-                        }
+                                    .withInsertHandler(componentInsertHandler(info.tagName))
+                            }
+                    result.addKona(tag.prefix, tagElements)
                     if ("slot".startsWith(tag.prefix, ignoreCase = true) || tag.prefix.isEmpty()) {
-                        offerBareXSlot(matched, tag.prefix)
+                        offerBareXSlot(result, tag.prefix)
                     }
                 }
             },
@@ -110,11 +107,12 @@ class XComponentCompletionContributor : CompletionContributor(), DumbAware {
 
     private fun offerBareXSlot(result: CompletionResultSet, prefix: String) {
         if (!"slot".startsWith(prefix, ignoreCase = true) && prefix.isNotEmpty()) return
-        KonaLookup.add(
-            result::addElement,
+        result.offerKona(
+            prefix,
             LookupElementBuilder.create("slot")
                 .withPresentableText("<x-slot>")
                 .withTypeText("Crema named slot", true)
+                .bold()
                 .withIcon(KonaIcons.KONA_13)
                 .withInsertHandler { ctx, _ ->
                     val doc = ctx.document

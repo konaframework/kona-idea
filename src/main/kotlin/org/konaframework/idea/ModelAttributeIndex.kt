@@ -112,6 +112,27 @@ object ModelAttributeIndex {
         return merge(columns, table, parsed)
     }
 
+    /** Union of columns (and model extras) across every table — unscoped Cadence key APIs. */
+    fun attributesForAny(
+        projectRoot: Path,
+        mode: ColumnSourceMode = ColumnSourceMode.BOTH,
+        probeJdbc: Boolean = true,
+    ): List<Attribute> {
+        val snap = DbColumnIndex.collect(projectRoot, mode = mode, probeJdbc = probeJdbc)
+        val out = linkedMapOf<String, Attribute>()
+        for ((table, cols) in snap.byTable) {
+            for (attr in merge(cols, table, emptyList())) {
+                out.putIfAbsent(attr.name, attr)
+            }
+        }
+        for (info in ModelIndex.collect(projectRoot)) {
+            for (attr in attributesFor(projectRoot, info.className, mode = mode, probeJdbc = false)) {
+                out.putIfAbsent(attr.name, attr)
+            }
+        }
+        return out.values.toList()
+    }
+
     fun parseSource(source: String): List<Attribute> {
         if (source.isBlank()) return emptyList()
         val out = linkedMapOf<String, Attribute>()

@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
@@ -50,16 +49,15 @@ class EnvKeyCompletionContributor : CompletionContributor(), DumbAware {
                         keys = EnvKeys.completionKeys(root)
                         typeText = "env"
                     }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-                    EnvKeys.matching(keys, prefix).forEach { name ->
-                        KonaLookup.add(
-                            matched::addElement,
+                    val elements =
+                        EnvKeys.matching(keys, prefix).map { name ->
                             LookupElementBuilder.create(name)
                                 .withPresentableText(name)
                                 .withTypeText(typeText, true)
-                                .withIcon(KonaIcons.KONA_13),
-                        )
-                    }
+                                .bold()
+                                .withIcon(KonaIcons.KONA_13)
+                        }
+                    result.addKona(prefix, elements)
                 }
             },
         )

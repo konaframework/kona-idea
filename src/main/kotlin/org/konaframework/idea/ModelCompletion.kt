@@ -20,7 +20,8 @@ object ModelCompletion {
         AttributeKeyPatterns.keyContextAt(text, offset)?.let { key ->
             val modelClass =
                 ModelPropertyCompletionContributor.resolveModelClass(text, key.receiver, offset)
-                    ?: return@let null
+                    ?: conventionClass(key.receiver)
+                    ?: ""
             return Request(
                 receiver = key.receiver.orEmpty(),
                 modelClass = modelClass,
@@ -30,7 +31,7 @@ object ModelCompletion {
             )
         }
         val prop = ModelPropertyPatterns.propertyAt(text, offset) ?: return null
-        val modelClass = prop.modelClass ?: return null
+        val modelClass = prop.modelClass ?: conventionClass(prop.receiver) ?: return null
         return Request(
             receiver = prop.receiver,
             modelClass = modelClass,
@@ -38,5 +39,14 @@ object ModelCompletion {
             quoted = true,
             isKey = false,
         )
+    }
+
+    /** `user` → `User` when the type is unknown (seeders, services, params typed as Authenticatable). */
+    fun conventionClass(receiver: String?): String? {
+        if (receiver.isNullOrBlank()) return null
+        if (receiver == "this" || receiver == "super") return null
+        val simple = receiver.substringAfterLast('.')
+        if (simple.isEmpty() || !simple[0].isLowerCase()) return null
+        return simple.replaceFirstChar { it.uppercaseChar() }
     }
 }

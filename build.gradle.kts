@@ -85,6 +85,9 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.23 — Cadence columns in any Kotlin/Java file (services,
+                  seeders, jobs, <code>Authenticatable</code> params); Kona
+                  suggestions sort at the top of the lookup list</li>
               <li>0.5.22 — Cadence columns on Kotlin safe-call
                   <code>user?.getAttribute("…")</code> (DashboardController)</li>
               <li>0.5.21 — Cadence columns from kona new migrations/models:
@@ -226,6 +229,7 @@ kover {
                     "org.konaframework.idea.ModelPropertyCompletionContributor$*",
                     "org.konaframework.idea.KonaCompletionWeigher",
                     "org.konaframework.idea.KonaCompletionWeigher$*",
+                    "org.konaframework.idea.KonaLookupPublishKt",
                     "org.konaframework.idea.GrindCallCompletionContributor",
                     "org.konaframework.idea.GrindCallCompletionContributor$*",
                     "org.konaframework.idea.XComponentCompletionContributor",

@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
@@ -38,14 +37,13 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
                     val prefix = CremaCompletion.prefixBefore(text, offset)
                     if (prefix.isEmpty() && !CremaCompletion.justTypedAt(text, offset)) return
                     val effectivePrefix = prefix.ifEmpty { "@" }
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(effectivePrefix))
                     // Always show the full filtered set on autopopup (do not wait for Ctrl+Space).
-                    CremaDirectives.completionsForPrefix(effectivePrefix).forEach { label ->
-                        KonaLookup.add(
-                            matched::addElement,
+                    val elements =
+                        CremaDirectives.completionsForPrefix(effectivePrefix).map { label ->
                             LookupElementBuilder.create(label)
                                 .withPresentableText(label)
                                 .withTypeText("Crema", true)
+                                .bold()
                                 .withIcon(KonaIcons.KONA_13)
                                 .withInsertHandler { ctx, _ ->
                                     val doc = ctx.document
@@ -57,9 +55,9 @@ class CremaCompletionContributor : CompletionContributor(), DumbAware {
                                         doc.replaceString(start - 1, ctx.tailOffset, label)
                                         ctx.editor.caretModel.moveToOffset(start - 1 + label.length)
                                     }
-                                },
-                        )
-                    }
+                                }
+                        }
+                    result.addKona(effectivePrefix, elements)
                 }
             },
         )

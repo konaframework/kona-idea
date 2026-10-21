@@ -4,7 +4,6 @@ import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -30,7 +29,7 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
         val mode = KonaIdeaSettings.getInstance(parameters.position.project).columnSourceMode
         val suggestions = suggestionsFor(parameters, root, mode, matcherPrefix)
         if (suggestions.isEmpty()) return
-        offer(suggestions, result)
+        offer(suggestions, result, matcherPrefix)
     }
 
     companion object {
@@ -94,20 +93,23 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
         fun offer(
             suggestions: List<CadenceCompletion.Suggestion>,
             result: CompletionResultSet,
+            matcherPrefix: String = "",
         ) {
             if (suggestions.isEmpty()) return
-            val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
-            suggestions.forEach { attr ->
-                var builder =
-                    LookupElementBuilder.create(attr.name)
-                        .withPresentableText(attr.name)
-                        .withTypeText(attr.typeText, true)
-                        .withIcon(KonaIcons.KONA_13)
-                if (!attr.quoted) {
-                    builder = builder.withInsertHandler(quoteInsertHandler(attr.name))
+            val elements =
+                suggestions.map { attr ->
+                    var builder =
+                        LookupElementBuilder.create(attr.name)
+                            .withPresentableText(attr.name)
+                            .withTypeText(attr.typeText, true)
+                            .bold()
+                            .withIcon(KonaIcons.KONA_13)
+                    if (!attr.quoted) {
+                        builder = builder.withInsertHandler(quoteInsertHandler(attr.name))
+                    }
+                    builder
                 }
-                KonaLookup.add(matched::addElement, builder)
-            }
+            result.addKona(matcherPrefix, elements)
         }
 
         fun offer(
@@ -140,7 +142,7 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
                             modelClass = modelClass,
                         )
                     }
-            offer(suggestions, result)
+            offer(suggestions, result, prefix)
         }
 
         private fun quoteInsertHandler(name: String): InsertHandler<LookupElement> =

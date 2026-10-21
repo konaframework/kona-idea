@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
@@ -57,16 +56,16 @@ class DbColumnCompletionContributor : CompletionContributor(), DumbAware {
                             )
                     }
                     if (suggestions.isEmpty()) return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(""))
-                    suggestions.forEach { col ->
-                        KonaLookup.add(
-                            matched::addElement,
+                    result.addKona(
+                        matcherPrefix,
+                        suggestions.map { col ->
                             LookupElementBuilder.create(col.name)
                                 .withPresentableText(col.name)
                                 .withTypeText(col.typeText, true)
-                                .withIcon(KonaIcons.KONA_13),
-                        )
-                    }
+                                .bold()
+                                .withIcon(KonaIcons.KONA_13)
+                        },
+                    )
                 }
             },
         )

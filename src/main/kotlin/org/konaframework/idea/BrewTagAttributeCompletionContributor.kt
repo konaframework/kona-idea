@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.guessProjectDir
@@ -37,20 +36,19 @@ class BrewTagAttributeCompletionContributor : CompletionContributor(), DumbAware
                     val info = BrewComponentIndex.findComponent(root, ctx.componentName) ?: return
                     val names = info.acceptedAttributeNames()
                     if (names.isEmpty()) return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(ctx.prefix))
-                    names
-                        .filter { it.startsWith(ctx.prefix, ignoreCase = true) || ctx.prefix.isEmpty() }
-                        .distinct()
-                        .sorted()
-                        .forEach { name ->
-                            KonaLookup.add(
-                                matched::addElement,
+                    val elements =
+                        names
+                            .filter { it.startsWith(ctx.prefix, ignoreCase = true) || ctx.prefix.isEmpty() }
+                            .distinct()
+                            .sorted()
+                            .map { name ->
                                 LookupElementBuilder.create(name)
                                     .withPresentableText(name)
                                     .withTypeText("${info.className} · Brew attr", true)
-                                    .withIcon(KonaIcons.KONA_13),
-                            )
-                        }
+                                    .bold()
+                                    .withIcon(KonaIcons.KONA_13)
+                            }
+                    result.addKona(ctx.prefix, elements)
                 }
             },
         )

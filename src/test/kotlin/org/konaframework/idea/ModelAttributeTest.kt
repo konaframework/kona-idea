@@ -459,6 +459,17 @@ class ModelAttributeTest {
         assertFalse(key.quoted)
 
         assertNull(ModelCompletion.requestAt("println(", "println(".length))
+
+        val authenticatable =
+            """
+            fun greet(user: Authenticatable) {
+                user.
+            """.trimIndent()
+        assertEquals("Authenticatable", ModelCompletion.requestAt(authenticatable, authenticatable.length)!!.modelClass)
+        val bare = """getAttribute("em"""
+        val unscoped = ModelCompletion.requestAt(bare, bare.length)!!
+        assertTrue(unscoped.isKey)
+        assertEquals("", unscoped.modelClass)
     }
 
     @Test
@@ -602,6 +613,52 @@ class ModelAttributeTest {
         assertEquals("Account", ModelPropertyPatterns.resolveModelClass(java, "account"))
         val endCast = "val user = Auth.user() as? User"
         assertEquals("User", ModelPropertyPatterns.resolveModelClass(endCast, "user"))
+    }
+
+    @Test
+    fun conventionClassFromLowercaseReceiver() {
+        assertNull(ModelCompletion.conventionClass(null))
+        assertNull(ModelCompletion.conventionClass(""))
+        assertNull(ModelCompletion.conventionClass("   "))
+        assertNull(ModelCompletion.conventionClass("this"))
+        assertNull(ModelCompletion.conventionClass("super"))
+        assertNull(ModelCompletion.conventionClass("User"))
+        assertNull(ModelCompletion.conventionClass("."))
+        assertEquals("User", ModelCompletion.conventionClass("user"))
+        assertEquals("User", ModelCompletion.conventionClass("app.user"))
+    }
+
+    @Test
+    fun attributesForAnyUnionsEveryTable() {
+        val root = Files.createTempDirectory("kona-any-attrs")
+        val mig = root.resolve("src/main/kotlin/database/migrations")
+        Files.createDirectories(mig)
+        Files.writeString(
+            mig.resolve("CreateUsersTable.kt"),
+            """schema.create("users") { id(); string("email") }""",
+        )
+        Files.writeString(
+            mig.resolve("CreatePostsTable.kt"),
+            """schema.create("posts") { id(); string("title") }""",
+        )
+        val models = root.resolve("src/main/kotlin/app/models")
+        Files.createDirectories(models)
+        Files.writeString(models.resolve("User.kt"), "class User : Cadence<User>()")
+        val any =
+            ModelAttributeIndex.attributesForAny(
+                root,
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            )
+        val names = any.map { it.name }.toSet()
+        assertTrue(names.containsAll(setOf("email", "title", "id")))
+        assertTrue(
+            ModelAttributeIndex.attributesForAny(
+                Files.createTempDirectory("kona-any-empty"),
+                mode = ColumnSourceMode.MIGRATIONS_ONLY,
+                probeJdbc = false,
+            ).isEmpty(),
+        )
     }
 
     @Test

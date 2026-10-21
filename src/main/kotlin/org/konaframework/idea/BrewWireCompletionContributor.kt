@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.completion.InsertHandler
-import com.intellij.codeInsight.completion.PlainPrefixMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -31,17 +30,16 @@ class BrewWireCompletionContributor : CompletionContributor(), DumbAware {
                     val text = snap.text
                     val offset = snap.offset
                     val prefix = BrewWirePatterns.attributePrefixAt(text, offset) ?: return
-                    val matched = result.withPrefixMatcher(PlainPrefixMatcher(prefix))
-                    BrewWireAttributes.completionsForPrefix(prefix).forEach { label ->
-                        KonaLookup.add(
-                            matched::addElement,
+                    val elements =
+                        BrewWireAttributes.completionsForPrefix(prefix).map { label ->
                             LookupElementBuilder.create(label)
                                 .withPresentableText(label)
                                 .withTypeText("Brew wire", true)
+                                .bold()
                                 .withIcon(KonaIcons.KONA_13)
-                                .withInsertHandler(wireInsertHandler(label)),
-                        )
-                    }
+                                .withInsertHandler(wireInsertHandler(label))
+                        }
+                    result.addKona(prefix, elements)
                 }
             },
         )

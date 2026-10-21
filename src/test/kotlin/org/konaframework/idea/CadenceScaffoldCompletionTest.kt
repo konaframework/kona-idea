@@ -77,6 +77,41 @@ class CadenceScaffoldCompletionTest {
     }
 
     @Test
+    fun columnsCompleteInServicesSeedersAndJobs() {
+        val root = kotlinApp()
+        val service =
+            """
+            package app.services
+            import org.konaframework.auth.Authenticatable
+            class WelcomeMailer {
+                fun send(user: Authenticatable) {
+                    user.getAttribute("em
+            """.trimIndent()
+        assertSuggests(root, service, "email")
+
+        val seeder =
+            """
+            package database.seeders
+            class DatabaseSeeder {
+                fun run() {
+                    val user = User()
+                    user.
+            """.trimIndent()
+        assertSuggests(root, seeder, "email", "name", "password")
+
+        val command =
+            """
+            package app.console
+            class InspectUsers {
+                fun handle() {
+                    User.where("em
+            """.trimIndent()
+        assertSuggests(root, command, "email")
+
+        assertSuggests(root, """getAttribute("em""", "email")
+    }
+
+    @Test
     fun columnsCompleteInsideTheModelSource() {
         val root = kotlinApp()
         val userKt = Files.readString(root.resolve("src/main/kotlin/app/models/User.kt"))
@@ -115,6 +150,17 @@ class CadenceScaffoldCompletionTest {
             """.trimIndent()
         assertSuggests(root, prop, "name")
         assertSuggests(root, """User.QUERY.where("em""", "email")
+
+        val javaService =
+            """
+            package app.services;
+            import org.konaframework.auth.Authenticatable;
+            import app.models.User;
+            class WelcomeMailer {
+              void send(Authenticatable user) {
+                user.get("em
+            """.trimIndent()
+        assertSuggests(root, javaService, "email")
     }
 
     @Test

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.23
+
+- **Cadence columns anywhere** — complete `user.` / `getAttribute("…")` /
+  `where("…")` in services, seeders, jobs, console commands, and the model
+  class, not only HTTP controllers. Parameters typed as `Authenticatable`
+  still resolve through the instance name (`user` → `User`). Bare
+  `getAttribute("…")` offers every known column.
+- **Kona lookups first** — Kona suggestions are batched onto the lookup list
+  and ranked above language members (weigher before `priority` / `prefix`,
+  plus priority + explicitProximity `1000`).
+
 ## 0.5.22
 
 - **DashboardController columns** — `val session = request.session() as Session`
