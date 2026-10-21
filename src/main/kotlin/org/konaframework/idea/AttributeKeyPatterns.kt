@@ -26,15 +26,18 @@ object AttributeKeyPatterns {
 
     private val METHOD_ALT = (KEY_METHODS + GET_SET).joinToString("|")
 
+    /** `.` / Kotlin `?.` / `!!.` — DashboardController uses `user?.getAttribute("…")`. */
+    private const val DOT = """(?:\?\.|!!\.|\.)"""
+
     private val CALL =
         Regex("""\b(?:$METHOD_ALT)\s*\(\s*(?:(?:key|name)\s*=\s*)?$""")
 
     private val RECEIVER_CALL =
-        Regex("""\b(\w+)\s*\.\s*(?:$METHOD_ALT)\s*\(\s*(?:(?:key|name)\s*=\s*)?$""")
+        Regex("""\b(\w+)\s*$DOT\s*(?:$METHOD_ALT)\s*\(\s*(?:(?:key|name)\s*=\s*)?$""")
 
     private val UNQUOTED_CALL =
         Regex(
-            """\b(\w+)\s*\.\s*($METHOD_ALT)\s*\(\s*(?:(?:key|name)\s*=\s*)?([\w.-]*)$""",
+            """\b(\w+)\s*$DOT\s*($METHOD_ALT)\s*\(\s*(?:(?:key|name)\s*=\s*)?([\w.-]*)$""",
         )
 
     private val INDEX =

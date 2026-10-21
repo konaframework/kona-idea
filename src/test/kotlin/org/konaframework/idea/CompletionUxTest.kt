@@ -128,6 +128,9 @@ class CompletionUxTest {
         val queryField = """User.QUERY.where("em"""
         assertEquals("User", DbColumnPatterns.columnContextAt(queryField, queryField.length)!!.receiver)
 
+        val safeWhere = """user?.where("em"""
+        assertEquals("user", DbColumnPatterns.columnContextAt(safeWhere, safeWhere.length)!!.receiver)
+
         assertNull(DbColumnPatterns.columnContextAt("""println("em""", """println("em""".length))
     }
 

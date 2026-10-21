@@ -36,6 +36,47 @@ class CadenceScaffoldCompletionTest {
     }
 
     @Test
+    fun dashboardControllerSafeCallGetAttributeCompletesColumns() {
+        val root = kotlinApp()
+        val typed =
+            """
+            class DashboardController {
+                fun index(request: Request): Response {
+                    val user = Auth.user() as? User
+                    val session = request.session() as Session
+                    user.
+            """.trimIndent()
+        assertEquals("User", ModelPropertyPatterns.resolveModelClass(typed, "user"))
+        assertSuggests(root, typed, "email", "name", "password")
+        assertSuggests(
+            root,
+            typed.replace("user.", "user?.getAttribute(\""),
+            "email",
+            "name",
+        )
+
+        val src = DASHBOARD_KT
+        val marker = "getAttribute(\"name\")"
+        val at = src.indexOf(marker) + "getAttribute(\"".length
+        assertTrue("marker missing", src.contains(marker))
+        val names = CadenceCompletion.collect(root, src, at).map { it.name }.toSet()
+        assertTrue(
+            "user?.getAttribute(\"name\") in DashboardController: $names",
+            names.containsAll(setOf("email", "name", "password")),
+        )
+        assertEquals(
+            "user",
+            AttributeKeyPatterns.keyContextAt(src, at)!!.receiver,
+        )
+        val bang = src.replace("user?.getAttribute", "user!!.getAttribute")
+        val bangAt = bang.indexOf(marker) + "getAttribute(\"".length
+        assertTrue(
+            CadenceCompletion.collect(root, bang, bangAt).any { it.name == "email" },
+        )
+        assertSuggests(root, """val user = Auth.user() as? User${'\n'}user?.where("em""", "email")
+    }
+
+    @Test
     fun columnsCompleteInsideTheModelSource() {
         val root = kotlinApp()
         val userKt = Files.readString(root.resolve("src/main/kotlin/app/models/User.kt"))
@@ -341,6 +382,37 @@ class CadenceScaffoldCompletionTest {
     }
 
     companion object {
+        private val DASHBOARD_KT =
+            """
+            package app.http.controllers
+
+            import app.models.User
+            import org.konaframework.auth.Auth
+            import org.konaframework.core.Env
+            import org.konaframework.crema.view
+            import org.konaframework.http.Request
+            import org.konaframework.http.Response
+            import org.konaframework.session.Csrf
+            import org.konaframework.session.Session
+
+            class DashboardController {
+                fun index(request: Request): Response {
+                    Auth.setRequest(request)
+                    val user = Auth.user() as? User
+                    val session = request.session() as Session
+                    return view(
+                        "dashboard",
+                        mapOf(
+                            "name" to Env.getOrDefault("APP_NAME", "Kona"),
+                            "_token" to Csrf.token(session),
+                            "userName" to (user?.getAttribute("name")?.toString() ?: "User"),
+                            "userEmail" to (user?.getEmail() ?: ""),
+                        ),
+                    ).toResponse()
+                }
+            }
+            """.trimIndent()
+
         private val KOTLIN_USER =
             """
             package app.models
