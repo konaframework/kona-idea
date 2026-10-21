@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.21
+
+- **Cadence columns from real apps** — complete `email` / `name` / … from the
+  `kona new` users migration and model, including `this.` and bare
+  `getAttribute("` inside `User.kt`, Java `User.QUERY.find` / `User.QUERY.where`,
+  and a relative SQLite/H2 `DB_URL` (resolved against the app root). The IDE
+  loads JDBC drivers from `build/kona-runtime.classpath` when the driver is not
+  on the plugin classpath. Completion still finds the app when `./grind` is
+  missing but `database/migrations` exists.
+
 ## 0.5.20
 
 - **Kona Project View frontend files** — the scaffold pane lists root

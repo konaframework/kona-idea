@@ -34,23 +34,34 @@ class ModelPropertyCompletionContributor : CompletionContributor(), DumbAware {
     }
 
     companion object {
-        fun resolveModelClass(text: CharSequence, receiver: String?): String? {
-            if (receiver.isNullOrBlank()) return null
-            return if (receiver[0].isUpperCase()) {
-                receiver
-            } else {
-                ModelPropertyPatterns.resolveModelClass(text, receiver)
+        fun resolveModelClass(
+            text: CharSequence,
+            receiver: String?,
+            offset: Int = text.length,
+        ): String? {
+            if (receiver.isNullOrBlank() || receiver == "this" || receiver == "super") {
+                return ModelIndex.enclosingCadenceClass(text, offset)
             }
+            if (receiver[0].isUpperCase()) {
+                return ModelPropertyPatterns.simpleModelName(receiver) ?: receiver
+            }
+            return ModelPropertyPatterns.resolveModelClass(text, receiver, offset)
         }
 
         fun appRoot(parameters: CompletionParameters): java.nio.file.Path? {
-            val fromFile =
-                parameters.originalFile.virtualFile?.parent?.let { vf ->
-                    runCatching { vf.toNioPath() }.getOrNull()
-                }
-            KonaLayout.appRootNear(fromFile)?.let { return it }
-            val guessed = parameters.position.project.guessProjectDir()?.toNioPath() ?: return null
-            return guessed.takeIf { KonaLayout.isKonaApp(it) }
+            val vf = parameters.originalFile.virtualFile
+            var current = vf
+            while (current != null) {
+                val node = current
+                val path =
+                    runCatching { node.toNioPath() }.getOrNull()
+                        ?: runCatching { java.nio.file.Path.of(node.path) }.getOrNull()
+                KonaLayout.completionRootNear(path)?.let { return it }
+                current = node.parent
+            }
+            val guessed =
+                runCatching { parameters.position.project.guessProjectDir()?.toNioPath() }.getOrNull()
+            return KonaLayout.completionRootNear(guessed)
         }
 
         fun suggestionsFor(

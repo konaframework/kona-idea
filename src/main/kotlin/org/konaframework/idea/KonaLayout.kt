@@ -111,6 +111,36 @@ object KonaLayout {
         return null
     }
 
+    /**
+     * Like [appRootNear], but also accepts a Gradle project that has Cadence
+     * models or migrations even when `./grind` is missing (so completion still
+     * finds `database/migrations` when IDEA's guessed directory is a parent).
+     */
+    fun completionRootNear(start: Path?): Path? {
+        var dir: Path? = start?.toAbsolutePath()?.normalize()
+        while (dir != null) {
+            if (isKonaApp(dir) || looksLikeKonaSources(dir)) return dir
+            dir = dir.parent
+        }
+        return null
+    }
+
+    fun looksLikeKonaSources(root: Path): Boolean {
+        if (ROOT_MARKERS.none { Files.isRegularFile(root.resolve(it)) }) {
+            return false
+        }
+        val markers =
+            listOf(
+                "src/main/kotlin/database/migrations",
+                "src/main/java/database/migrations",
+                "src/main/kotlin/app/models",
+                "src/main/java/app/models",
+                "src/main/kotlin/app/Models",
+                "src/main/java/app/Models",
+            )
+        return markers.any { Files.isDirectory(root.resolve(it)) }
+    }
+
     fun detect(root: Path): Detection {
         val abs = root.toAbsolutePath().normalize()
         val kotlinRoot = abs.resolve("src/main/kotlin")

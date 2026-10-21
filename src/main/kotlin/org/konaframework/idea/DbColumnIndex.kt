@@ -42,9 +42,9 @@ object DbColumnIndex {
         var jdbcOk = false
         if (useJdbc) {
             val env = EnvFile.load(projectRoot.resolve(".env"))
-            val settings = EnvFile.dbSettings(env)
+            val settings = EnvFile.dbSettings(env, projectRoot)
             if (settings != null) {
-                fromJdbc = JdbcColumnProbe.columnsFor(settings)
+                fromJdbc = JdbcColumnProbe.columnsFor(settings, projectRoot)
                 jdbcOk = fromJdbc.isNotEmpty()
             }
         }
@@ -73,13 +73,17 @@ object DbColumnIndex {
         val sources = mutableListOf<String>()
         for (dir in dirs) {
             if (!Files.isDirectory(dir)) continue
-            Files.list(dir).use { stream ->
-                stream
-                    .filter {
-                        val n = it.fileName.toString()
-                        it.isRegularFile() && (n.endsWith(".kt") || n.endsWith(".java"))
-                    }
-                    .forEach { sources += Files.readString(it) }
+            runCatching {
+                Files.list(dir).use { stream ->
+                    stream
+                        .filter {
+                            val n = it.fileName.toString()
+                            it.isRegularFile() && (n.endsWith(".kt") || n.endsWith(".java"))
+                        }
+                        .forEach { file ->
+                            runCatching { sources += Files.readString(file) }
+                        }
+                }
             }
         }
         return sources

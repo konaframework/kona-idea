@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.19)
+## Features (0.5.21)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
@@ -139,16 +139,20 @@ Cadence Kotlin/Java
 ### Cadence models + DB columns
 - Completes column names in Cadence / QueryBuilder call sites (`where`, `select`,
   `orderBy`, `create(mapOf(…))`, …), **scoped to the receiver model’s table**
-  (`User.where("` → `users` columns only)
-- Completes **model attributes** on instances (`val user = User.query().first()` →
+  (`User.where("` / Java `User.QUERY.where("` → `users` columns only)
+- Completes **model attributes** on instances (`val user = User.query().first()` /
+  `Auth.user() as? User` / Java `User user = User.QUERY.find(1)` →
   `user.email` / `user.name`), including fillable/casts, accessors, and relations
 - Completes the same keys in `user.getAttribute("…")`, `user.get("…")`,
-  `user["…"]`, and when the caret is still inside `getAttribute()`. Kona
-  items stay at the top of the list without replacing the column catalog.
+  `user["…"]`, `this.` / bare `getAttribute("` **inside the model class**, and
+  when the caret is still inside `getAttribute()`. Kona items stay at the top
+  of the list without replacing the column catalog.
 - Column sources (configurable):
   1. **Migrations** under `src/main/{kotlin|java}/database/migrations`
-  2. **JDBC** — if `.env` has `DB_URL` (and optional `DB_USERNAME` / `DB_PASSWORD` /
-     `DB_DRIVER`) and a driver can connect, columns come from `DatabaseMetaData`
+     (`app/models` from `kona new`, including `json` / `longText`)
+  2. **JDBC** — `.env` `DB_URL` or `DB_CONNECTION=sqlite` / `h2` (relative file
+     URLs resolved against the app root). Drivers load from
+     `build/kona-runtime.classpath` when they are not on the plugin classpath.
 - **Settings → Tools → Kona** — Column source: **Both** (default) |
   **Migrations only** | **Connection only**
 
@@ -197,12 +201,16 @@ remain available.
    directive list; continue with `com` → filtered `@component` / … stays open.
 3. **`<x-*>`** — add `views/components/alert.crema.html`, type `<x-` → `alert`;
    inside `<x-alert>`, type `<` → `x-slot` hints.
-4. **Model attributes** — with `projects` migration columns + `Project` model,
-   type `val project = Project.find(1)` then `project.` → `description` / `name`.
-5. **Scoped query columns** — `User.where("` suggests only `users` columns (not
-   `projects` / `todos`).
+4. **Model attributes** — in a `kona new` app, `val user = Auth.user() as? User`
+   then `user.` → `email` / `name` / `password` from the users migration. Inside
+   `User.kt`, `this.` and bare `getAttribute("` complete the same columns. Java:
+   `User user = User.QUERY.find(1);` then `user.get("` / `User.QUERY.where("`.
+5. **Scoped query columns** — `User.where("` (and `User.QUERY.where("`) suggests
+   only `users` columns (not `projects` / `todos`).
 6. **Settings** — **Settings → Tools → Kona** → change Column source and re-try
-   completion (Connection only / Migrations only / Both).
+   completion (Connection only / Migrations only / Both). Connection uses the
+   relative SQLite/H2 URL in `.env` against the app root; run `./grind` once so
+   `build/kona-runtime.classpath` exists when the driver is not bundled.
 7. **Tool window** — open **Kona** on the right → **Serve (Netty :4000)**.
 8. **Views** — in `Crema.view(engine, "|")` or `@extends('|')`, complete names; **Ctrl+B** opens the file.
 

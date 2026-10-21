@@ -125,6 +125,9 @@ class CompletionUxTest {
         val chained = """User.query().where("id"""
         assertEquals("User", DbColumnPatterns.columnContextAt(chained, chained.length)!!.receiver)
 
+        val queryField = """User.QUERY.where("em"""
+        assertEquals("User", DbColumnPatterns.columnContextAt(queryField, queryField.length)!!.receiver)
+
         assertNull(DbColumnPatterns.columnContextAt("""println("em""", """println("em""".length))
     }
 
