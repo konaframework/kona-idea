@@ -85,6 +85,9 @@ intellijPlatform {
         changeNotes.set(
             """
             <ul>
+              <li>0.5.24 — Wire <code>&lt;wire:*&gt;</code> tags from
+                  <code>app.wire</code> (<code>brew:</code> aliases);
+                  grind <code>gradle:build</code> / <code>gradle:install</code></li>
               <li>0.5.23 — Cadence columns in any Kotlin/Java file (services,
                   seeders, jobs, <code>Authenticatable</code> params); Kona
                   suggestions sort at the top of the lookup list</li>

@@ -44,6 +44,14 @@ object GrindCommands {
             Command("assets:vite", "Print Vite asset bundling setup help"),
             Command("storage:link", "Symlink public/storage to storage/app/public"),
             Command("deploy:systemd", "Build a systemd unit, env file, and install.sh"),
+            Command("gradle:build", "Run ./gradlew build"),
+            Command("gradle:install", "Run ./gradlew installDist"),
+            Command("gradle:test", "Run ./gradlew test"),
+            Command("gradle:check", "Run ./gradlew check"),
+            Command("gradle:classes", "Run ./gradlew classes"),
+            Command("gradle:clean", "Run ./gradlew clean"),
+            Command("gradle:run", "Run ./gradlew run"),
+            Command("gradle", "Run ./gradlew with the given tasks"),
             Command("key:generate", "Set the application key (APP_KEY)"),
             Command("list", "List grind commands"),
             Command("help", "Show usage"),
@@ -56,6 +64,8 @@ object GrindCommands {
             BUILTIN.first { it.name == "migrate" },
             BUILTIN.first { it.name == "queue:work" },
             BUILTIN.first { it.name == "schedule:work" },
+            BUILTIN.first { it.name == "gradle:build" },
+            BUILTIN.first { it.name == "gradle:install" },
         )
 
     fun find(name: String): Command? = BUILTIN.find { it.name == name }
