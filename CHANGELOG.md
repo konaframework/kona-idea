@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.24
+
+- **Kona Wire** — complete `<wire:*>` tags from `app.wire`; `<brew:*>` /
+  `app.brew` remain aliases. Artifact help lists `kona-wire` (and the
+  deprecated `kona-brew` shim).
+- **Grind `gradle:*`** — run-config / command catalog includes
+  `gradle:build`, `gradle:install` (`installDist`), `gradle:test`,
+  `gradle:check`, `gradle:classes`, `gradle:clean`, `gradle:run`, and
+  `gradle`.
+
 ## 0.5.23
 
 - **Cadence columns anywhere** — complete `user.` / `getAttribute("…")` /
