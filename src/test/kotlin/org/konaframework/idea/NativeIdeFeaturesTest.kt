@@ -196,6 +196,8 @@ class NativeIdeFeaturesTest {
                     "db:show",
                     "db:table",
                     "schema:dump",
+                    "gradle:build",
+                    "gradle:install",
                 ),
             ),
         )

@@ -122,6 +122,10 @@ class KonaModernAlignmentTest {
                     "db:table",
                     "schema:dump",
                     "deploy:systemd",
+                    "gradle:build",
+                    "gradle:install",
+                    "gradle:test",
+                    "gradle",
                 ),
             ),
         )

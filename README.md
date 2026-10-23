@@ -75,7 +75,7 @@ Cadence Kotlin/Java
 
 ---
 
-## Features (0.5.23)
+## Features (0.5.24)
 
 ### Crema (native)
 - File type for `*.crema.html` and `*.crema.kt`
