@@ -5,16 +5,18 @@ import java.nio.file.Path
 import kotlin.io.path.isRegularFile
 
 /**
- * Discovers Brew components under `app/brew` (Kotlin/Java) and maps them to
- * convention views (`views/brew/<name>.crema.html`) plus public members used
- * by `wire:*` values and `{{ }}` echoes.
+ * Discovers Wire components under `app/wire` (and the `app/brew` alias)
+ * (Kotlin/Java) and maps them to convention views (`views/wire/<name>.crema.html`)
+ * plus public members used by `wire:*` values and `{{ }}` echoes.
  *
  * Mirrors framework naming in `ComponentRegistry` / `ComponentMeta` without
  * loading classes at runtime.
  */
 object BrewComponentIndex {
-    const val DEFAULT_VIEW_PREFIX: String = "brew"
-    const val DEFAULT_NAMESPACE: String = "app.brew"
+    const val DEFAULT_VIEW_PREFIX: String = "wire"
+    const val LEGACY_VIEW_PREFIX: String = "brew"
+    const val DEFAULT_NAMESPACE: String = "app.wire"
+    const val LEGACY_NAMESPACE: String = "app.brew"
 
     enum class MemberKind {
         PROPERTY,
@@ -76,8 +78,8 @@ object BrewComponentIndex {
         Regex("""(?:open\s+|abstract\s+)?class\s+(\w+)\s*(?:<[^>]*>)?\s*:\s*Component\b""")
     private val JAVA_CLASS =
         Regex("""(?:public\s+|abstract\s+)?class\s+(\w+)\s+extends\s+Component\b""")
-    private val BREW_COMPONENT_ANN =
-        Regex("""@BrewComponent\(\s*["']([^"']+)["']\s*\)""")
+    private val COMPONENT_ANN =
+        Regex("""@(?:Wire|Brew)Component\(\s*["']([^"']+)["']\s*\)""")
     private val RENDER_VIEW_KT =
         Regex(
             """(?:override\s+)?fun\s+render\s*\([^)]*\)[^{=\n]*(?:=\s*view\(\s*["']([^"']+)["']|\{\s*[^}]*?view\(\s*["']([^"']+)["'])""",
@@ -117,22 +119,26 @@ object BrewComponentIndex {
     private val NON_ACTIONS = setOf("equals", "hashCode", "toString", "copy", "render", "template")
     private val DATA_CLASS = Regex("component\\d+")
 
-    fun brewDirs(projectRoot: Path): List<Path> =
+    fun brewDirs(projectRoot: Path): List<Path> = componentDirs(projectRoot).map { it.first }
+
+    fun componentDirs(projectRoot: Path): List<Pair<Path, String>> =
         listOf(
-            projectRoot.resolve("src/main/kotlin/app/brew"),
-            projectRoot.resolve("src/main/java/app/brew"),
+            projectRoot.resolve("src/main/kotlin/app/wire") to DEFAULT_VIEW_PREFIX,
+            projectRoot.resolve("src/main/java/app/wire") to DEFAULT_VIEW_PREFIX,
+            projectRoot.resolve("src/main/kotlin/app/brew") to LEGACY_VIEW_PREFIX,
+            projectRoot.resolve("src/main/java/app/brew") to LEGACY_VIEW_PREFIX,
         )
 
     fun collect(projectRoot: Path): List<ComponentInfo> {
         val results = linkedMapOf<String, ComponentInfo>()
-        for (dir in brewDirs(projectRoot)) {
+        for ((dir, viewPrefix) in componentDirs(projectRoot)) {
             if (!Files.isDirectory(dir)) continue
             Files.walk(dir).use { stream ->
                 stream.filter { it.isRegularFile() }.forEach { file ->
                     val name = file.fileName.toString()
                     if (!name.endsWith(".kt") && !name.endsWith(".java")) return@forEach
                     val relativePkg = packageRelativeToBrew(dir, file)
-                    parseSource(Files.readString(file), file, relativePkg).forEach { info ->
+                    parseSource(Files.readString(file), file, relativePkg, viewPrefix).forEach { info ->
                         results[info.componentName] = info
                     }
                 }
@@ -174,10 +180,12 @@ object BrewComponentIndex {
     fun ownerForViewName(projectRoot: Path, viewName: String): ComponentInfo? {
         val byView = byViewName(projectRoot)
         byView[viewName]?.let { return it }
-        val prefix = "$DEFAULT_VIEW_PREFIX."
-        if (viewName.startsWith(prefix)) {
-            val componentName = viewName.removePrefix(prefix)
-            return byComponentName(projectRoot)[componentName]
+        for (prefixRoot in listOf(DEFAULT_VIEW_PREFIX, LEGACY_VIEW_PREFIX)) {
+            val prefix = "$prefixRoot."
+            if (viewName.startsWith(prefix)) {
+                val componentName = viewName.removePrefix(prefix)
+                return byComponentName(projectRoot)[componentName]
+            }
         }
         return null
     }
@@ -186,6 +194,7 @@ object BrewComponentIndex {
         source: String,
         sourcePath: Path? = null,
         packageRelative: String = "",
+        viewPrefix: String = DEFAULT_VIEW_PREFIX,
     ): List<ComponentInfo> {
         val classes = mutableListOf<Triple<String, IntRange, Boolean>>()
         KOTLIN_CLASS.findAll(source).forEach { classes += Triple(it.groupValues[1], it.range, true) }
@@ -197,7 +206,7 @@ object BrewComponentIndex {
             val body = source.substring(range.first, end)
             val before = source.substring(0, range.first)
             val annotated =
-                BREW_COMPONENT_ANN.findAll(before).lastOrNull()?.groupValues?.get(1)
+                COMPONENT_ANN.findAll(before).lastOrNull()?.groupValues?.get(1)
             val componentName =
                 annotated
                     ?: if (packageRelative.isEmpty()) {
@@ -211,7 +220,7 @@ object BrewComponentIndex {
                 } else {
                     RENDER_VIEW_JAVA.find(body)?.groupValues?.get(1)
                 }
-            val viewName = explicitView ?: "$DEFAULT_VIEW_PREFIX.$componentName"
+            val viewName = explicitView ?: "$viewPrefix.$componentName"
             ComponentInfo(
                 className = name,
                 componentName = componentName,

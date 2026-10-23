@@ -7,7 +7,9 @@ package org.konaframework.idea
  * `@BrewComponent("posts")` → `posts`), rendered as `<brew:counter />`.
  */
 object BrewTagPatterns {
-    const val PREFIX: String = "brew:"
+    const val PREFIX: String = "wire:"
+    const val LEGACY_PREFIX: String = "brew:"
+    private val TAG_PREFIXES: List<String> = listOf(PREFIX, LEGACY_PREFIX)
 
     data class TagPrefix(
         /** Component-name prefix after `brew:` (may be empty). */
@@ -19,39 +21,49 @@ object BrewTagPatterns {
         val afterColon: Boolean,
     )
 
-    /** Prefix after `<brew:` (or while typing `brew` / `brew:`) at [offset]. */
+    /** Prefix after `<wire:` / `<brew:` (or while typing `wire` / `brew`) at [offset]. */
     fun tagPrefixAt(text: CharSequence, offset: Int): TagPrefix? {
         var i = offset - 1
         while (i >= 0 && isTagPart(text[i])) i--
         val before = text.subSequence(0, i + 1).toString()
-        when {
-            before.endsWith("<$PREFIX") ->
-                return TagPrefix(text.subSequence(i + 1, offset).toString(), afterColon = true)
-            before.endsWith("<brew") && offset > i + 1 && text[i + 1] == ':' ->
-                return TagPrefix(text.subSequence(i + 2, offset).toString(), afterColon = true)
+        for (prefix in TAG_PREFIXES) {
+            val stem = prefix.removeSuffix(":")
+            when {
+                before.endsWith("<$prefix") ->
+                    return TagPrefix(text.subSequence(i + 1, offset).toString(), afterColon = true)
+                before.endsWith("<$stem") && offset > i + 1 && text[i + 1] == ':' ->
+                    return TagPrefix(text.subSequence(i + 2, offset).toString(), afterColon = true)
+            }
         }
         if (before.endsWith("<") && offset > i + 1) {
             val typed = text.subSequence(i + 1, offset).toString()
-            if (typed.startsWith(PREFIX, ignoreCase = true)) {
-                return TagPrefix(typed.substring(PREFIX.length), afterColon = true)
-            }
-            if (typed.equals("brew", ignoreCase = true) ||
-                typed.equals("bre", ignoreCase = true)
-            ) {
-                // Require ≥3 chars so `<b` / `<br` stay normal HTML completion.
-                return TagPrefix("", afterColon = false)
+            for (prefix in TAG_PREFIXES) {
+                if (typed.startsWith(prefix, ignoreCase = true)) {
+                    return TagPrefix(typed.substring(prefix.length), afterColon = true)
+                }
+                val stem = prefix.removeSuffix(":")
+                if (typed.equals(stem, ignoreCase = true) ||
+                    typed.equals(stem.take(3), ignoreCase = true)
+                ) {
+                    // Require ≥3 chars so `<b` / `<br` / `<wi` stay normal HTML completion.
+                    return TagPrefix("", afterColon = false)
+                }
             }
         }
         return null
     }
 
     fun isBrewTagName(name: String): Boolean =
-        name.startsWith(PREFIX, ignoreCase = true)
+        TAG_PREFIXES.any { name.startsWith(it, ignoreCase = true) }
 
-    /** Component name inside `<brew:todos>` / `brew:todos`, or null if not a brew tag. */
+    /** Component name inside `<wire:todos>` / `<brew:todos>`, or null if not a Wire tag. */
     fun componentNameFromTag(name: String): String? {
-        if (!isBrewTagName(name)) return null
-        return name.substring(PREFIX.length)
+        for (prefix in TAG_PREFIXES) {
+            if (name.startsWith(prefix, ignoreCase = true)) {
+                return name.substring(prefix.length)
+            }
+        }
+        return null
     }
 
     fun htmlTag(componentName: String): String = PREFIX + componentName
@@ -73,14 +85,18 @@ object BrewTagPatterns {
         var end = pos + 1
         while (end < text.length && isTagPart(text[end])) end++
         val token = text.subSequence(start, end).toString()
-        if (token.startsWith(PREFIX, ignoreCase = true)) {
-            return token.substring(PREFIX.length).takeIf { it.isNotEmpty() }
+        for (prefix in TAG_PREFIXES) {
+            if (token.startsWith(prefix, ignoreCase = true)) {
+                return token.substring(prefix.length).takeIf { it.isNotEmpty() }
+            }
         }
-        // Bare name after `<brew:` / `</brew:`
+        // Bare name after `<wire:` / `</wire:` (and brew aliases)
         if (start < 5) return null
         val before = text.subSequence(0, start).toString()
-        if (before.endsWith("<$PREFIX", ignoreCase = true) ||
-            before.endsWith("</$PREFIX", ignoreCase = true)
+        if (TAG_PREFIXES.any {
+                before.endsWith("<$it", ignoreCase = true) ||
+                    before.endsWith("</$it", ignoreCase = true)
+            }
         ) {
             return token.takeIf { it.isNotEmpty() }
         }
@@ -164,11 +180,12 @@ object BrewTagPatterns {
         if (sawClose || i < 0 || text[i] != '<') return null
         var j = i + 1
         if (j < text.length && text[j] == '/') return null // closing tag
-        if (j + PREFIX.length > text.length) return null
-        if (!text.subSequence(j, j + PREFIX.length).toString().equals(PREFIX, ignoreCase = true)) {
-            return null
-        }
-        j += PREFIX.length
+        val matched =
+            TAG_PREFIXES.firstOrNull { prefix ->
+                j + prefix.length <= text.length &&
+                    text.subSequence(j, j + prefix.length).toString().equals(prefix, ignoreCase = true)
+            } ?: return null
+        j += matched.length
         val nameStart = j
         while (j < text.length && isTagPart(text[j])) j++
         if (j == nameStart) return null

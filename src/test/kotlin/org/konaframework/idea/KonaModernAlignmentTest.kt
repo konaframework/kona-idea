@@ -91,10 +91,12 @@ class KonaModernAlignmentTest {
     fun artifactsAndCommandsCoverSurface() {
         assertTrue(KonaArtifacts.MODULES.contains("kona-http"))
         assertTrue(KonaArtifacts.MODULES.contains("kona-grind"))
+        assertTrue(KonaArtifacts.MODULES.contains("kona-wire"))
         assertTrue(KonaArtifacts.MODULES.contains("kona-brew"))
         assertTrue(KonaArtifacts.MODULES.contains("kona-inertia"))
         assertTrue(KonaArtifacts.coordinate("kona-http").startsWith("org.konaframework:"))
         assertTrue(KonaArtifacts.helpText().contains("Netty"))
+        assertTrue(KonaArtifacts.helpText().contains("kona-wire"))
         assertTrue(KonaArtifacts.helpText().contains("kona-brew"))
         assertTrue(KonaArtifacts.coordinates().all { it.startsWith("org.konaframework:") })
         assertEquals("serve", GrindCommands.find("serve")!!.name)

@@ -102,7 +102,7 @@ class KonaQuickAccessPanel(private val project: Project) : JPanel(BorderLayout()
         addRunnable("Crema views") {
             BrowserUtil.browse("https://docs.konaframework.org/docs/the-basics/views/")
         }
-        addRunnable("Brew") { BrowserUtil.browse("https://docs.konaframework.org/docs/brew/") }
+        addRunnable("Wire") { BrowserUtil.browse("https://docs.konaframework.org/docs/wire/") }
         addRunnable("Inertia") {
             BrowserUtil.browse("https://docs.konaframework.org/docs/inertia/")
         }

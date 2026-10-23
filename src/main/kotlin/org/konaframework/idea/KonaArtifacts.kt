@@ -25,6 +25,7 @@ object KonaArtifacts {
             "kona-support",
             "kona-testing",
             "kona-drip",
+            "kona-wire",
             "kona-brew",
             "kona-inertia",
             "kona-broadcasting",
@@ -53,7 +54,8 @@ object KonaArtifacts {
             appendLine("  …")
             appendLine()
             appendLine("Frontend extras:")
-            appendLine("  ${coordinate("kona-brew")}     — Brew (wire:* in Crema)")
+            appendLine("  ${coordinate("kona-wire")}     — Wire (wire:* in Crema)")
+            appendLine("  ${coordinate("kona-brew")}     — deprecated alias of kona-wire")
             appendLine("  ${coordinate("kona-inertia")}  — Inertia page responses")
             appendLine()
             appendLine("HTTP: KonaHttpServer is a Netty adapter; requests run on virtual threads.")
