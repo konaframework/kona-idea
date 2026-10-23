@@ -41,7 +41,7 @@ Kona app (kona new / grind scaffold)
   Crema file type (overrider + detector beat HTML)
   LanguageInjector (Java/Kotlin hosts → Crema fragments)
         ├── Native CremaLexer + layered HTML highlighter
-        ├── @directive autopopup + <x-*> / <brew:*> completion
+        ├── @directive autopopup + <x-*> / <wire:*> completion
         ├── View name refs → Ctrl+B / Ctrl+Click
         └── {{ }} typed handler
 
@@ -89,8 +89,8 @@ Cadence Kotlin/Java
   caret between the quotes
 - **`<x-*>` components** — complete tags from `views/components/**`; `<x-slot>` /
   `<x-slot:name>` hints for named slots
-- **`<brew:*>` components** — complete tags from `app.brew` (`Counter` →
-  `<brew:counter />`); HTML unknown-tag warnings suppressed
+- **`<wire:*>` components** — complete tags from `app.wire` (`Counter` →
+  `<wire:counter />`); `<brew:*>` / `app.brew` remain aliases; HTML unknown-tag warnings suppressed
 - Unknown-directive warnings (emails like `hi@example.com` ignored)
 - **Reformat Code** — Ctrl+Alt+L (macOS: ⌥⌘L) formats tags with HTML code-style
   rules; indent size matches **Settings → Editor → Code Style → HTML**. Crema
@@ -102,7 +102,7 @@ Cadence Kotlin/Java
 - **New → Crema View**
 
 ### View names
-- Autocomplete dotted names (`home`, `layouts.app`) in `Crema.view` / `Brew.view` /
+- Autocomplete dotted names (`home`, `layouts.app`) in `Crema.view` / `Wire.view` /
   `engine.make` / `engine.render` / `@extends` / `@include*` / `@component`
 - Inertia page names (`Pages/Welcome`) in `Inertia.render` / `manager.render` /
   `Inertia.manager().render`
@@ -110,18 +110,18 @@ Cadence Kotlin/Java
   opens the `.crema.html` / `.crema.kt` file
 - Help: **Kona → Show View Navigation Help**
 
-### Brew (`wire:*`)
-- Completes known Brew attributes in Crema HTML (`wire:model`, `wire:click`,
+### Wire (`wire:*`)
+- Completes known Wire attributes in Crema HTML (`wire:model`, `wire:click`,
   `wire:submit`, `wire:loading`, … + common modifiers)
 - Completes **actions** (`wire:submit="add"`) and **properties** /
   `@Computed` (`wire:model="draft"`, `{{ remaining }}`) from the owning
-  `app.brew` component class paired with the view
-  (`views/brew/todos.crema.html` ↔ `Todos`), or from the **host class** when
+  `app.wire` component class paired with the view
+  (`views/wire/todos.crema.html` ↔ `Todos`), or from the **host class** when
   the markup lives in an injected `template()` string
 - Known `wire:*` names are registered as HTML attributes, so IDEA does not
   report them as “attribute is not allowed here”
 - Weak warnings for unknown `wire:*` names
-- Maven: `org.konaframework:kona-brew`
+- Maven: `org.konaframework:kona-wire` (`kona-brew` is a deprecated alias)
 
 ### Env keys
 - In config (and any `Env.get` / `Env.getOrDefault` / `Env.require` string),
@@ -133,7 +133,7 @@ Cadence Kotlin/Java
 ### Inertia
 - Live templates: `kinertia`, `kinertashare` (Kotlin), `jinertia` (Java)
 - File templates: **Kona Inertia Page.vue**, **Kona Inertia Root.crema.html**
-- Help: **Kona → Show Brew + Inertia Help**
+- Help: **Kona → Show Wire + Inertia Help**
 - Maven: `org.konaframework:kona-inertia`
 
 ### Cadence models + DB columns

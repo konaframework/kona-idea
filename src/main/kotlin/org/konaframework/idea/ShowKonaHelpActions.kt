@@ -40,7 +40,7 @@ class ShowViewNavHelpAction : AnAction() {
 object ViewNavHelp {
     fun text(): String =
         """
-        View / page names (Crema.view, Brew.view, Inertia.render, engine.make / render,
+        View / page names (Crema.view, Wire.view, Inertia.render, engine.make / render,
         @extends, @include, …) support native IntelliJ navigation — no language server.
 
         Go to Declaration (open the .crema.html file):
@@ -51,11 +51,11 @@ object ViewNavHelp {
 
         Autocomplete: Ctrl+Space inside the view / page name string.
         Crema directives: type @ in a *.crema.html view (native completion).
-        Brew: type wire: on HTML tags for Brew attribute completion.
+        Wire: type wire: on HTML tags for Wire attribute completion.
         Inside wire:submit / wire:click / wire:model (and {{ }} echoes), Ctrl+Space
-        completes actions and properties from the owning app.brew component class.
+        completes actions and properties from the owning app.wire component class.
         Ctrl+B / Ctrl+Click on those names opens the property or method in the Kotlin/Java class.
-        On <brew:counter>, Ctrl+B opens the component class; tag attributes complete from
+        On <wire:counter>, Ctrl+B opens the component class; tag attributes complete from
         properties / mount params. On page views, {{ name }} jumps to the controller mapOf key.
         Known wire:* names are legal HTML attributes in Crema views.
         Project tool window: switch the view dropdown to “Kona” for the scaffold tree.
@@ -81,26 +81,27 @@ object ViewNavHelp {
 
 class ShowBrewInertiaHelpAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        Messages.showInfoMessage(e.project, BrewInertiaHelp.text(), "Kona Brew + Inertia")
+        Messages.showInfoMessage(e.project, BrewInertiaHelp.text(), "Kona Wire + Inertia")
     }
 }
 
 object BrewInertiaHelp {
     fun text(): String =
         """
-        Brew (org.konaframework:kona-brew)
+        Wire (org.konaframework:kona-wire; deprecated alias org.konaframework:kona-brew)
           • Crema HTML attributes: wire:model, wire:click, wire:submit, wire:loading,
             wire:target, wire:ignore, wire:key, wire:dirty, wire:offline, wire:confirm,
             wire:poll, wire:init, wire:show, wire:transition (+ common modifiers).
           • Autocomplete + weak warnings for unknown wire:* names in *.crema.html
             and in injected template() / @CremaTemplate / // language=Crema strings.
           • wire:submit / wire:click / wire:init / wire:target values complete actions
-            from the paired app.brew component (views/brew/todos ↔ Todos) or the
+            from the paired app.wire component (views/wire/todos ↔ Todos) or the
             host Component class for inline template() strings.
           • wire:model / wire:show / wire:text and {{ }} echoes complete properties
             and @Computed members from that class.
-          • Ctrl+B / Ctrl+Click on <brew:name> opens the class; on attributes / wire
+          • Ctrl+B / Ctrl+Click on <wire:name> opens the class; on attributes / wire
             values / {{ }} jumps to the prop, mount param, method, or controller mapOf key.
+          • <brew:name> and kona-brew remain aliases for the 0.3.0 train.
 
         Inertia (org.konaframework:kona-inertia)
           • Page names in Inertia.render(…) / manager.render(…) get the same completion
@@ -108,7 +109,7 @@ object BrewInertiaHelp {
           • Live templates: kinertia, kinertashare (Kotlin), jinertia (Java).
           • File templates: Kona Inertia Page.vue, Kona Inertia Root.crema.html.
 
-        Docs: https://docs.konaframework.org/docs/brew/
+        Docs: https://docs.konaframework.org/docs/wire/
               https://docs.konaframework.org/docs/inertia/
         """.trimIndent()
 }

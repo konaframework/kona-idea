@@ -47,6 +47,8 @@ class BrewInertiaSupportTest {
     fun brewAndCremaViewPatternsStillWork() {
         val brew = """Brew.view(engine, "home")"""
         assertEquals("home", ViewNamePatterns.viewNameAt(brew, brew.indexOf('h') + 1)!!.name)
+        val wire = """Wire.view(engine, "home")"""
+        assertEquals("home", ViewNamePatterns.viewNameAt(wire, wire.indexOf('h') + 1)!!.name)
         val crema = """Crema.view(crema, "layouts.app")"""
         assertEquals(
             "layouts.app",
@@ -427,7 +429,7 @@ class BrewInertiaSupportTest {
                 packageRelative = "admin_area",
             ).single()
         assertEquals("admin-area.show-posts", nestedPkg.componentName)
-        assertEquals("brew.admin-area.show-posts", nestedPkg.viewName)
+        assertEquals("wire.admin-area.show-posts", nestedPkg.viewName)
 
         assertTrue(BrewComponentIndex.parseSource("class NotAComponent").isEmpty())
     }
@@ -443,13 +445,21 @@ class BrewInertiaSupportTest {
         assertNull(BrewTagPatterns.tagPrefixAt("<br", 3))
         assertNull(BrewTagPatterns.tagPrefixAt("<b", 2))
         assertNull(BrewTagPatterns.tagPrefixAt("hello", 5))
+        assertEquals("coun", BrewTagPatterns.tagPrefixAt("<wire:coun", 10)?.prefix)
+        assertTrue(BrewTagPatterns.tagPrefixAt("<wire:", 6)!!.afterColon)
+        assertFalse(BrewTagPatterns.tagPrefixAt("<wire", 5)!!.afterColon)
+        assertEquals("", BrewTagPatterns.tagPrefixAt("<wir", 4)?.prefix)
+        assertNull(BrewTagPatterns.tagPrefixAt("<wi", 3))
         assertTrue(BrewTagPatterns.isBrewTagName("brew:todos"))
+        assertTrue(BrewTagPatterns.isBrewTagName("wire:todos"))
         assertTrue(BrewTagPatterns.isBrewTagName("BREW:Counter"))
+        assertTrue(BrewTagPatterns.isBrewTagName("WIRE:Counter"))
         assertFalse(BrewTagPatterns.isBrewTagName("x-alert"))
         assertEquals("todos", BrewTagPatterns.componentNameFromTag("brew:todos"))
+        assertEquals("todos", BrewTagPatterns.componentNameFromTag("wire:todos"))
         assertEquals("admin.show-posts", BrewTagPatterns.componentNameFromTag("brew:admin.show-posts"))
         assertNull(BrewTagPatterns.componentNameFromTag("div"))
-        assertEquals("brew:counter", BrewTagPatterns.htmlTag("counter"))
+        assertEquals("wire:counter", BrewTagPatterns.htmlTag("counter"))
     }
 
     @Test

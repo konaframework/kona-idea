@@ -234,6 +234,8 @@ class NativeIdeFeaturesTest {
         assertTrue(ViewNamePatterns.findAll(src).any { it.name == "a" || it.name == "partials.nav" })
         val brew = """Brew.view(engine, "home")"""
         assertEquals("home", ViewNamePatterns.viewNameAt(brew, brew.indexOf('h') + 1)!!.name)
+        val wire = """Wire.view(engine, "home")"""
+        assertEquals("home", ViewNamePatterns.viewNameAt(wire, wire.indexOf('h') + 1)!!.name)
         val inertia = """Inertia.render("Pages/Welcome")"""
         assertEquals(
             "Pages/Welcome",

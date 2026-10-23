@@ -8,7 +8,7 @@ object ViewNamePatterns {
     private val CALL_PREFIXES =
         listOf(
             Regex("""(?i)\b(?:Crema\.)?view\s*\(\s*(?:[^,"']+,\s*)?$"""),
-            Regex("""(?i)\b(?:Brew\.)?view\s*\(\s*(?:[^,"']+,\s*)?$"""),
+            Regex("""(?i)\b(?:Brew\.|Wire\.)?view\s*\(\s*(?:[^,"']+,\s*)?$"""),
             Regex("""(?i)\b(?:engine|crema)\.make\s*\(\s*$"""),
             Regex("""(?i)\b(?:engine|crema)\.render\s*\(\s*$"""),
             // Inertia facade / manager: page string is 1st arg, or 2nd after request/Request.get(…)
