@@ -43,6 +43,7 @@ object GrindCommands {
             Command("steam", "Interactive REPL"),
             Command("assets:vite", "Print Vite asset bundling setup help"),
             Command("storage:link", "Symlink public/storage to storage/app/public"),
+            Command("deploy:systemd", "Build a systemd unit, env file, and install.sh"),
             Command("key:generate", "Set the application key (APP_KEY)"),
             Command("list", "List grind commands"),
             Command("help", "Show usage"),
