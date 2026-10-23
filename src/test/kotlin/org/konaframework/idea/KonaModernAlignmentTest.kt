@@ -119,6 +119,7 @@ class KonaModernAlignmentTest {
                     "db:show",
                     "db:table",
                     "schema:dump",
+                    "deploy:systemd",
                 ),
             ),
         )
