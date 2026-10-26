@@ -14,6 +14,7 @@
       <li><b>Cadence</b> — on a model instance (<code>user.</code>), complete DB columns, fillable/casts, accessors, and relations in <b>any</b> Kotlin/Java file (controllers, services, seeders, jobs, the model class — not only HTTP controllers). The same keys inside <code>getAttribute("…")</code> / <code>user?.getAttribute("…")</code> / <code>get("…")</code> / <code>user["…"]</code> (and with the caret still inside empty parentheses). <code>this.email</code> and Java <code>User.QUERY.find</code> / <code>User.QUERY.where("…")</code> resolve to that model. Receivers typed as <code>Authenticatable</code> (or cast as a Cadence model) complete via the instance name (<code>user</code> → <code>User</code>) — <code>Auth.user() as? User</code>, <code>as User</code>, <code>val user: User?</code>, Java <code>(User) Auth.user()</code>. Column strings in <code>User.where("…")</code> complete from migrations and, when <code>.env</code> can connect (relative SQLite/H2 paths resolved against the app root; drivers loaded from <code>build/kona-runtime.classpath</code>), from the database. Pick the source in <b>Settings → Tools → Kona</b>. Wherever Kona suggestions appear, they are sorted at the <b>top</b> of the lookup list.</li>
       <li><b>Grind</b> — run configurations and the <b>Kona</b> tool window on the right. <code>Grind.call("…")</code> / <code>callSilently</code> complete built-in and custom command names. <code>./grind serve</code> uses Netty on port <code>4000</code>.</li>
       <li><b>Templates</b> — file and live templates for typed Router handlers, Cadence, Auth, disks, Queue, Schedule, Crema, and Inertia.</li>
+      <li><b>Firefly</b> — in Kotlin and Java, complete <code>Panel</code>, <code>Resource</code>, <code>Page</code>, and widget types, and the methods on those types after a dot. The names come from the generated catalog of the shipped classes.</li>
     </ul>
     <p><b>Getting started</b></p>
     <ol>
@@ -82,6 +83,7 @@
     <completion.contributor language="any" implementationClass="org.konaframework.idea.DbColumnCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.ModelPropertyCompletionContributor" order="first"/>
     <completion.contributor language="any" implementationClass="org.konaframework.idea.GrindCallCompletionContributor" order="first"/>
+    <completion.contributor language="any" implementationClass="org.konaframework.idea.FireflyCompletionContributor" order="first"/>
     <weigher key="completion" implementationClass="org.konaframework.idea.KonaCompletionWeigher" id="konaPriority" order="first, before:priority, before:prefix, before:stats, before:explicitProximity"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.CremaAnnotator"/>
     <annotator language="Crema" implementationClass="org.konaframework.idea.BrewWireAnnotator"/>
