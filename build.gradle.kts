@@ -235,6 +235,8 @@ kover {
                     "org.konaframework.idea.KonaLookupPublishKt",
                     "org.konaframework.idea.GrindCallCompletionContributor",
                     "org.konaframework.idea.GrindCallCompletionContributor$*",
+                    "org.konaframework.idea.FireflyCompletionContributor",
+                    "org.konaframework.idea.FireflyCompletionContributor$*",
                     "org.konaframework.idea.XComponentCompletionContributor",
                     "org.konaframework.idea.XComponentCompletionContributor$*",
                     "org.konaframework.idea.BrewTagCompletionContributor",
